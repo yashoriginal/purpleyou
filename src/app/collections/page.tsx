@@ -1,4 +1,4 @@
-import ProductGrid from "@/features/product/ProductGrid";
+import ProductGrid from "@/components/product/ProductGrid";
 import { getProductsByCollection } from "@/services/product.service";
 
 export const revalidate = 600;
