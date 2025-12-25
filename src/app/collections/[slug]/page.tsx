@@ -1,30 +1,79 @@
-import ProductGrid from "@/components/product/ProductGrid"
-import { products } from "@/lib/data"
+import ProductGrid from "@/components/product/ProductGrid";
+import { products } from "@/lib/data";
+import type { Metadata } from "next";
 
-type PageProps = {
-  params: Promise<{ category: string }> | { category: string }
+/* ---------------------------------------
+   Static generation (SSG)
+---------------------------------------- */
+export function generateStaticParams() {
+  const categories = Array.from(
+    new Set(
+      products
+        .map((product) => (product.category ?? "").toString().toLowerCase())
+        .filter(Boolean)
+    )
+  );
+
+  return categories.map((category) => ({
+    category,
+  }));
 }
 
-export default async function CategoryPage({ params }: PageProps) {
-  // Await params if it's a Promise
-  const { category } = params instanceof Promise ? await params : params
+/* ---------------------------------------
+   ISR (Incremental Static Regeneration)
+---------------------------------------- */
+export const revalidate = 300; // Revalidate every 5 minutes
 
-  const filteredProducts = products.filter(
-    (p) => p.category.toLowerCase() === category.toLowerCase()
-  )
+/* ---------------------------------------
+   SEO metadata per category
+---------------------------------------- */
+export function generateMetadata({
+  params,
+}: {
+  params: { category?: string };
+}): Metadata {
+  const category = params.category ?? "Collection";
+
+  const categoryName =
+    category.charAt(0).toUpperCase() + category.slice(1);
+
+  return {
+    title: `${categoryName} | Purple You Jewellery`,
+    description: `Explore premium ${categoryName} jewellery from Purple You. Minimal, modern, and luxury designs crafted for everyday elegance.`,
+  };
+}
+
+/* ---------------------------------------
+   Page component
+---------------------------------------- */
+type PageProps = {
+  params: { category: string };
+};
+
+export default function CategoryPage({ params }: PageProps) {
+  const { category } = params;
+
+  const normalizedCategory = (category ?? "").toLowerCase();
+
+  const filteredProducts = products.filter((product) => {
+    return (product.category ?? "").toLowerCase() === normalizedCategory;
+  });
 
   if (filteredProducts.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-600">
-        No products found in the category "{category}".
+      <div className="flex min-h-[50vh] items-center justify-center text-sm text-[#6b6b6b]">
+        No products found in “{category}”.
       </div>
-    )
+    );
   }
 
   return (
-    <section className="p-4">
-      <h1 className="text-2xl font-semibold capitalize mb-4">{category}</h1>
+    <section className="mx-auto max-w-6xl px-4 py-10">
+      <h1 className="mb-8 text-center text-2xl font-semibold capitalize tracking-wide">
+        {category}
+      </h1>
+
       <ProductGrid products={filteredProducts} />
     </section>
-  )
+  );
 }
