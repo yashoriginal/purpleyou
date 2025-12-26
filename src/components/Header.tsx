@@ -2,123 +2,150 @@
 "use client";
 
 import { useState } from "react";
-import { HiOutlineSearch, HiOutlineHeart, HiOutlineMenu } from "react-icons/hi";
+import { HiOutlineSearch, HiOutlineHeart, HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import Link from "next/link";
 
-const navLinks = [
-  { label: "Shop", href: "/collections/all" },
-  { label: "Earrings", href: "/collections/earrings" },
-  { label: "Necklaces", href: "/collections/necklaces" },
+const mainNavLinks = [
+  {
+    label: "Shop",
+    href: "/collections/all",
+    submenu: [
+      { label: "All Jewelry", href: "/collections/all" },
+      { label: "Best Sellers", href: "/collections/best-sellers" },
+      { label: "New Arrivals", href: "/collections/new" },
+    ]
+  },
+  { label: "Best Sellers", href: "/collections/best-sellers" },
   { label: "Rings", href: "/collections/rings" },
+  { label: "Necklaces", href: "/collections/necklaces" },
   { label: "Bracelets", href: "/collections/bracelets" },
   { label: "About", href: "/about" },
 ];
 
 export default function Header() {
-  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40">
+    <header className="sticky top-0 z-50 bg-white">
       {/* Top announcement bar */}
-      <div className="w-full bg-[#f5f2f0] border-b border-[#e6dcd4] text-xs">
-        <div className="mx-auto max-w-7xl flex items-center justify-center px-4 py-2.5">
-          <span className="text-[#5f6a66] tracking-wider">
-            Real jewelry for real life • Guaranteed for life
+      <div className="w-full bg-[#D3C9FF] border-b border-[#e6e0da] text-xs">
+        <div className="mx-auto max-w-7xl flex items-center justify-center px-4 py-3">
+          <span className="text-[#111111] tracking-wider font-medium">
+            Most versatile accessories in town • Free shipping on orders above ₹3000
           </span>
         </div>
       </div>
 
       {/* Main navigation bar */}
-      <div className="w-full bg-white border-b border-[#f5f2f0]">
+      <div className="w-full bg-white border-b border-[#e6e0da]">
         <div className="mx-auto max-w-7xl flex items-center justify-between px-4 py-4">
-          {/* LEFT: mobile menu + search, desktop logo */}
+          {/* LEFT: mobile menu + logo */}
           <div className="flex items-center gap-4">
-            {/* mobile only */}
+            {/* mobile menu button */}
             <button
-              className="inline-flex sm:hidden text-[#305040]"
+              className="inline-flex sm:hidden text-[#111111]"
               aria-label="Menu"
-              onClick={() => setOpen((v) => !v)}
+              onClick={() => setMobileOpen(!mobileOpen)}
             >
-              <HiOutlineMenu className="h-6 w-6" />
-            </button>
-            <button
-              className="inline-flex sm:hidden text-[#305040]"
-              aria-label="Search"
-            >
-              <HiOutlineSearch className="h-5 w-5" />
+              {mobileOpen ? <HiOutlineX className="h-6 w-6" /> : <HiOutlineMenu className="h-6 w-6" />}
             </button>
 
-            {/* desktop logo on left */}
-            <Link href="/" className="hidden sm:block">
-              <span className="inline-block text-2xl font-light tracking-[0.15em] text-[#305040]">
-                AURATE
-              </span>
+            {/* Logo */}
+            <Link href="/" className="flex-shrink-0">
+              <div className="bg-[#D3C9FF] px-3 py-1.5 rounded">
+                <span className="text-lg font-bold text-[#111111] tracking-wider" style={{ fontFamily: "Tan Tangkiwood, sans-serif" }}>
+                  PURPLE YOU
+                </span>
+              </div>
             </Link>
           </div>
 
-          {/* CENTER: mobile logo, desktop nav */}
-          <div className="flex-1 flex justify-center sm:justify-start sm:ml-8">
-            {/* mobile logo in center */}
-            <Link href="/" className="sm:hidden">
-              <span className="inline-block text-xl font-light tracking-[0.15em] text-[#305040]">
-                AURATE
-              </span>
-            </Link>
-
-            {/* desktop nav */}
-            <nav className="hidden sm:flex items-center gap-6 text-xs uppercase tracking-[0.18em]">
-              {navLinks.map((item) => (
+          {/* CENTER: Desktop navigation */}
+          <nav className="hidden sm:flex items-center gap-8 flex-1 ml-8">
+            {mainNavLinks.map((item) => (
+              <div key={item.href} className="relative group">
                 <Link
-                  key={item.href}
                   href={item.href}
-                  className="text-[#305040] hover:text-[#6b7b73] transition-colors font-normal"
+                  className="text-sm font-medium text-[#111111] hover:text-[#5540b7] transition-colors uppercase tracking-wider"
                 >
                   {item.label}
                 </Link>
-              ))}
-            </nav>
-          </div>
+                {/* Mega menu for Shop */}
+                {item.label === "Shop" && item.submenu && (
+                  <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-[#e6e0da] shadow-lg py-4 px-6 w-48">
+                    {item.submenu.map((sub) => (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        className="block py-2 text-xs text-[#6b6b6b] hover:text-[#5540b7] transition-colors"
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
 
-          {/* RIGHT: icons */}
-          <div className="flex items-center justify-end gap-4 flex-1">
-            {/* desktop search icon */}
+          {/* RIGHT: Icons */}
+          <div className="flex items-center justify-end gap-4">
+            {/* Search */}
             <button
               aria-label="Search"
-              className="hidden sm:inline-flex text-[#305040]"
+              className="hidden sm:inline-flex text-[#111111] hover:text-[#5540b7]"
             >
               <HiOutlineSearch className="h-5 w-5" />
             </button>
-            <button
-              aria-label="Wishlist"
-              className="text-[#305040]"
-            >
+            {/* Account */}
+            <button aria-label="Account" className="hidden sm:inline text-xs font-medium text-[#111111] hover:text-[#5540b7] uppercase tracking-wider">
+              Account
+            </button>
+            {/* Wishlist */}
+            <button aria-label="Wishlist" className="text-[#111111] hover:text-[#5540b7]">
               <HiOutlineHeart className="h-5 w-5" />
             </button>
+            {/* Cart */}
             <button
               aria-label="Cart"
-              className="relative flex items-center justify-center text-[#305040]"
+              className="relative flex items-center justify-center text-[#111111] hover:text-[#5540b7]"
             >
               <HiOutlineShoppingBag className="h-5 w-5" />
-              <span className="absolute -top-2 -right-2 bg-[#305040] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
+              <span className="absolute -top-2 -right-2 bg-[#5540b7] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
                 0
               </span>
             </button>
           </div>
         </div>
 
-        {/* mobile dropdown menu */}
-        {open && (
-          <nav className="sm:hidden border-t border-[#f5f2f0] bg-white">
-            <div className="flex flex-col px-4 py-3 text-xs uppercase tracking-[0.18em]">
-              {navLinks.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="py-3 border-b border-[#f5f2f0] last:border-b-0 text-[#305040]"
-                >
-                  {item.label}
-                </Link>
+        {/* Mobile menu */}
+        {mobileOpen && (
+          <nav className="sm:hidden border-t border-[#e6e0da] bg-white">
+            <div className="flex flex-col px-4 py-4 text-sm">
+              {mainNavLinks.map((item) => (
+                <div key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="py-3 text-[#111111] font-medium uppercase tracking-wider hover:text-[#5540b7] block border-b border-[#e6e0da] last:border-b-0"
+                  >
+                    {item.label}
+                  </Link>
+                  {item.submenu && (
+                    <div className="bg-[#f8f5f2] px-4 py-2">
+                      {item.submenu.map((sub) => (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          className="block py-2 text-xs text-[#6b6b6b] hover:text-[#5540b7]"
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </nav>
