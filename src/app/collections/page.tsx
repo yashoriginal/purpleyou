@@ -9,21 +9,31 @@ export default function CollectionsIndex() {
   );
 
   return (
-    <section className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="mb-6 text-2xl font-semibold">Collections</h1>
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
+      <div className="mb-12">
+        <h1 className="text-4xl font-light text-[#305040] tracking-wide mb-3">
+          Collections
+        </h1>
+        <p className="text-sm text-[#6b6b6b] font-light max-w-2xl">
+          Browse our curated collections of fine jewelry, handcrafted with sustainable materials and timeless design.
+        </p>
+      </div>
 
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         {categories.map((cat) => (
-          <li key={cat}>
-            <Link
-              href={`/collections/${cat}`}
-              className="block rounded-lg border p-4 text-center hover:shadow"
-            >
-              <span className="capitalize">{cat.replace("-", " ")}</span>
-            </Link>
-          </li>
+          <Link
+            key={cat}
+            href={`/collections/${cat}`}
+            className="collection-card group"
+          >
+            <div className="bg-[#f5f2f0] h-40 sm:h-48 flex items-center justify-center overflow-hidden hover:bg-[#efeae2] transition-colors">
+              <span className="text-sm sm:text-base font-light text-[#305040] tracking-wide capitalize text-center px-4 group-hover:text-[#6b7b73]">
+                {cat.replace("-", " ")}
+              </span>
+            </div>
+          </Link>
         ))}
-      </ul>
+      </div>
     </section>
   );
 }
