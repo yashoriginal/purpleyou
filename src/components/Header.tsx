@@ -4,15 +4,15 @@
 import { useState } from "react";
 import { HiOutlineSearch, HiOutlineHeart, HiOutlineMenu } from "react-icons/hi";
 import { HiOutlineShoppingBag } from "react-icons/hi2";
+import Link from "next/link";
 
 const navLinks = [
   { label: "Shop", href: "/collections/all" },
-  { label: "Tennis", href: "/collections/tennis" },
-  { label: "Best Sellers", href: "/collections/best-sellers" },
-  { label: "Rings", href: "/collections/rings" },
-  { label: "Necklaces", href: "/collections/necklaces" },
   { label: "Earrings", href: "/collections/earrings" },
+  { label: "Necklaces", href: "/collections/necklaces" },
+  { label: "Rings", href: "/collections/rings" },
   { label: "Bracelets", href: "/collections/bracelets" },
+  { label: "About", href: "/about" },
 ];
 
 export default function Header() {
@@ -20,125 +20,105 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40">
-      {/* Announcement bar (same in desktop & mobile) */}
-      <div className="w-full bg-[#6b1515] text-white text-xs">
-        <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-2">
-          <span className="uppercase tracking-wide">
-            Final hours • 25% off! Use code: HOLIDAY
-          </span>
-          <span className="font-semibold tabular-nums">
-            01 : 24 : 30
+      {/* Top announcement bar */}
+      <div className="w-full bg-[#f5f2f0] border-b border-[#e6dcd4] text-xs">
+        <div className="mx-auto max-w-7xl flex items-center justify-center px-4 py-2.5">
+          <span className="text-[#5f6a66] tracking-wider">
+            Real jewelry for real life • Guaranteed for life
           </span>
         </div>
       </div>
 
-      {/* Thin cream strip with message + currency */}
-      <div className="w-full bg-[#f8f5f2] border-b border-[#e6e0da] text-xs">
-        <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-2">
-          <span className="mx-auto text-center text-[#6b6b6b]">
-            Biggest Ever Holiday Sale
-          </span>
-          <button className="hidden sm:inline text-[#6b6b6b]">
-            US ▾
-          </button>
-        </div>
-      </div>
-
-      {/* Main white nav bar */}
-      <div className="w-full bg-white border-b border-[#e6e0da]">
-        <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-3">
+      {/* Main navigation bar */}
+      <div className="w-full bg-white border-b border-[#f5f2f0]">
+        <div className="mx-auto max-w-7xl flex items-center justify-between px-4 py-4">
           {/* LEFT: mobile menu + search, desktop logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {/* mobile only */}
             <button
-              className="inline-flex sm:hidden"
+              className="inline-flex sm:hidden text-[#305040]"
               aria-label="Menu"
               onClick={() => setOpen((v) => !v)}
             >
               <HiOutlineMenu className="h-6 w-6" />
             </button>
             <button
-              className="inline-flex sm:hidden"
+              className="inline-flex sm:hidden text-[#305040]"
               aria-label="Search"
             >
               <HiOutlineSearch className="h-5 w-5" />
             </button>
 
             {/* desktop logo on left */}
-            <div className="hidden sm:flex items-center">
-              <span
-                className="inline-block text-2xl font-semibold tracking-[0.25em]"
-                style={{
-                  fontFamily: "Tan Tangkiwood, Inter, system-ui, sans-serif",
-                }}
-              >
-                PURPLE YOU
+            <Link href="/" className="hidden sm:block">
+              <span className="inline-block text-2xl font-light tracking-[0.15em] text-[#305040]">
+                AURATE
               </span>
-            </div>
+            </Link>
           </div>
 
           {/* CENTER: mobile logo, desktop nav */}
-          <div className="flex-1 flex justify-center">
+          <div className="flex-1 flex justify-center sm:justify-start sm:ml-8">
             {/* mobile logo in center */}
-            <span
-              className="sm:hidden inline-block text-2xl font-semibold tracking-[0.25em]"
-              style={{
-                fontFamily: "Tan Tangkiwood, Inter, system-ui, sans-serif",
-              }}
-            >
-              PURPLE YOU
-            </span>
+            <Link href="/" className="sm:hidden">
+              <span className="inline-block text-xl font-light tracking-[0.15em] text-[#305040]">
+                AURATE
+              </span>
+            </Link>
 
             {/* desktop nav */}
-            <nav className="hidden sm:flex items-center gap-8 text-xs uppercase tracking-[0.25em]">
+            <nav className="hidden sm:flex items-center gap-6 text-xs uppercase tracking-[0.18em]">
               {navLinks.map((item) => (
-                <a
+                <Link
                   key={item.href}
                   href={item.href}
-                  className="text-[#111111] hover:text-[#5540b7] transition-colors"
+                  className="text-[#305040] hover:text-[#6b7b73] transition-colors font-normal"
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
             </nav>
           </div>
 
           {/* RIGHT: icons */}
-          <div className="flex items-center justify-end gap-3 flex-1">
+          <div className="flex items-center justify-end gap-4 flex-1">
             {/* desktop search icon */}
             <button
               aria-label="Search"
-              className="hidden sm:inline-flex"
+              className="hidden sm:inline-flex text-[#305040]"
             >
               <HiOutlineSearch className="h-5 w-5" />
             </button>
-            <button aria-label="Account" className="hidden sm:inline text-xs uppercase tracking-[0.2em]">
-              Account
-            </button>
-            <button aria-label="Wishlist">
+            <button
+              aria-label="Wishlist"
+              className="text-[#305040]"
+            >
               <HiOutlineHeart className="h-5 w-5" />
             </button>
             <button
               aria-label="Cart"
-              className="relative flex items-center justify-center rounded-full bg-[#d3c9ff] h-8 w-8 text-xs font-semibold"
+              className="relative flex items-center justify-center text-[#305040]"
             >
-              0
+              <HiOutlineShoppingBag className="h-5 w-5" />
+              <span className="absolute -top-2 -right-2 bg-[#305040] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
+                0
+              </span>
             </button>
           </div>
         </div>
 
         {/* mobile dropdown menu */}
         {open && (
-          <nav className="sm:hidden border-t border-[#e6e0da] bg-white">
-            <div className="flex flex-col px-4 py-2 text-sm uppercase tracking-[0.2em]">
+          <nav className="sm:hidden border-t border-[#f5f2f0] bg-white">
+            <div className="flex flex-col px-4 py-3 text-xs uppercase tracking-[0.18em]">
               {navLinks.map((item) => (
-                <a
+                <Link
                   key={item.href}
                   href={item.href}
-                  className="py-2 border-b border-[#e6e0da] last:border-b-0"
+                  className="py-3 border-b border-[#f5f2f0] last:border-b-0 text-[#305040]"
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
             </div>
           </nav>
