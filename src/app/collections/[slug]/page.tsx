@@ -68,10 +68,15 @@ export default function CategoryPage({ params }: PageProps) {
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="mb-8 text-center text-2xl font-semibold capitalize tracking-wide">
-        {category}
-      </h1>
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
+      <div className="mb-12">
+        <h1 className="text-4xl font-light text-[#305040] tracking-wide capitalize mb-3">
+          {category}
+        </h1>
+        <p className="text-sm text-[#6b6b6b] font-light max-w-2xl">
+          Discover our collection of sustainable, ethically crafted {category.toLowerCase()}. Each piece is designed to last a lifetime.
+        </p>
+      </div>
 
       <ProductGrid products={filteredProducts} />
     </section>
