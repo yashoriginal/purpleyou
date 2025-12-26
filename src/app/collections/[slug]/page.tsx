@@ -38,8 +38,8 @@ export function generateMetadata({
     category.charAt(0).toUpperCase() + category.slice(1);
 
   return {
-    title: `${categoryName} | Purple You Jewellery`,
-    description: `Explore premium ${categoryName} jewellery from Purple You. Minimal, modern, and luxury designs crafted for everyday elegance.`,
+    title: `${categoryName} | Aurate New York`,
+    description: `Explore sustainable fine ${categoryName.toLowerCase()} from Aurate New York. Ethically crafted, guaranteed for life.`,
   };
 }
 
