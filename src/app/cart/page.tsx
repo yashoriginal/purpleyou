@@ -44,7 +44,7 @@ export default function CartPage() {
 
       // For now, just show a message and redirect
       alert(
-        "Checkout flow not yet implemented. Please implement the backend integration."
+        "Checkout flow not yet implemented. Please implement the backend integration.",
       );
     } catch (error) {
       console.error("Checkout error:", error);
@@ -130,7 +130,7 @@ export default function CartPage() {
                                 <span className="font-medium">{key}:</span>{" "}
                                 {value}
                               </p>
-                            )
+                            ),
                           )}
                         </div>
                       )}

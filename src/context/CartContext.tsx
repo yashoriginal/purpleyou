@@ -20,7 +20,7 @@ interface CartContextType {
   addToCart: (
     product: Product,
     selectedVariants?: Record<string, string>,
-    quantity?: number
+    quantity?: number,
   ) => void;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
@@ -38,13 +38,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Calculate total price
   const totalPrice = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   // Generate unique ID for cart items based on product and variants
   const generateCartItemId = (
     productId: number,
-    variants?: Record<string, string>
+    variants?: Record<string, string>,
   ): string => {
     const variantString = variants
       ? Object.entries(variants)
@@ -58,7 +58,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCart = (
     product: Product,
     selectedVariants?: Record<string, string>,
-    quantity: number = 1
+    quantity: number = 1,
   ) => {
     const itemId = generateCartItemId(product.id, selectedVariants);
 
@@ -70,7 +70,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return prevItems.map((item) =>
           item.id === itemId
             ? { ...item, quantity: item.quantity + quantity }
-            : item
+            : item,
         );
       } else {
         // Add new item to cart
@@ -119,8 +119,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === itemId ? { ...item, quantity } : item
-      )
+        item.id === itemId ? { ...item, quantity } : item,
+      ),
     );
 
     // TODO: API Integration
@@ -151,9 +151,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     clearCart,
   };
 
-  return (
-    <CartContext.Provider value={value}>{children}</CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart(): CartContextType {

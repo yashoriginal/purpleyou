@@ -75,7 +75,8 @@ export default function AccountPage() {
             {isRegister ? "Account Created!" : "Login Successful!"}
           </h2>
           <p className="text-[#6b6b6b] font-light mb-8">
-            Welcome to PURPLE YOU. Your {isRegister ? "account has been created" : "login was successful"}.
+            Welcome to PURPLE YOU. Your{" "}
+            {isRegister ? "account has been created" : "login was successful"}.
           </p>
           <div className="space-y-3">
             <Link href="/collections/all">
@@ -161,7 +162,9 @@ export default function AccountPage() {
                     placeholder="Enter 10-digit number"
                     value={phoneNumber}
                     onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                      const value = e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 10);
                       setPhoneNumber(value);
                     }}
                     maxLength={10}
@@ -214,7 +217,8 @@ export default function AccountPage() {
             <form onSubmit={handleVerifyOTP} className="space-y-6">
               <div>
                 <p className="text-sm text-[#6b6b6b] font-light mb-4">
-                  Enter the 4-digit OTP sent to <strong>+91 {phoneNumber}</strong>
+                  Enter the 4-digit OTP sent to{" "}
+                  <strong>+91 {phoneNumber}</strong>
                 </p>
                 <label className="block text-xs font-semibold text-[#111111] uppercase tracking-wide mb-2">
                   One-Time Password

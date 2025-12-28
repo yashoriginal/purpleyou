@@ -1,12 +1,12 @@
-import "@/app/globals.css"
-import Header from "@/components/layout/Header"
-import Footer from "@/components/layout/Footer"
-import { CartProvider } from "@/context/CartContext"
+import "@/app/globals.css";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { CartProvider } from "@/context/CartContext";
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -18,5 +18,5 @@ export default function RootLayout({
         </CartProvider>
       </body>
     </html>
-  )
+  );
 }
