@@ -132,19 +132,21 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
         <button
           onClick={handleAddToCart}
           className={`w-full px-8 py-4 text-sm font-semibold uppercase tracking-wider transition-colors ${
-            isAdded
-              ? "bg-green-600 text-white"
+            isInCart
+              ? "bg-red-600 text-white hover:bg-red-700"
               : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
           }`}
         >
-          {isAdded ? "✓ Added to Bag" : "Add to Bag"}
+          {isInCart ? "Remove from Bag" : "Add to Bag"}
         </button>
-        <button
-          onClick={handleBuyNow}
-          className="w-full border border-[#111111] text-[#111111] px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#111111] hover:text-white transition-colors"
-        >
-          Buy Now
-        </button>
+        {!isInCart && (
+          <button
+            onClick={handleBuyNow}
+            className="w-full border border-[#111111] text-[#111111] px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#111111] hover:text-white transition-colors"
+          >
+            Buy Now
+          </button>
+        )}
       </div>
 
       {/* Wishlist Button */}
