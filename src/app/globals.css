@@ -50,12 +50,18 @@ html {
   scroll-behavior: smooth;
 }
 
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* INTERACTIVE ELEMENTS - Smooth Transitions */
+a, button, input, textarea, select {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Smooth transitions */
-a, button {
-  transition: all 0.3s ease;
+/* HOVER STATES - Premium Feel */
+a:hover, button:hover {
+  color: var(--primary-purple);
+}
+
+/* Focus States - Accessibility */
+button:focus, input:focus, textarea:focus, select:focus {
+  outline: none;
+  ring: 2px var(--primary-purple);
 }
