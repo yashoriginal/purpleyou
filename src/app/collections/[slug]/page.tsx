@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo, use } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import ProductGrid from "@/components/product/ProductGrid";
 import CollectionFilters from "@/components/collection/CollectionFilters";
 import { products } from "@/lib/data";
