@@ -191,9 +191,7 @@ export default function AccountPage() {
           <h1 className="text-4xl font-light text-[#111111] tracking-wide mb-2">
             PURPLE YOU
           </h1>
-          <p className="text-[#6b6b6b] font-light">
-            Sign in to your account
-          </p>
+          <p className="text-[#6b6b6b] font-light">Sign in to your account</p>
         </div>
 
         {/* Tabs */}
@@ -304,8 +302,7 @@ export default function AccountPage() {
                 Enter OTP
               </label>
               <p className="text-sm text-[#6b6b6b] font-light mb-4">
-                Enter the 4-digit OTP sent to{" "}
-                <strong>+91 {phoneNumber}</strong>
+                Enter the 4-digit OTP sent to <strong>+91 {phoneNumber}</strong>
               </p>
               <input
                 type="text"

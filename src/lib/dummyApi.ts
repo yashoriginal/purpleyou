@@ -11,9 +11,7 @@ import { Product, products } from "./data";
  * });
  * return await response.json();
  */
-export async function fetchUserCart(
-  phoneNumber: string
-): Promise<
+export async function fetchUserCart(phoneNumber: string): Promise<
   Array<{
     productId: number;
     quantity: number;
@@ -55,7 +53,7 @@ export async function fetchUserCart(
  * return await response.json();
  */
 export async function fetchUserWishlist(
-  phoneNumber: string
+  phoneNumber: string,
 ): Promise<Array<{ productId: number }>> {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -91,7 +89,7 @@ export async function fetchUserWishlist(
  */
 export async function verifyOTP(
   phoneNumber: string,
-  otp: string
+  otp: string,
 ): Promise<{ isValid: boolean; message: string }> {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -123,7 +121,7 @@ export async function verifyOTP(
  * const { sent } = await response.json();
  */
 export async function sendOTP(
-  phoneNumber: string
+  phoneNumber: string,
 ): Promise<{ sent: boolean; message: string }> {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
