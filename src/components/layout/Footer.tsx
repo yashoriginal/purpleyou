@@ -22,22 +22,22 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-[#6b6b6b]">
               <li>
-                <Link href="/collections/earrings" className="hover:text-[#305040] transition-colors">
+                <Link href="/collections/earrings" className="hover:text-[#5540b7] transition-colors">
                   Earrings
                 </Link>
               </li>
               <li>
-                <Link href="/collections/necklaces" className="hover:text-[#305040] transition-colors">
+                <Link href="/collections/necklaces" className="hover:text-[#5540b7] transition-colors">
                   Necklaces
                 </Link>
               </li>
               <li>
-                <Link href="/collections/rings" className="hover:text-[#305040] transition-colors">
+                <Link href="/collections/rings" className="hover:text-[#5540b7] transition-colors">
                   Rings
                 </Link>
               </li>
               <li>
-                <Link href="/collections/bracelets" className="hover:text-[#305040] transition-colors">
+                <Link href="/collections/bracelets" className="hover:text-[#5540b7] transition-colors">
                   Bracelets
                 </Link>
               </li>
