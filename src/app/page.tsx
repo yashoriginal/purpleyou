@@ -22,8 +22,16 @@ export default function HomePage() {
     .filter((p) => p.category === "bracelets")
     .slice(0, 1);
 
+  const organizationSchema = generateOrganizationSchema();
+
   return (
     <>
+      {/* JSON-LD Structured Data */}
+      <Script
+        id="organization-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
       {/* Hero Section */}
       <Hero />
 
