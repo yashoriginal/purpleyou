@@ -114,7 +114,7 @@ export function generateProductMetadata(product: Product): Metadata {
       canonical: `${SITE_URL}/products/${product.slug}`,
     },
     openGraph: {
-      type: "product",
+      type: "website",
       url: `${SITE_URL}/products/${product.slug}`,
       title: product.name,
       description,
