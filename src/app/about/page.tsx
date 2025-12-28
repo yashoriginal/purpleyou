@@ -102,7 +102,7 @@ export default function AboutPage() {
             Lifetime Guarantee
           </h2>
           <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-4">
-            We stand behind every piece we create. Your Aurate jewelry is guaranteed for life—not just in materials, but in meaning. If anything ever needs adjustment, repair, or care, we're here to help.
+            We stand behind every piece we create. Your PURPLE YOU jewelry is guaranteed for life—not just in materials, but in meaning. If anything ever needs adjustment, repair, or care, we're here to help.
           </p>
           <p className="text-base text-[#6b6b6b] font-light leading-relaxed">
             Because jewelry worth keeping is worth keeping forever.
