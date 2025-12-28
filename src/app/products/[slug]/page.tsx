@@ -1,15 +1,59 @@
+import { Metadata } from "next";
 import { products } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import ProductAccordion from "@/components/product/ProductAccordion";
 import AddToCartButton from "@/components/product/AddToCartButton";
+import {
+  generateProductMetadata,
+  generateProductSchema,
+  generateBreadcrumbSchema,
+} from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+/**
+ * Generate static parameters for all product pages
+ * This enables static site generation (SSG) for each product
+ */
+export async function generateStaticParams() {
+  return products.map((product) => ({
+    slug: product.slug,
+  }));
+}
+
+/**
+ * Dynamic metadata generation for each product
+ */
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
+  const product = products.find((p) => p.slug === params.slug);
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "The product you're looking for doesn't exist.",
+    };
+  }
+
+  return generateProductMetadata(product);
+}
+
+// ISR: Revalidate every 30 minutes (price updates, stock changes, etc.)
+export const revalidate = 1800;
+
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
+
+  // TODO: API Integration - Replace mock data with backend API
+  // Example API call:
+  // const product = await fetch(
+  //   `https://api.example.com/products/${slug}`,
+  //   { headers: { Authorization: `Bearer ${process.env.API_KEY}` } }
+  // ).then((res) => res.json());
 
   const product = products.find((p) => p.slug === slug);
 
