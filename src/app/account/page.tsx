@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
@@ -11,9 +12,10 @@ import {
   verifyOTP,
   fetchUserCart,
   fetchUserWishlist,
+  saveProfile,
 } from "@/lib/dummyApi";
 
-type AuthStep = "phone" | "otp" | "success";
+type AuthStep = "phone" | "otp" | "profile" | "success";
 
 export default function AccountPage() {
   const { isLoggedIn, user, login, logout } = useAuth();
