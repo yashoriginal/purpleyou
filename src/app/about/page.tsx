@@ -50,7 +50,7 @@ export default function AboutPage() {
           <div className="bg-[#f5f2f0] h-80 sm:h-96 rounded-lg overflow-hidden">
             <Image
               src="/images/hero1.jpg"
-              alt="Aurate craftspeople"
+              alt="PURPLE YOU craftspeople"
               width={500}
               height={500}
               className="w-full h-full object-cover"
