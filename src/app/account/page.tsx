@@ -18,6 +18,7 @@ import {
 type AuthStep = "phone" | "otp" | "profile" | "success";
 
 export default function AccountPage() {
+  const router = useRouter();
   const { isLoggedIn, user, login, logout } = useAuth();
   const { addToCart, clearCart } = useCart();
   const { addToWishlist, clearWishlist } = useWishlist();
@@ -25,9 +26,18 @@ export default function AccountPage() {
   const [step, setStep] = useState<AuthStep>("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
+  const [name, setName] = useState("");
+  const [pincode, setPincode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isRegister, setIsRegister] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
+
+  // Auto-redirect to home if already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push("/collections/all");
+    }
+  }, [isLoggedIn, router]);
 
   // Handle OTP sending
   const handleSendOTP = async (e: React.FormEvent) => {
