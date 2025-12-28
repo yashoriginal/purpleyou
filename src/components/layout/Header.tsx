@@ -92,9 +92,19 @@ export default function Header() {
             >
               <HiOutlineSearch className="h-5 w-5" />
             </button>
-            <button aria-label="Wishlist" className="text-[#111111]">
-              <HiOutlineHeart className="h-5 w-5" />
-            </button>
+            <Link href="/wishlist">
+              <button
+                aria-label="Wishlist"
+                className="relative flex items-center justify-center text-[#111111] hover:text-[#5540b7] transition-colors"
+              >
+                <HiOutlineHeart className="h-5 w-5" />
+                {itemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-[#5540b7] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
+                    {itemCount > 9 ? "9+" : itemCount}
+                  </span>
+                )}
+              </button>
+            </Link>
             <Link href="/cart">
               <button
                 aria-label="Cart"
