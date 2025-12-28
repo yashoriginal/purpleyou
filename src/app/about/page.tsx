@@ -22,7 +22,7 @@ export default function AboutPage() {
           <div className="absolute inset-0 flex items-end pb-12">
             <div className="px-4 sm:px-8 text-white">
               <h1 className="text-4xl sm:text-5xl font-light tracking-wide">
-                About Aurate
+                About PURPLE YOU
               </h1>
             </div>
           </div>
