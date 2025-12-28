@@ -38,7 +38,7 @@ export default function AboutPage() {
               Our Story
             </h2>
             <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-4">
-              Aurate was founded on a simple belief: jewelry should be beautiful, sustainable, and accessible. We create fine jewelry pieces designed to last a lifetime—not just for fashion, but for meaning.
+              PURPLE YOU was founded on a simple belief: jewelry should be beautiful, sustainable, and accessible. We create fine jewelry pieces designed to last a lifetime—not just for fashion, but for meaning.
             </p>
             <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-4">
               Every piece in our collection is handcrafted by generational artisans who understand that true luxury isn't about excess—it's about excellence. We use only the finest ethically sourced materials and sustainable practices to ensure our gold, gemstones, and designs are something you can feel good about wearing.
