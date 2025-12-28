@@ -58,13 +58,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white text-black">
-        <CartProvider>
-          <WishlistProvider>
-            <Header />
-            <main className="min-h-screen">{children}</main>
-            <Footer />
-          </WishlistProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <Header />
+              <main className="min-h-screen">{children}</main>
+              <Footer />
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
