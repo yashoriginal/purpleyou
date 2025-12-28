@@ -34,7 +34,7 @@ export default function AboutPage() {
         {/* Mission Statement */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
           <div>
-            <h2 className="text-3xl sm:text-4xl font-light text-[#305040] tracking-wide mb-6">
+            <h2 className="text-3xl sm:text-4xl font-light text-[#5540b7] tracking-wide mb-6">
               Our Story
             </h2>
             <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-4">
@@ -60,13 +60,13 @@ export default function AboutPage() {
 
         {/* Values Section */}
         <div className="mb-20">
-          <h2 className="text-3xl sm:text-4xl font-light text-[#305040] tracking-wide mb-12">
+          <h2 className="text-3xl sm:text-4xl font-light text-[#5540b7] tracking-wide mb-12">
             Our Values
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Value 1 */}
             <div className="border-t-2 border-[#305040] pt-6">
-              <h3 className="text-lg font-light text-[#305040] tracking-wide mb-3">
+              <h3 className="text-lg font-light text-[#5540b7] tracking-wide mb-3">
                 Sustainability
               </h3>
               <p className="text-sm text-[#6b6b6b] font-light leading-relaxed">
@@ -76,7 +76,7 @@ export default function AboutPage() {
 
             {/* Value 2 */}
             <div className="border-t-2 border-[#305040] pt-6">
-              <h3 className="text-lg font-light text-[#305040] tracking-wide mb-3">
+              <h3 className="text-lg font-light text-[#5540b7] tracking-wide mb-3">
                 Quality & Craftsmanship
               </h3>
               <p className="text-sm text-[#6b6b6b] font-light leading-relaxed">
@@ -86,7 +86,7 @@ export default function AboutPage() {
 
             {/* Value 3 */}
             <div className="border-t-2 border-[#305040] pt-6">
-              <h3 className="text-lg font-light text-[#305040] tracking-wide mb-3">
+              <h3 className="text-lg font-light text-[#5540b7] tracking-wide mb-3">
                 Ethical Pricing
               </h3>
               <p className="text-sm text-[#6b6b6b] font-light leading-relaxed">
@@ -98,7 +98,7 @@ export default function AboutPage() {
 
         {/* Guarantee Section */}
         <div className="bg-[#f5f2f0] rounded-lg px-8 sm:px-12 py-12 mb-20">
-          <h2 className="text-3xl sm:text-4xl font-light text-[#305040] tracking-wide mb-6">
+          <h2 className="text-3xl sm:text-4xl font-light text-[#5540b7] tracking-wide mb-6">
             Lifetime Guarantee
           </h2>
           <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-4">
@@ -111,14 +111,14 @@ export default function AboutPage() {
 
         {/* CTA Section */}
         <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-light text-[#305040] tracking-wide mb-6">
+          <h2 className="text-3xl sm:text-4xl font-light text-[#5540b7] tracking-wide mb-6">
             Discover Our Collection
           </h2>
           <p className="text-base text-[#6b6b6b] font-light mb-8 max-w-2xl mx-auto">
             Explore our curated selection of sustainable, ethically crafted fine jewelry.
           </p>
           <Link href="/collections/all">
-            <button className="inline-flex items-center justify-center border border-[#305040] px-12 py-3 text-xs uppercase tracking-[0.15em] text-[#305040] bg-transparent hover:bg-[#305040] hover:text-white transition-colors duration-300">
+            <button className="inline-flex items-center justify-center border border-[#305040] px-12 py-3 text-xs uppercase tracking-[0.15em] text-[#5540b7] bg-transparent hover:bg-[#305040] hover:text-white transition-colors duration-300">
               Shop Now
             </button>
           </Link>
