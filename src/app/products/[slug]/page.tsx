@@ -1,17 +1,17 @@
-import { products } from "@/lib/data"
-import Image from "next/image"
-import Link from "next/link"
-import ProductAccordion from "@/components/product/ProductAccordion"
-import AddToCartButton from "@/components/product/AddToCartButton"
+import { products } from "@/lib/data";
+import Image from "next/image";
+import Link from "next/link";
+import ProductAccordion from "@/components/product/ProductAccordion";
+import AddToCartButton from "@/components/product/AddToCartButton";
 
 type PageProps = {
-  params: Promise<{ slug: string }>
-}
+  params: Promise<{ slug: string }>;
+};
 
 export default async function ProductDetailPage({ params }: PageProps) {
-  const { slug } = await params
+  const { slug } = await params;
 
-  const product = products.find(p => p.slug === slug)
+  const product = products.find((p) => p.slug === slug);
 
   if (!product) {
     return (
@@ -22,28 +22,32 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </h1>
         </div>
       </section>
-    )
+    );
   }
 
   const accordionItems = [
     {
       title: "Description",
-      content: product.description || "A versatile piece of jewelry crafted with precision and care."
+      content:
+        product.description ||
+        "A versatile piece of jewelry crafted with precision and care.",
     },
     {
       title: "Materials & Care",
       content: product.materials
-        ? `${product.materials}. ${product.careInstructions || 'Store safely and clean regularly with a soft cloth.'}`
-        : "18K gold or gold plated. Care instructions available upon request."
+        ? `${product.materials}. ${product.careInstructions || "Store safely and clean regularly with a soft cloth."}`
+        : "18K gold or gold plated. Care instructions available upon request.",
     },
     {
       title: "Size Guide",
-      content: "Size varies by product. For rings, measure your ring size by wrapping a piece of string around your finger. For necklaces and bracelets, standard sizes are provided with options for customization."
+      content:
+        "Size varies by product. For rings, measure your ring size by wrapping a piece of string around your finger. For necklaces and bracelets, standard sizes are provided with options for customization.",
     },
     {
       title: "Shipping & Returns",
-      content: "Free shipping on orders above ₹3000 in India. Standard delivery: 5-7 business days. Hassle-free returns within 15 days. GST included in all prices."
-    }
+      content:
+        "Free shipping on orders above ₹3000 in India. Standard delivery: 5-7 business days. Hassle-free returns within 15 days. GST included in all prices.",
+    },
   ];
 
   return (
@@ -89,7 +93,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                   </svg>
                 </div>
@@ -123,11 +131,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
             {/* Price & Rating */}
             <div className="flex items-baseline gap-3 mb-4">
               <span className="text-3xl font-light text-[#111111]">
-                ₹{product.price.toLocaleString('en-IN')}
+                ₹{product.price.toLocaleString("en-IN")}
               </span>
               {product.comparePrice && (
                 <span className="text-lg text-[#6b6b6b] line-through">
-                  ₹{product.comparePrice.toLocaleString('en-IN')}
+                  ₹{product.comparePrice.toLocaleString("en-IN")}
                 </span>
               )}
             </div>
@@ -158,10 +166,15 @@ export default async function ProductDetailPage({ params }: PageProps) {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {products
-            .filter(p => p.category === product.category && p.id !== product.id)
+            .filter(
+              (p) => p.category === product.category && p.id !== product.id,
+            )
             .slice(0, 4)
             .map((relatedProduct) => (
-              <Link key={relatedProduct.id} href={`/products/${relatedProduct.slug}`}>
+              <Link
+                key={relatedProduct.id}
+                href={`/products/${relatedProduct.slug}`}
+              >
                 <div className="group cursor-pointer">
                   <div className="relative bg-[#f8f5f2] aspect-[3/4] mb-3 overflow-hidden">
                     <Image
@@ -171,9 +184,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
-                  <h3 className="text-sm font-medium text-[#111111] line-clamp-2">{relatedProduct.name}</h3>
+                  <h3 className="text-sm font-medium text-[#111111] line-clamp-2">
+                    {relatedProduct.name}
+                  </h3>
                   <p className="text-sm font-medium text-[#111111] mt-2">
-                    ₹{relatedProduct.price.toLocaleString('en-IN')}
+                    ₹{relatedProduct.price.toLocaleString("en-IN")}
                   </p>
                 </div>
               </Link>
@@ -181,5 +196,5 @@ export default async function ProductDetailPage({ params }: PageProps) {
         </div>
       </div>
     </section>
-  )
+  );
 }

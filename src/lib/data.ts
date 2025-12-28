@@ -33,31 +33,35 @@ export const categories: Category[] = [
     id: 1,
     name: "Rings",
     slug: "rings",
-    description: "Elegant rings for every occasion - from minimalist bands to statement pieces.",
+    description:
+      "Elegant rings for every occasion - from minimalist bands to statement pieces.",
     image: "/images/hero1.jpg",
   },
   {
     id: 2,
     name: "Necklaces",
     slug: "necklaces",
-    description: "Timeless necklaces including delicate chains, layering sets, and pendant styles.",
+    description:
+      "Timeless necklaces including delicate chains, layering sets, and pendant styles.",
     image: "/images/hero1.jpg",
   },
   {
     id: 3,
     name: "Bracelets",
     slug: "bracelets",
-    description: "Stylish bracelets from delicate chains to bold tennis designs.",
+    description:
+      "Stylish bracelets from delicate chains to bold tennis designs.",
     image: "/images/hero1.jpg",
   },
   {
     id: 4,
     name: "Earrings",
     slug: "earrings",
-    description: "Stunning earrings - studs, hoops, drops, and more in classic gold.",
+    description:
+      "Stunning earrings - studs, hoops, drops, and more in classic gold.",
     image: "/images/hero1.jpg",
   },
-]
+];
 
 export const products: Product[] = [
   {
@@ -90,9 +94,7 @@ export const products: Product[] = [
     description: "Three delicate chains for effortless layering",
     isBestseller: true,
     isNew: false,
-    variants: [
-      { name: "Length", options: ["16-18 inches", "18-20 inches"] }
-    ],
+    variants: [{ name: "Length", options: ["16-18 inches", "18-20 inches"] }],
     materials: "18K gold plated sterling silver",
     careInstructions: "Remove before swimming or exercising.",
   },
@@ -108,9 +110,7 @@ export const products: Product[] = [
     subcategory: "minimal-rings",
     description: "Sleek and simple - stack or wear solo",
     isNew: true,
-    variants: [
-      { name: "Size", options: ["6", "7", "8", "9", "10"] }
-    ],
+    variants: [{ name: "Size", options: ["6", "7", "8", "9", "10"] }],
     materials: "18K gold",
     careInstructions: "Clean with lukewarm water and soft soap.",
   },
@@ -144,7 +144,7 @@ export const products: Product[] = [
     description: "Elegant diamond-like stones in a timeless setting",
     isBestseller: true,
     variants: [
-      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] }
+      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] },
     ],
     materials: "Cubic zirconia with 18K gold setting",
     careInstructions: "Professional cleaning recommended quarterly.",
@@ -161,7 +161,10 @@ export const products: Product[] = [
     subcategory: "pendants",
     description: "Sophisticated pendant on elegant chain",
     variants: [
-      { name: "Chain Length", options: ["16 inches", "18 inches", "20 inches"] }
+      {
+        name: "Chain Length",
+        options: ["16 inches", "18 inches", "20 inches"],
+      },
     ],
     materials: "18K gold plated",
     careInstructions: "Gently wipe with microfiber cloth.",
@@ -192,9 +195,7 @@ export const products: Product[] = [
     category: "rings",
     subcategory: "statement",
     description: "Eye-catching design that commands attention",
-    variants: [
-      { name: "Size", options: ["6", "7", "8", "9", "10"] }
-    ],
+    variants: [{ name: "Size", options: ["6", "7", "8", "9", "10"] }],
     materials: "18K gold with stone",
     careInstructions: "Store separately from other jewelry.",
   },
@@ -211,7 +212,7 @@ export const products: Product[] = [
     description: "Minimal chain bracelet for everyday elegance",
     isBestseller: true,
     variants: [
-      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] }
+      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] },
     ],
     materials: "18K gold plated silver",
     careInstructions: "Remove before water activities.",
@@ -244,7 +245,7 @@ export const products: Product[] = [
     description: "Simple, understated chain for versatile styling",
     isBestseller: true,
     variants: [
-      { name: "Length", options: ["16 inches", "18 inches", "20 inches"] }
+      { name: "Length", options: ["16 inches", "18 inches", "20 inches"] },
     ],
     materials: "18K gold plated sterling silver",
     careInstructions: "Store in jewelry box to prevent tarnishing.",
@@ -261,9 +262,7 @@ export const products: Product[] = [
     subcategory: "statement",
     description: "Bold and beautiful statement piece",
     isNew: true,
-    variants: [
-      { name: "Size", options: ["6", "7", "8", "9", "10"] }
-    ],
+    variants: [{ name: "Size", options: ["6", "7", "8", "9", "10"] }],
     materials: "18K gold",
     careInstructions: "Keep away from chemicals.",
   },
@@ -279,9 +278,7 @@ export const products: Product[] = [
     subcategory: "solitaire",
     description: "Classic solitaire with cubic zirconia stone",
     isBestseller: true,
-    variants: [
-      { name: "Size", options: ["6", "7", "8", "9", "10"] }
-    ],
+    variants: [{ name: "Size", options: ["6", "7", "8", "9", "10"] }],
     materials: "18K gold with cubic zirconia",
     careInstructions: "Professional cleaning recommended quarterly.",
   },
@@ -296,9 +293,7 @@ export const products: Product[] = [
     category: "rings",
     subcategory: "bands",
     description: "Elegant twisted design in premium gold",
-    variants: [
-      { name: "Size", options: ["6", "7", "8", "9", "10"] }
-    ],
+    variants: [{ name: "Size", options: ["6", "7", "8", "9", "10"] }],
     materials: "18K gold",
     careInstructions: "Clean with soft cloth regularly.",
   },
@@ -315,7 +310,10 @@ export const products: Product[] = [
     description: "Multi-layered design for modern elegance",
     isNew: true,
     variants: [
-      { name: "Chain Length", options: ["16 inches", "18 inches", "20 inches"] }
+      {
+        name: "Chain Length",
+        options: ["16 inches", "18 inches", "20 inches"],
+      },
     ],
     materials: "18K gold plated",
     careInstructions: "Avoid contact with water and perfume.",
@@ -347,7 +345,10 @@ export const products: Product[] = [
     subcategory: "lariat",
     description: "Long flowing design with elegant drop detail",
     variants: [
-      { name: "Chain Length", options: ["24 inches", "26 inches", "28 inches"] }
+      {
+        name: "Chain Length",
+        options: ["24 inches", "26 inches", "28 inches"],
+      },
     ],
     materials: "18K gold",
     careInstructions: "Keep away from humidity.",
@@ -365,7 +366,7 @@ export const products: Product[] = [
     description: "Stunning beaded design with premium stones",
     isNew: true,
     variants: [
-      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] }
+      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] },
     ],
     materials: "Cubic zirconia with gold setting",
     careInstructions: "Wipe clean after wear.",
@@ -382,7 +383,7 @@ export const products: Product[] = [
     subcategory: "bangles",
     description: "Set of three matching gold bangles",
     variants: [
-      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] }
+      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] },
     ],
     materials: "18K gold plated",
     careInstructions: "Remove before water activities.",
@@ -400,7 +401,7 @@ export const products: Product[] = [
     description: "Brilliant cubic zirconia stones in elegant setting",
     isBestseller: true,
     variants: [
-      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] }
+      { name: "Length", options: ["7 inches", "7.5 inches", "8 inches"] },
     ],
     materials: "Cubic zirconia, 18K gold",
     careInstructions: "Clean with microfiber cloth gently.",
@@ -464,4 +465,4 @@ export const products: Product[] = [
     materials: "18K gold plated with silk tassels",
     careInstructions: "Keep away from moisture.",
   },
-]
+];

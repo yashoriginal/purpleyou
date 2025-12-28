@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { HiOutlineHeart, HiOutlineFire } from 'react-icons/hi';
+import { useState } from "react";
+import { HiOutlineHeart, HiOutlineFire } from "react-icons/hi";
 
 interface AddToCartButtonProps {
   productId: number;
@@ -9,15 +9,21 @@ interface AddToCartButtonProps {
   variants?: Array<{ name: string; options: string[] }>;
 }
 
-export default function AddToCartButton({ productId, productName, variants }: AddToCartButtonProps) {
-  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+export default function AddToCartButton({
+  productId,
+  productName,
+  variants,
+}: AddToCartButtonProps) {
+  const [selectedVariants, setSelectedVariants] = useState<
+    Record<string, string>
+  >({});
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
   const handleVariantSelect = (variantName: string, option: string) => {
-    setSelectedVariants(prev => ({
+    setSelectedVariants((prev) => ({
       ...prev,
-      [variantName]: option
+      [variantName]: option,
     }));
   };
 
@@ -48,8 +54,8 @@ export default function AddToCartButton({ productId, productName, variants }: Ad
                     onClick={() => handleVariantSelect(variant.name, option)}
                     className={`px-4 py-2 border text-sm transition-colors ${
                       selectedVariants[variant.name] === option
-                        ? 'border-[#5540b7] bg-[#5540b7] text-white'
-                        : 'border-[#e6e0da] text-[#111111] hover:border-[#5540b7] hover:text-[#5540b7]'
+                        ? "border-[#5540b7] bg-[#5540b7] text-white"
+                        : "border-[#e6e0da] text-[#111111] hover:border-[#5540b7] hover:text-[#5540b7]"
                     }`}
                   >
                     {option}
@@ -65,19 +71,27 @@ export default function AddToCartButton({ productId, productName, variants }: Ad
       <div className="py-6 space-y-3">
         <div className="flex items-start gap-3">
           <HiOutlineFire className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-[#6b6b6b] font-light">Free shipping on orders above ₹3000</span>
+          <span className="text-sm text-[#6b6b6b] font-light">
+            Free shipping on orders above ₹3000
+          </span>
         </div>
         <div className="flex items-start gap-3">
           <HiOutlineFire className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-[#6b6b6b] font-light">Secure checkout with Razorpay (UPI, Cards, Netbanking)</span>
+          <span className="text-sm text-[#6b6b6b] font-light">
+            Secure checkout with Razorpay (UPI, Cards, Netbanking)
+          </span>
         </div>
         <div className="flex items-start gap-3">
           <HiOutlineFire className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-[#6b6b6b] font-light">GST included • 15-day returns</span>
+          <span className="text-sm text-[#6b6b6b] font-light">
+            GST included • 15-day returns
+          </span>
         </div>
         <div className="flex items-start gap-3">
           <HiOutlineFire className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-[#6b6b6b] font-light">COD available on select locations</span>
+          <span className="text-sm text-[#6b6b6b] font-light">
+            COD available on select locations
+          </span>
         </div>
       </div>
 
@@ -87,11 +101,11 @@ export default function AddToCartButton({ productId, productName, variants }: Ad
           onClick={handleAddToCart}
           className={`w-full px-8 py-4 text-sm font-semibold uppercase tracking-wider transition-colors ${
             isAdded
-              ? 'bg-green-600 text-white'
-              : 'bg-[#5540b7] text-white hover:bg-[#3d2d7f]'
+              ? "bg-green-600 text-white"
+              : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
           }`}
         >
-          {isAdded ? '✓ Added to Bag' : 'Add to Bag'}
+          {isAdded ? "✓ Added to Bag" : "Add to Bag"}
         </button>
         <button
           onClick={handleBuyNow}
@@ -107,8 +121,10 @@ export default function AddToCartButton({ productId, productName, variants }: Ad
           onClick={() => setIsWishlisted(!isWishlisted)}
           className="flex items-center justify-center gap-2 w-full text-sm font-medium text-[#6b6b6b] hover:text-[#5540b7] transition-colors"
         >
-          <HiOutlineHeart className={`w-5 h-5 ${isWishlisted ? 'fill-current text-[#5540b7]' : ''}`} />
-          {isWishlisted ? 'Added to Wishlist' : 'Add to Wishlist'}
+          <HiOutlineHeart
+            className={`w-5 h-5 ${isWishlisted ? "fill-current text-[#5540b7]" : ""}`}
+          />
+          {isWishlisted ? "Added to Wishlist" : "Add to Wishlist"}
         </button>
       </div>
     </>

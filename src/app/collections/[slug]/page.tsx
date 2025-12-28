@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useMemo, use } from 'react';
+import { useState, useMemo, use } from "react";
 import ProductGrid from "@/components/product/ProductGrid";
 import CollectionFilters from "@/components/collection/CollectionFilters";
 import { products } from "@/lib/data";
@@ -25,7 +25,7 @@ export default function CategoryPage({ params }: PageProps) {
 
   const [filters, setFilters] = useState({
     priceRange: [0, 100000] as [number, number],
-    sortBy: 'featured',
+    sortBy: "featured",
   });
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -41,18 +41,20 @@ export default function CategoryPage({ params }: PageProps) {
 
     // Sort
     switch (filters.sortBy) {
-      case 'newest':
+      case "newest":
         result = result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
         break;
-      case 'price-low':
+      case "price-low":
         result = result.sort((a, b) => a.price - b.price);
         break;
-      case 'price-high':
+      case "price-high":
         result = result.sort((a, b) => b.price - a.price);
         break;
-      case 'featured':
+      case "featured":
       default:
-        result = result.sort((a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0));
+        result = result.sort(
+          (a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0),
+        );
         break;
     }
 
@@ -77,7 +79,8 @@ export default function CategoryPage({ params }: PageProps) {
           {displayTitle}
         </h1>
         <p className="text-sm text-[#6b6b6b] font-light max-w-2xl">
-          Explore our premium {slug === "all" ? "jewelry" : slug.toLowerCase()} collection. Crafted with care. Made for you.
+          Explore our premium {slug === "all" ? "jewelry" : slug.toLowerCase()}{" "}
+          collection. Crafted with care. Made for you.
         </p>
       </div>
 
@@ -85,7 +88,7 @@ export default function CategoryPage({ params }: PageProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Sidebar Filters (Desktop) */}
         <div className="hidden md:block md:col-span-1">
-          <CollectionFilters 
+          <CollectionFilters
             onFilterChange={setFilters}
             productCount={filteredAndSortedProducts.length}
           />
@@ -95,7 +98,7 @@ export default function CategoryPage({ params }: PageProps) {
         <div className="md:col-span-3">
           {/* Mobile Filters */}
           <div className="md:hidden mb-6">
-            <CollectionFilters 
+            <CollectionFilters
               onFilterChange={setFilters}
               productCount={filteredAndSortedProducts.length}
             />
@@ -104,9 +107,13 @@ export default function CategoryPage({ params }: PageProps) {
           {filteredAndSortedProducts.length === 0 ? (
             <div className="flex min-h-[40vh] items-center justify-center text-center">
               <div>
-                <p className="text-sm text-[#6b6b6b]">No products match your filters.</p>
+                <p className="text-sm text-[#6b6b6b]">
+                  No products match your filters.
+                </p>
                 <button
-                  onClick={() => setFilters({ priceRange: [0, 100000], sortBy: 'featured' })}
+                  onClick={() =>
+                    setFilters({ priceRange: [0, 100000], sortBy: "featured" })
+                  }
                   className="mt-4 text-sm text-[#5540b7] underline hover:no-underline"
                 >
                   Clear filters
