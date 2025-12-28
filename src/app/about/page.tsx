@@ -65,7 +65,7 @@ export default function AboutPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Value 1 */}
-            <div className="border-t-2 border-[#305040] pt-6">
+            <div className="border-t-2 border-[#5540b7] pt-6">
               <h3 className="text-lg font-light text-[#5540b7] tracking-wide mb-3">
                 Sustainability
               </h3>
@@ -75,7 +75,7 @@ export default function AboutPage() {
             </div>
 
             {/* Value 2 */}
-            <div className="border-t-2 border-[#305040] pt-6">
+            <div className="border-t-2 border-[#5540b7] pt-6">
               <h3 className="text-lg font-light text-[#5540b7] tracking-wide mb-3">
                 Quality & Craftsmanship
               </h3>
@@ -85,7 +85,7 @@ export default function AboutPage() {
             </div>
 
             {/* Value 3 */}
-            <div className="border-t-2 border-[#305040] pt-6">
+            <div className="border-t-2 border-[#5540b7] pt-6">
               <h3 className="text-lg font-light text-[#5540b7] tracking-wide mb-3">
                 Ethical Pricing
               </h3>
@@ -118,7 +118,7 @@ export default function AboutPage() {
             Explore our curated selection of sustainable, ethically crafted fine jewelry.
           </p>
           <Link href="/collections/all">
-            <button className="inline-flex items-center justify-center border border-[#305040] px-12 py-3 text-xs uppercase tracking-[0.15em] text-[#5540b7] bg-transparent hover:bg-[#305040] hover:text-white transition-colors duration-300">
+            <button className="inline-flex items-center justify-center border border-[#5540b7] px-12 py-3 text-xs uppercase tracking-[0.15em] text-[#5540b7] bg-transparent hover:bg-[#305040] hover:text-white transition-colors duration-300">
               Shop Now
             </button>
           </Link>
