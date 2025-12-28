@@ -1,0 +1,47 @@
+# robots.txt for PURPLE YOU
+# This file tells search engines which pages they can and cannot crawl
+
+# Allow all robots
+User-agent: *
+Allow: /
+
+# Disallow sensitive paths
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /admin
+Disallow: /_next
+Disallow: /*.json$
+
+# Allow crawling of important pages
+Allow: /collections
+Allow: /products
+Allow: /about
+Allow: /privacy-policy
+Allow: /terms-and-conditions
+
+# Sitemap location
+Sitemap: https://purpleyou.com/sitemap.xml
+
+# Crawl delay (in seconds) - adjust based on server capacity
+Crawl-delay: 1
+
+# For Google
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# For Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Slow down aggressive crawlers
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Crawl-delay: 10
