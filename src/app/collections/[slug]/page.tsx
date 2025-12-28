@@ -6,13 +6,13 @@ import CollectionFilters from "@/components/collection/CollectionFilters";
 import { products } from "@/lib/data";
 
 type PageProps = {
-  params: { category: string };
+  params: { slug: string };
 };
 
 export default function CategoryPage({ params }: PageProps) {
-  const { category } = params;
+  const { slug } = params;
 
-  const normalizedCategory = (category ?? "").toLowerCase();
+  const normalizedCategory = (slug ?? "").toLowerCase();
 
   const baseProducts = useMemo(() => {
     return products.filter((product) => {
