@@ -75,7 +75,8 @@ export async function fetchUserWishlist(
 /**
  * Dummy API to validate OTP
  * Test credentials:
- * - Phone: 9999999999
+ * - Phone: 9999999999 (existing user)
+ * - Phone: any other 10-digit (new user)
  * - OTP: 9999
  *
  * TODO: Replace with actual backend OTP verification
@@ -85,12 +86,12 @@ export async function fetchUserWishlist(
  *   headers: { 'Content-Type': 'application/json' },
  *   body: JSON.stringify({ phoneNumber, otp }),
  * });
- * const { isValid, token } = await response.json();
+ * const { isValid, new_user, token } = await response.json();
  */
 export async function verifyOTP(
   phoneNumber: string,
   otp: string,
-): Promise<{ isValid: boolean; message: string }> {
+): Promise<{ isValid: boolean; new_user: boolean; message: string }> {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
@@ -98,12 +99,23 @@ export async function verifyOTP(
   if (phoneNumber === "9999999999" && otp === "9999") {
     return {
       isValid: true,
+      new_user: false, // Existing user - return false
+      message: "OTP verified successfully",
+    };
+  }
+
+  // Any other 10-digit number with correct OTP is a new user
+  if (phoneNumber && phoneNumber.length === 10 && otp === "9999") {
+    return {
+      isValid: true,
+      new_user: true, // New user - return true
       message: "OTP verified successfully",
     };
   }
 
   return {
     isValid: false,
+    new_user: false,
     message: "Invalid OTP. Please try again.",
   };
 }
