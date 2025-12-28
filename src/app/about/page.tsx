@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
-  title: "About Aurate | Sustainable Fine Jewelry",
-  description: "Learn about Aurate New York's commitment to sustainable, ethically crafted fine jewelry guaranteed for life.",
+  title: "About PURPLE YOU | Premium Fine Jewelry",
+  description: "Learn about PURPLE YOU's commitment to sustainable, ethically crafted fine jewelry guaranteed for life.",
 };
 
 export default function AboutPage() {
