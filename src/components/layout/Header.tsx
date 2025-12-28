@@ -142,6 +142,12 @@ export default function Header() {
                   {item.label}
                 </Link>
               ))}
+              <Link
+                href="/account"
+                className="py-3 border-b border-[#f5f2f0] text-[#111111]"
+              >
+                Account
+              </Link>
             </div>
           </nav>
         )}
