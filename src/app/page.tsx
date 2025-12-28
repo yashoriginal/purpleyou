@@ -1,14 +1,18 @@
-import Hero from "@/components/Hero"
-import ProductGrid from "@/components/product/ProductGrid"
-import { products } from "@/lib/data"
-import Link from "next/link"
-import Image from "next/image"
+import Hero from "@/components/Hero";
+import ProductGrid from "@/components/product/ProductGrid";
+import { products } from "@/lib/data";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function HomePage() {
-  const bestsellers = products.filter(p => p.isBestseller).slice(0, 6);
-  const rings = products.filter(p => p.category === "rings").slice(0, 1);
-  const necklaces = products.filter(p => p.category === "necklaces").slice(0, 1);
-  const bracelets = products.filter(p => p.category === "bracelets").slice(0, 1);
+  const bestsellers = products.filter((p) => p.isBestseller).slice(0, 6);
+  const rings = products.filter((p) => p.category === "rings").slice(0, 1);
+  const necklaces = products
+    .filter((p) => p.category === "necklaces")
+    .slice(0, 1);
+  const bracelets = products
+    .filter((p) => p.category === "bracelets")
+    .slice(0, 1);
 
   return (
     <>
@@ -19,7 +23,10 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Rings */}
-          <Link href="/collections/rings" className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square">
+          <Link
+            href="/collections/rings"
+            className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square"
+          >
             <Image
               src="/images/hero1.jpg"
               alt="Rings Collection"
@@ -27,12 +34,17 @@ export default function HomePage() {
               className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-              <h3 className="text-3xl font-light text-white tracking-wider">RINGS</h3>
+              <h3 className="text-3xl font-light text-white tracking-wider">
+                RINGS
+              </h3>
             </div>
           </Link>
 
           {/* Necklaces */}
-          <Link href="/collections/necklaces" className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square">
+          <Link
+            href="/collections/necklaces"
+            className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square"
+          >
             <Image
               src="/images/hero1.jpg"
               alt="Necklaces Collection"
@@ -40,12 +52,17 @@ export default function HomePage() {
               className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-              <h3 className="text-3xl font-light text-white tracking-wider">NECKLACES</h3>
+              <h3 className="text-3xl font-light text-white tracking-wider">
+                NECKLACES
+              </h3>
             </div>
           </Link>
 
           {/* Bracelets */}
-          <Link href="/collections/bracelets" className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square">
+          <Link
+            href="/collections/bracelets"
+            className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square"
+          >
             <Image
               src="/images/hero1.jpg"
               alt="Bracelets Collection"
@@ -53,7 +70,9 @@ export default function HomePage() {
               className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-              <h3 className="text-3xl font-light text-white tracking-wider">BRACELETS</h3>
+              <h3 className="text-3xl font-light text-white tracking-wider">
+                BRACELETS
+              </h3>
             </div>
           </Link>
         </div>
@@ -85,14 +104,22 @@ export default function HomePage() {
                   </div>
                 )}
               </div>
-              <h3 className="text-sm font-medium text-[#111111]">{product.name}</h3>
+              <h3 className="text-sm font-medium text-[#111111]">
+                {product.name}
+              </h3>
               <div className="mt-2 flex gap-2">
-                <span className="text-lg font-medium text-[#111111]">₹{product.price.toLocaleString('en-IN')}</span>
+                <span className="text-lg font-medium text-[#111111]">
+                  ₹{product.price.toLocaleString("en-IN")}
+                </span>
                 {product.comparePrice && (
-                  <span className="text-sm text-[#6b6b6b] line-through">₹{product.comparePrice.toLocaleString('en-IN')}</span>
+                  <span className="text-sm text-[#6b6b6b] line-through">
+                    ₹{product.comparePrice.toLocaleString("en-IN")}
+                  </span>
                 )}
               </div>
-              <p className="text-xs text-[#6b6b6b] mt-2 line-clamp-2">{product.description}</p>
+              <p className="text-xs text-[#6b6b6b] mt-2 line-clamp-2">
+                {product.description}
+              </p>
             </div>
           ))}
         </div>
@@ -106,10 +133,15 @@ export default function HomePage() {
               Most versatile accessories in town
             </h2>
             <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-6">
-              At Purple You, we believe jewelry should be versatile, elegant, and accessible. Our collections are designed to seamlessly fit into any style—from minimalist everyday wear to bold statement pieces.
+              At Purple You, we believe jewelry should be versatile, elegant,
+              and accessible. Our collections are designed to seamlessly fit
+              into any style—from minimalist everyday wear to bold statement
+              pieces.
             </p>
             <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-8">
-              Each piece is carefully crafted with premium materials and attention to detail, ensuring they're made to last and loved for years to come.
+              Each piece is carefully crafted with premium materials and
+              attention to detail, ensuring they're made to last and loved for
+              years to come.
             </p>
             <Link href="/about">
               <button className="bg-[#5540b7] text-white px-8 py-3 text-sm font-medium uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors">
@@ -148,8 +180,15 @@ export default function HomePage() {
             Your browser does not support the video tag.
           </video>
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none">
-            <button className="bg-white/80 hover:bg-white rounded-full p-4 transition-all" aria-label="Play video">
-              <svg className="w-8 h-8 text-[#5540b7]" fill="currentColor" viewBox="0 0 20 20">
+            <button
+              className="bg-white/80 hover:bg-white rounded-full p-4 transition-all"
+              aria-label="Play video"
+            >
+              <svg
+                className="w-8 h-8 text-[#5540b7]"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
               </svg>
             </button>
@@ -164,7 +203,8 @@ export default function HomePage() {
             Join the PURPLE YOU Club
           </h2>
           <p className="text-base text-[#111111] font-light mb-8">
-            Get exclusive offers, early access to new collections, and styling tips delivered to your inbox.
+            Get exclusive offers, early access to new collections, and styling
+            tips delivered to your inbox.
           </p>
           <form className="flex flex-col sm:flex-row gap-3">
             <input
@@ -186,5 +226,5 @@ export default function HomePage() {
         </div>
       </section>
     </>
-  )
+  );
 }

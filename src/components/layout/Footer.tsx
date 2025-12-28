@@ -11,7 +11,8 @@ export default function Footer() {
               PURPLE YOU
             </h3>
             <p className="text-xs text-[#6b6b6b] font-light leading-relaxed">
-              Real jewelry for real life. Sustainable, ethically crafted fine jewelry guaranteed for life.
+              Real jewelry for real life. Sustainable, ethically crafted fine
+              jewelry guaranteed for life.
             </p>
           </div>
 
@@ -22,22 +23,34 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-[#6b6b6b]">
               <li>
-                <Link href="/collections/earrings" className="hover:text-[#5540b7] transition-colors">
+                <Link
+                  href="/collections/earrings"
+                  className="hover:text-[#5540b7] transition-colors"
+                >
                   Earrings
                 </Link>
               </li>
               <li>
-                <Link href="/collections/necklaces" className="hover:text-[#5540b7] transition-colors">
+                <Link
+                  href="/collections/necklaces"
+                  className="hover:text-[#5540b7] transition-colors"
+                >
                   Necklaces
                 </Link>
               </li>
               <li>
-                <Link href="/collections/rings" className="hover:text-[#5540b7] transition-colors">
+                <Link
+                  href="/collections/rings"
+                  className="hover:text-[#5540b7] transition-colors"
+                >
                   Rings
                 </Link>
               </li>
               <li>
-                <Link href="/collections/bracelets" className="hover:text-[#5540b7] transition-colors">
+                <Link
+                  href="/collections/bracelets"
+                  className="hover:text-[#5540b7] transition-colors"
+                >
                   Bracelets
                 </Link>
               </li>
@@ -51,7 +64,10 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-[#6b6b6b]">
               <li>
-                <Link href="/about" className="hover:text-[#5540b7] transition-colors">
+                <Link
+                  href="/about"
+                  className="hover:text-[#5540b7] transition-colors"
+                >
                   About Us
                 </Link>
               </li>
@@ -80,22 +96,34 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-[#6b6b6b]">
               <li>
-                <Link href="/shipping-and-delivery" className="hover:text-[#5540b7] transition-colors">
+                <Link
+                  href="/shipping-and-delivery"
+                  className="hover:text-[#5540b7] transition-colors"
+                >
                   Shipping and Delivery
                 </Link>
               </li>
               <li>
-                <Link href="/refund-and-cancellation" className="hover:text-[#5540b7] transition-colors">
+                <Link
+                  href="/refund-and-cancellation"
+                  className="hover:text-[#5540b7] transition-colors"
+                >
                   Refund and Cancellation
                 </Link>
               </li>
               <li>
-                <Link href="/privacy-policy" className="hover:text-[#5540b7] transition-colors">
+                <Link
+                  href="/privacy-policy"
+                  className="hover:text-[#5540b7] transition-colors"
+                >
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms-and-conditions" className="hover:text-[#5540b7] transition-colors">
+                <Link
+                  href="/terms-and-conditions"
+                  className="hover:text-[#5540b7] transition-colors"
+                >
                   Terms and Conditions
                 </Link>
               </li>

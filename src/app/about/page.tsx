@@ -3,7 +3,8 @@ import Link from "next/link";
 
 export const metadata = {
   title: "About PURPLE YOU | Premium Fine Jewelry",
-  description: "Learn about PURPLE YOU's commitment to sustainable, ethically crafted fine jewelry guaranteed for life.",
+  description:
+    "Learn about PURPLE YOU's commitment to sustainable, ethically crafted fine jewelry guaranteed for life.",
 };
 
 export default function AboutPage() {
@@ -38,13 +39,21 @@ export default function AboutPage() {
               Our Story
             </h2>
             <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-4">
-              PURPLE YOU was founded on a simple belief: jewelry should be beautiful, sustainable, and accessible. We create fine jewelry pieces designed to last a lifetime—not just for fashion, but for meaning.
+              PURPLE YOU was founded on a simple belief: jewelry should be
+              beautiful, sustainable, and accessible. We create fine jewelry
+              pieces designed to last a lifetime—not just for fashion, but for
+              meaning.
             </p>
             <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-4">
-              Every piece in our collection is handcrafted by generational artisans who understand that true luxury isn't about excess—it's about excellence. We use only the finest ethically sourced materials and sustainable practices to ensure our gold, gemstones, and designs are something you can feel good about wearing.
+              Every piece in our collection is handcrafted by generational
+              artisans who understand that true luxury isn't about excess—it's
+              about excellence. We use only the finest ethically sourced
+              materials and sustainable practices to ensure our gold, gemstones,
+              and designs are something you can feel good about wearing.
             </p>
             <p className="text-base text-[#6b6b6b] font-light leading-relaxed">
-              Real jewelry for real life. Made to withstand whatever life throws your way. Guaranteed for life.
+              Real jewelry for real life. Made to withstand whatever life throws
+              your way. Guaranteed for life.
             </p>
           </div>
           <div className="bg-[#f5f2f0] h-80 sm:h-96 rounded-lg overflow-hidden">
@@ -70,7 +79,10 @@ export default function AboutPage() {
                 Sustainability
               </h3>
               <p className="text-sm text-[#6b6b6b] font-light leading-relaxed">
-                Our gold is sustainably sourced and locally casted, polished, and perfected by generational craftsmen. We recycle excess materials and produce pieces on a made-to-order basis to minimize environmental impact.
+                Our gold is sustainably sourced and locally casted, polished,
+                and perfected by generational craftsmen. We recycle excess
+                materials and produce pieces on a made-to-order basis to
+                minimize environmental impact.
               </p>
             </div>
 
@@ -80,7 +92,9 @@ export default function AboutPage() {
                 Quality & Craftsmanship
               </h3>
               <p className="text-sm text-[#6b6b6b] font-light leading-relaxed">
-                Every design goes through a rigorous 5-step testing process. Our commitment to excellence means pieces that shine with brilliance and endure through a lifetime of wear.
+                Every design goes through a rigorous 5-step testing process. Our
+                commitment to excellence means pieces that shine with brilliance
+                and endure through a lifetime of wear.
               </p>
             </div>
 
@@ -90,7 +104,9 @@ export default function AboutPage() {
                 Ethical Pricing
               </h3>
               <p className="text-sm text-[#6b6b6b] font-light leading-relaxed">
-                We believe luxury shouldn't come with excessive markups. By keeping operations local and efficient, we deliver exceptional quality at fair prices.
+                We believe luxury shouldn't come with excessive markups. By
+                keeping operations local and efficient, we deliver exceptional
+                quality at fair prices.
               </p>
             </div>
           </div>
@@ -102,7 +118,9 @@ export default function AboutPage() {
             Lifetime Guarantee
           </h2>
           <p className="text-base text-[#6b6b6b] font-light leading-relaxed mb-4">
-            We stand behind every piece we create. Your PURPLE YOU jewelry is guaranteed for life—not just in materials, but in meaning. If anything ever needs adjustment, repair, or care, we're here to help.
+            We stand behind every piece we create. Your PURPLE YOU jewelry is
+            guaranteed for life—not just in materials, but in meaning. If
+            anything ever needs adjustment, repair, or care, we're here to help.
           </p>
           <p className="text-base text-[#6b6b6b] font-light leading-relaxed">
             Because jewelry worth keeping is worth keeping forever.
@@ -115,7 +133,8 @@ export default function AboutPage() {
             Discover Our Collection
           </h2>
           <p className="text-base text-[#6b6b6b] font-light mb-8 max-w-2xl mx-auto">
-            Explore our curated selection of sustainable, ethically crafted fine jewelry.
+            Explore our curated selection of sustainable, ethically crafted fine
+            jewelry.
           </p>
           <Link href="/collections/all">
             <button className="inline-flex items-center justify-center border border-[#5540b7] px-12 py-3 text-xs uppercase tracking-[0.15em] text-[#5540b7] bg-transparent hover:bg-[#5540b7] hover:text-white transition-colors duration-300">

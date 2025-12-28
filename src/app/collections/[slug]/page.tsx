@@ -83,8 +83,8 @@ export default function CategoryPage({ params }: PageProps) {
             {displayTitle} 25% Off
           </h1>
           <p className="text-base text-[#6b6b6b] font-light">
-            The closest to playing good {slug === "all" ? "jewelry" : slug.toLowerCase()} will ever
-            get.
+            The closest to playing good{" "}
+            {slug === "all" ? "jewelry" : slug.toLowerCase()} will ever get.
           </p>
         </div>
 
@@ -119,7 +119,9 @@ export default function CategoryPage({ params }: PageProps) {
                 }
               }}
             />
-            <span className="text-xs font-medium text-[#111111]">IN-STOCK ONLY</span>
+            <span className="text-xs font-medium text-[#111111]">
+              IN-STOCK ONLY
+            </span>
           </label>
         </div>
       </div>

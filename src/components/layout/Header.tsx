@@ -88,10 +88,7 @@ export default function Header() {
             >
               <HiOutlineSearch className="h-5 w-5" />
             </button>
-            <button
-              aria-label="Wishlist"
-              className="text-[#111111]"
-            >
+            <button aria-label="Wishlist" className="text-[#111111]">
               <HiOutlineHeart className="h-5 w-5" />
             </button>
             <button

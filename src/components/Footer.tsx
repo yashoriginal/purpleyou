@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { FaInstagram } from "react-icons/fa";
@@ -10,14 +10,21 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-8 sm:gap-12 md:grid-cols-5">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <h3 className="text-base font-bold text-[#111111] tracking-wider mb-4" style={{ fontFamily: "Tan Tangkiwood, sans-serif" }}>
+            <h3
+              className="text-base font-bold text-[#111111] tracking-wider mb-4"
+              style={{ fontFamily: "Tan Tangkiwood, sans-serif" }}
+            >
               PURPLE YOU
             </h3>
             <p className="text-xs text-[#6b6b6b] font-light leading-relaxed mb-4">
-              Premium jewelry for every moment. Crafted with care. Made in India.
+              Premium jewelry for every moment. Crafted with care. Made in
+              India.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-[#111111] hover:text-[#5540b7] transition-colors">
+              <a
+                href="#"
+                className="text-[#111111] hover:text-[#5540b7] transition-colors"
+              >
                 <FaInstagram className="h-5 w-5" />
               </a>
             </div>
@@ -30,22 +37,34 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-[#6b6b6b]">
               <li>
-                <Link href="/collections/rings" className="hover:text-[#111111] transition-colors">
+                <Link
+                  href="/collections/rings"
+                  className="hover:text-[#111111] transition-colors"
+                >
                   Rings
                 </Link>
               </li>
               <li>
-                <Link href="/collections/necklaces" className="hover:text-[#111111] transition-colors">
+                <Link
+                  href="/collections/necklaces"
+                  className="hover:text-[#111111] transition-colors"
+                >
                   Necklaces
                 </Link>
               </li>
               <li>
-                <Link href="/collections/bracelets" className="hover:text-[#111111] transition-colors">
+                <Link
+                  href="/collections/bracelets"
+                  className="hover:text-[#111111] transition-colors"
+                >
                   Bracelets
                 </Link>
               </li>
               <li>
-                <Link href="/collections/best-sellers" className="hover:text-[#111111] transition-colors">
+                <Link
+                  href="/collections/best-sellers"
+                  className="hover:text-[#111111] transition-colors"
+                >
                   Best Sellers
                 </Link>
               </li>
@@ -103,7 +122,10 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/about" className="hover:text-[#111111] transition-colors">
+                <a
+                  href="/about"
+                  className="hover:text-[#111111] transition-colors"
+                >
                   About
                 </a>
               </li>
