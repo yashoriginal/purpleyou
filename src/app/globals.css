@@ -1,14 +1,32 @@
 @import "tailwindcss";
 
+/**
+ * PURPLE YOU - Brand Identity & Design System
+ *
+ * Brand Philosophy: Minimal, Premium, High-End Jewelry
+ * Inspired by: Melody Ehsani & Auraté
+ */
+
 :root {
+  /* BRAND COLORS */
+  /* Primary Accent: Light Lavender */
+  --primary-accent: #D3C9FF;
+  /* Deep Purple: Hover & Interactive States */
+  --primary-purple: #5540b7;
+  /* Luxury Cream Background */
+  --luxury-bg: #f8f5f2;
+
+  /* TYPOGRAPHY COLORS */
+  --text-primary: #111111;
+  --text-secondary: #6b6b6b;
+
+  /* UI COLORS */
+  --border-color: #e6e0da;
   --background: #ffffff;
   --foreground: #111111;
-  --primary-accent: #D3C9FF;
-  --primary-purple: #5540b7;
-  --primary-text: #111111;
-  --secondary-text: #6b6b6b;
-  --tertiary-bg: #f8f5f2;
-  --border-color: #e6e0da;
+
+  /* DEPRECATED: Use specific color names above */
+  --tertiary-bg: var(--luxury-bg);
 }
 
 @theme inline {
@@ -20,9 +38,12 @@
 
 body {
   background: var(--background);
-  color: var(--primary-text);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Inter", Roboto, sans-serif;
+  font-weight: 400;
   letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html {
