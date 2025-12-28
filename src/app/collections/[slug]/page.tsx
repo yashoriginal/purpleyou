@@ -64,52 +64,19 @@ export default async function CategoryPage({ params }: PageProps) {
 
   const normalizedCategory = (slug ?? "").toLowerCase();
 
-  const baseProducts = useMemo(() => {
-    if (normalizedCategory === "all") {
-      return products;
-    }
-    return products.filter((product) => {
-      return (product.category ?? "").toLowerCase() === normalizedCategory;
-    });
-  }, [normalizedCategory]);
+  // TODO: API Integration - Replace mock data with backend API
+  // Example API call:
+  // const baseProducts = await fetch(
+  //   `https://api.example.com/products?category=${normalizedCategory}`,
+  //   { headers: { Authorization: `Bearer ${process.env.API_KEY}` } }
+  // ).then((res) => res.json());
 
-  const [filters, setFilters] = useState({
-    priceRange: [0, 100000] as [number, number],
-    sortBy: "featured",
-  });
-
-  const filteredAndSortedProducts = useMemo(() => {
-    let result = [...baseProducts];
-
-    // Filter by price
-    result = result.filter((product) => {
-      return (
-        product.price >= filters.priceRange[0] &&
-        product.price <= filters.priceRange[1]
-      );
-    });
-
-    // Sort
-    switch (filters.sortBy) {
-      case "newest":
-        result = result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-        break;
-      case "price-low":
-        result = result.sort((a, b) => a.price - b.price);
-        break;
-      case "price-high":
-        result = result.sort((a, b) => b.price - a.price);
-        break;
-      case "featured":
-      default:
-        result = result.sort(
-          (a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0),
-        );
-        break;
-    }
-
-    return result;
-  }, [baseProducts, filters]);
+  const baseProducts =
+    normalizedCategory === "all"
+      ? products
+      : products.filter((product) => {
+          return (product.category ?? "").toLowerCase() === normalizedCategory;
+        });
 
   if (baseProducts.length === 0) {
     return (
@@ -120,6 +87,19 @@ export default async function CategoryPage({ params }: PageProps) {
   }
 
   const displayTitle = slug === "all" ? "All Products" : slug.replace("-", " ");
+  const category =
+    categories.find((c) => c.slug === slug) ||
+    (slug === "all"
+      ? {
+          id: 0,
+          name: "All Products",
+          slug: "all",
+          description: "Browse our complete collection",
+          image: "/images/hero1.jpg",
+        }
+      : null);
+
+  const collectionSchema = category ? generateCollectionSchema(category, "https://purpleyou.com", baseProducts) : null;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
