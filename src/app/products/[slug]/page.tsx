@@ -94,8 +94,37 @@ export default async function ProductDetailPage({ params }: PageProps) {
     },
   ];
 
+  const productSchema = generateProductSchema(product, "https://purpleyou.com");
+  const breadcrumbs = generateBreadcrumbSchema([
+    { name: "Home", url: "https://purpleyou.com" },
+    {
+      name: "Products",
+      url: "https://purpleyou.com/collections/all",
+    },
+    {
+      name: product.category,
+      url: `https://purpleyou.com/collections/${product.category}`,
+    },
+    {
+      name: product.name,
+      url: `https://purpleyou.com/products/${product.slug}`,
+    },
+  ]);
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
+      {/* JSON-LD Structured Data */}
+      <Script
+        id={`product-schema-${product.id}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <Script
+        id={`breadcrumb-schema-${product.id}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mb-16">
         {/* Left Column - Media Gallery */}
         <div className="flex flex-col gap-6">
