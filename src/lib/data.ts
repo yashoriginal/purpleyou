@@ -1,5 +1,14 @@
 // src/lib/data.ts
 
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  image: string;
+  productCount?: number;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -18,6 +27,37 @@ export interface Product {
   materials?: string;
   careInstructions?: string;
 }
+
+export const categories: Category[] = [
+  {
+    id: 1,
+    name: "Rings",
+    slug: "rings",
+    description: "Elegant rings for every occasion - from minimalist bands to statement pieces.",
+    image: "/images/hero1.jpg",
+  },
+  {
+    id: 2,
+    name: "Necklaces",
+    slug: "necklaces",
+    description: "Timeless necklaces including delicate chains, layering sets, and pendant styles.",
+    image: "/images/hero1.jpg",
+  },
+  {
+    id: 3,
+    name: "Bracelets",
+    slug: "bracelets",
+    description: "Stylish bracelets from delicate chains to bold tennis designs.",
+    image: "/images/hero1.jpg",
+  },
+  {
+    id: 4,
+    name: "Earrings",
+    slug: "earrings",
+    description: "Stunning earrings - studs, hoops, drops, and more in classic gold.",
+    image: "/images/hero1.jpg",
+  },
+]
 
 export const products: Product[] = [
   {
