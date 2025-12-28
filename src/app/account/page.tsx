@@ -325,11 +325,19 @@ export default function AccountPage() {
 
               {/* Test Credentials Help Text */}
               <div className="mt-4 p-3 bg-[#f8f5f2] rounded text-xs text-[#6b6b6b]">
-                <p className="font-medium text-[#111111] mb-1">
+                <p className="font-medium text-[#111111] mb-2">
                   Test Credentials:
                 </p>
-                <p>Phone: 9999999999</p>
-                <p>OTP: 9999</p>
+                <div className="space-y-2">
+                  <div>
+                    <p className="font-medium text-[#111111] text-xs">Existing User:</p>
+                    <p>Phone: 9999999999 | OTP: 9999</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-[#111111] text-xs">New User:</p>
+                    <p>Phone: 8888888888 | OTP: 8888</p>
+                  </div>
+                </div>
               </div>
             </div>
 
