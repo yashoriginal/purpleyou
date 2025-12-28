@@ -266,29 +266,6 @@ export default function AccountPage() {
           <p className="text-[#6b6b6b] font-light">Sign in to your account</p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-[#e6e0da]">
-          <button
-            onClick={() => setIsRegister(false)}
-            className={`pb-4 text-sm font-medium uppercase tracking-wider transition-colors ${
-              !isRegister
-                ? "border-b-2 border-[#5540b7] text-[#5540b7]"
-                : "text-[#6b6b6b] hover:text-[#111111]"
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => setIsRegister(true)}
-            className={`pb-4 text-sm font-medium uppercase tracking-wider transition-colors ${
-              isRegister
-                ? "border-b-2 border-[#5540b7] text-[#5540b7]"
-                : "text-[#6b6b6b] hover:text-[#111111]"
-            }`}
-          >
-            Register
-          </button>
-        </div>
 
         {/* Form */}
         {step === "phone" && (
