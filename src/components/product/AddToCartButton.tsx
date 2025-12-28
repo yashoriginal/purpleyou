@@ -2,18 +2,15 @@
 
 import { useState } from "react";
 import { HiOutlineHeart, HiOutlineFire } from "react-icons/hi";
+import { useCart } from "@/context/CartContext";
+import { Product } from "@/lib/data";
 
 interface AddToCartButtonProps {
-  productId: number;
-  productName: string;
-  variants?: Array<{ name: string; options: string[] }>;
+  product: Product;
 }
 
-export default function AddToCartButton({
-  productId,
-  productName,
-  variants,
-}: AddToCartButtonProps) {
+export default function AddToCartButton({ product }: AddToCartButtonProps) {
+  const { addToCart } = useCart();
   const [selectedVariants, setSelectedVariants] = useState<
     Record<string, string>
   >({});
@@ -28,13 +25,16 @@ export default function AddToCartButton({
   };
 
   const handleAddToCart = () => {
+    addToCart(product, selectedVariants, 1);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
-    // TODO: Implement actual cart functionality
   };
 
   const handleBuyNow = () => {
     // TODO: Implement checkout flow
+    // Once you have a checkout backend:
+    // 1. Add item to cart using addToCart()
+    // 2. Redirect to checkout: window.location.href = '/checkout';
   };
 
   return (
