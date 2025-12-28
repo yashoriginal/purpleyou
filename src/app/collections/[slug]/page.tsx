@@ -18,10 +18,7 @@ type PageProps = {
  * This enables static site generation (SSG) for each category
  */
 export async function generateStaticParams() {
-  return [
-    { slug: "all" },
-    ...categories.map((cat) => ({ slug: cat.slug })),
-  ];
+  return [{ slug: "all" }, ...categories.map((cat) => ({ slug: cat.slug }))];
 }
 
 /**
@@ -49,7 +46,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
         description: "Browse our complete collection of premium jewelry",
         image: "/images/hero1.jpg",
       },
-      products.length
+      products.length,
     );
   }
 
@@ -99,7 +96,9 @@ export default async function CategoryPage({ params }: PageProps) {
         }
       : null);
 
-  const collectionSchema = category ? generateCollectionSchema(category, "https://purpleyou.com", baseProducts) : null;
+  const collectionSchema = category
+    ? generateCollectionSchema(category, "https://purpleyou.com", baseProducts)
+    : null;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:py-12">

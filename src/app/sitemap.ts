@@ -101,10 +101,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  return [
-    ...staticPages,
-    ...collectionPages,
-    ...productPages,
-    ...policyPages,
-  ];
+  return [...staticPages, ...collectionPages, ...productPages, ...policyPages];
 }

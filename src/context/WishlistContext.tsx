@@ -18,7 +18,7 @@ interface WishlistContextType {
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
@@ -54,7 +54,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   const removeFromWishlist = (productId: number) => {
     setItems((prevItems) =>
-      prevItems.filter((item) => item.productId !== productId)
+      prevItems.filter((item) => item.productId !== productId),
     );
 
     // TODO: API Integration

@@ -45,7 +45,7 @@ export default function CollectionFiltersClient({
       case "featured":
       default:
         result = result.sort(
-          (a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0)
+          (a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0),
         );
         break;
     }

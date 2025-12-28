@@ -18,7 +18,7 @@ export default function WishlistPage() {
     .map((item) => products.find((p) => p.id === item.productId))
     .filter(Boolean) as typeof products;
 
-  const handleAddToCart = (product: typeof products[0]) => {
+  const handleAddToCart = (product: (typeof products)[0]) => {
     addToCart(product, {}, 1);
     setAddedToCartId(product.id);
     setTimeout(() => setAddedToCartId(null), 2000);

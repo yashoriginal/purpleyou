@@ -56,7 +56,7 @@ export function generateHomeMetadata(): Metadata {
  */
 export function generateCollectionMetadata(
   category: Category,
-  productCount: number
+  productCount: number,
 ): Metadata {
   const title = `${category.name} Collection - PURPLE YOU | Premium ${category.name}`;
   const description = `Shop our curated ${category.name.toLowerCase()} collection. ${category.description} Over ${productCount} unique pieces.`;
@@ -98,7 +98,8 @@ export function generateCollectionMetadata(
 export function generateProductMetadata(product: Product): Metadata {
   const title = `${product.name} - PURPLE YOU | ₹${product.price.toLocaleString("en-IN")}`;
   const description =
-    product.description || `Discover ${product.name} at PURPLE YOU. Premium jewelry handcrafted with care.`;
+    product.description ||
+    `Discover ${product.name} at PURPLE YOU. Premium jewelry handcrafted with care.`;
 
   return {
     title,
@@ -205,7 +206,7 @@ export function generateProductSchema(product: Product, baseURL: string) {
 export function generateCollectionSchema(
   category: Category,
   baseURL: string,
-  products: Product[]
+  products: Product[],
 ) {
   return {
     "@context": "https://schema.org",
@@ -232,7 +233,7 @@ export function generateCollectionSchema(
  * Generate BreadcrumbList schema for navigation
  */
 export function generateBreadcrumbSchema(
-  items: Array<{ name: string; url: string }>
+  items: Array<{ name: string; url: string }>,
 ) {
   return {
     "@context": "https://schema.org",
@@ -250,7 +251,7 @@ export function generateBreadcrumbSchema(
  * Generate JSON-LD structured data for FAQPage
  */
 export function generateFAQSchema(
-  faqs: Array<{ question: string; answer: string }>
+  faqs: Array<{ question: string; answer: string }>,
 ) {
   return {
     "@context": "https://schema.org",
@@ -277,7 +278,12 @@ export function getCanonicalUrl(path: string): string {
  * Helper to create sitemap URLs
  */
 export function generateSitemapUrls(
-  pages: Array<{ loc: string; lastmod?: string; changefreq?: string; priority?: number }>
+  pages: Array<{
+    loc: string;
+    lastmod?: string;
+    changefreq?: string;
+    priority?: number;
+  }>,
 ) {
   return pages.map(
     (page) => `
@@ -286,7 +292,7 @@ export function generateSitemapUrls(
     ${page.lastmod ? `<lastmod>${page.lastmod}</lastmod>` : ""}
     ${page.changefreq ? `<changefreq>${page.changefreq}</changefreq>` : ""}
     ${page.priority ? `<priority>${page.priority}</priority>` : ""}
-  </url>`
+  </url>`,
   );
 }
 
