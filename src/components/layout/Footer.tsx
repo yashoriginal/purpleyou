@@ -17,7 +17,7 @@ export default function Footer() {
 
           {/* Shop */}
           <div>
-            <h4 className="text-xs font-semibold text-[#305040] uppercase tracking-wider mb-4">
+            <h4 className="text-xs font-semibold text-[#111111] uppercase tracking-wider mb-4">
               Shop
             </h4>
             <ul className="space-y-2 text-xs text-[#6b6b6b]">
