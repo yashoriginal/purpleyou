@@ -92,6 +92,14 @@ export default function Header() {
             >
               <HiOutlineSearch className="h-5 w-5" />
             </button>
+            <Link href="/account">
+              <button
+                aria-label="Account"
+                className="text-[#111111] hover:text-[#5540b7] transition-colors"
+              >
+                <HiOutlineUser className="h-5 w-5" />
+              </button>
+            </Link>
             <Link href="/wishlist">
               <button
                 aria-label="Wishlist"
