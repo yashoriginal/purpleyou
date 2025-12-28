@@ -199,6 +199,16 @@ export default function AccountPage() {
 
   // Show success screen after login
   if (step === "success") {
+    // Auto-redirect to home after 2 seconds
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        router.push("/collections/all");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }, [router]);
+
+    const isNew = isNewUser;
+
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="max-w-md w-full px-4 py-8 text-center">
@@ -218,24 +228,41 @@ export default function AccountPage() {
             </svg>
           </div>
           <h2 className="text-3xl font-light text-[#111111] mb-3">
-            Login Successful!
+            {isNew ? "Account Created!" : "Welcome Back!"}
           </h2>
           <p className="text-[#6b6b6b] font-light mb-2">
-            Welcome back to PURPLE YOU
+            Welcome to PURPLE YOU
           </p>
           <p className="text-sm text-[#6b6b6b] font-light mb-8">
             +91 {phoneNumber}
           </p>
 
-          {/* Cart and Wishlist loaded message */}
+          {/* Success message */}
           <div className="bg-[#f8f5f2] rounded-lg p-4 mb-8 text-left space-y-2">
-            <p className="text-sm font-medium text-[#111111]">
-              ✓ Cart loaded successfully
-            </p>
-            <p className="text-sm font-medium text-[#111111]">
-              ✓ Wishlist loaded successfully
-            </p>
+            {isNew ? (
+              <>
+                <p className="text-sm font-medium text-[#111111]">
+                  ✓ Account created successfully
+                </p>
+                <p className="text-sm font-medium text-[#111111]">
+                  ✓ Profile information saved
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-[#111111]">
+                  ✓ Cart loaded successfully
+                </p>
+                <p className="text-sm font-medium text-[#111111]">
+                  ✓ Wishlist loaded successfully
+                </p>
+              </>
+            )}
           </div>
+
+          <p className="text-xs text-[#6b6b6b] mb-6 font-light">
+            Redirecting to your account...
+          </p>
 
           <div className="space-y-3">
             <Link href="/collections/all">
