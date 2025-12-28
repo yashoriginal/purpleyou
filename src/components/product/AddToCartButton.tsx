@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HiOutlineHeart, HiOutlineFire } from "react-icons/hi";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -11,13 +11,26 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
-  const { addToCart } = useCart();
+  const { addToCart, removeFromCart, items } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [selectedVariants, setSelectedVariants] = useState<
     Record<string, string>
   >({});
-  const [isAdded, setIsAdded] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
   const isWishlisted = isInWishlist(product.id);
+
+  // Check if product is in cart
+  useEffect(() => {
+    const variantString = selectedVariants
+      ? Object.entries(selectedVariants)
+          .sort()
+          .map(([key, value]) => `${key}:${value}`)
+          .join("|")
+      : "";
+    const itemId = `${product.id}_${variantString}`;
+    const productInCart = items.some((item) => item.id === itemId);
+    setIsInCart(productInCart);
+  }, [items, product.id, selectedVariants]);
 
   const handleVariantSelect = (variantName: string, option: string) => {
     setSelectedVariants((prev) => ({
@@ -26,10 +39,27 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
     }));
   };
 
+  const generateCartItemId = (variants?: Record<string, string>): string => {
+    const variantString = variants
+      ? Object.entries(variants)
+          .sort()
+          .map(([key, value]) => `${key}:${value}`)
+          .join("|")
+      : "";
+    return `${product.id}_${variantString}`;
+  };
+
   const handleAddToCart = () => {
-    addToCart(product, selectedVariants, 1);
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+    if (isInCart) {
+      // Remove from cart
+      const itemId = generateCartItemId(selectedVariants);
+      removeFromCart(itemId);
+      // Also remove from wishlist when removing from bag
+      removeFromWishlist(product.id);
+    } else {
+      // Add to cart
+      addToCart(product, selectedVariants, 1);
+    }
   };
 
   const handleBuyNow = () => {
