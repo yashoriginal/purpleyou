@@ -62,20 +62,22 @@ export default function CategoryPage({ params }: PageProps) {
   if (baseProducts.length === 0) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center text-sm text-[#6b6b6b]">
-        No products found in "{category}".
+        No products found in "{slug}".
       </div>
     );
   }
+
+  const displayTitle = slug === "all" ? "All Products" : slug.replace("-", " ");
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
       {/* Header */}
       <div className="mb-12">
         <h1 className="text-4xl font-light text-[#111111] tracking-wide capitalize mb-3">
-          {category}
+          {displayTitle}
         </h1>
         <p className="text-sm text-[#6b6b6b] font-light max-w-2xl">
-          Explore our premium {category.toLowerCase()} collection. Crafted with care. Made for you.
+          Explore our premium {slug === "all" ? "jewelry" : slug.toLowerCase()} collection. Crafted with care. Made for you.
         </p>
       </div>
 
