@@ -7,8 +7,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-8 sm:gap-12 md:grid-cols-4">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
-            <h3 className="text-lg font-light text-[#305040] tracking-wide mb-4">
-              AURATE
+            <h3 className="text-lg font-light text-[#5540b7] tracking-wide mb-4">
+              PURPLE YOU
             </h3>
             <p className="text-xs text-[#6b6b6b] font-light leading-relaxed">
               Real jewelry for real life. Sustainable, ethically crafted fine jewelry guaranteed for life.
