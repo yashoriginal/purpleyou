@@ -397,6 +397,87 @@ export default function AccountPage() {
             </button>
           </form>
         )}
+
+        {/* Profile Collection Step (for new users) */}
+        {step === "profile" && (
+          <form onSubmit={handleProfileSubmit} className="space-y-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-light text-[#111111] mb-2">
+                Complete Your Profile
+              </h2>
+              <p className="text-sm text-[#6b6b6b] font-light">
+                Help us know you better to personalize your experience
+              </p>
+            </div>
+
+            {/* Full Name Input */}
+            <div>
+              <label className="block text-sm font-medium text-[#111111] mb-3">
+                Full Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-3 border border-[#e6e0da] rounded outline-none focus:border-[#5540b7] focus:ring-1 focus:ring-[#5540b7]"
+                required
+              />
+            </div>
+
+            {/* Pincode Input */}
+            <div>
+              <label className="block text-sm font-medium text-[#111111] mb-3">
+                Pincode
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your 6-digit pincode"
+                maxLength={10}
+                value={pincode}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setPincode(value);
+                }}
+                className="w-full px-4 py-3 border border-[#e6e0da] rounded outline-none focus:border-[#5540b7] focus:ring-1 focus:ring-[#5540b7]"
+                required
+              />
+              <p className="text-xs text-[#6b6b6b] mt-2 font-light">
+                This helps us provide accurate shipping estimates
+              </p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-[#5540b7] text-white py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Creating Account..." : "Complete Registration"}
+            </button>
+
+            {/* Back Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setStep("otp");
+                setName("");
+                setPincode("");
+                setError("");
+              }}
+              className="w-full text-[#5540b7] py-3 text-sm font-medium uppercase tracking-wider hover:underline"
+            >
+              ← Back to OTP
+            </button>
+          </form>
+        )}
       </div>
     </section>
   );
