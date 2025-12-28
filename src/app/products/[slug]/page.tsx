@@ -144,58 +144,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </p>
           </div>
 
-          {/* Variants */}
-          {product.variants && product.variants.length > 0 && (
-            <div className="py-6 border-b border-[#e6e0da]">
-              {product.variants.map((variant, idx) => (
-                <div key={idx} className="mb-4 last:mb-0">
-                  <label className="block text-sm font-medium text-[#111111] mb-3">
-                    {variant.name}
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {variant.options.map((option) => (
-                      <button
-                        key={option}
-                        className="px-4 py-2 border border-[#e6e0da] text-sm text-[#111111] hover:border-[#5540b7] hover:text-[#5540b7] transition-colors"
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Benefits */}
-          <div className="py-6 space-y-3">
-            <div className="flex items-start gap-3">
-              <HiOutlineCheck className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-[#6b6b6b] font-light">Free shipping on orders above ₹3000</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <HiOutlineCheck className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-[#6b6b6b] font-light">Secure checkout with Razorpay (UPI, Cards, Netbanking)</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <HiOutlineCheck className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-[#6b6b6b] font-light">GST included • 15-day returns</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <HiOutlineCheck className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-[#6b6b6b] font-light">COD available on select locations</span>
-            </div>
-          </div>
-
-          {/* Add to Cart Section */}
-          <div className="border-t border-[#e6e0da] pt-6 space-y-3">
-            <button className="w-full bg-[#5540b7] text-white px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors">
-              Add to Bag
-            </button>
-            <button className="w-full border border-[#111111] text-[#111111] px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#111111] hover:text-white transition-colors">
-              Buy Now
-            </button>
-          </div>
+          <AddToCartButton
+            productId={product.id}
+            productName={product.name}
+            variants={product.variants}
+          />
         </div>
       </div>
 
