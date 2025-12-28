@@ -118,7 +118,7 @@ export default function AboutPage() {
             Explore our curated selection of sustainable, ethically crafted fine jewelry.
           </p>
           <Link href="/collections/all">
-            <button className="inline-flex items-center justify-center border border-[#5540b7] px-12 py-3 text-xs uppercase tracking-[0.15em] text-[#5540b7] bg-transparent hover:bg-[#305040] hover:text-white transition-colors duration-300">
+            <button className="inline-flex items-center justify-center border border-[#5540b7] px-12 py-3 text-xs uppercase tracking-[0.15em] text-[#5540b7] bg-transparent hover:bg-[#5540b7] hover:text-white transition-colors duration-300">
               Shop Now
             </button>
           </Link>
