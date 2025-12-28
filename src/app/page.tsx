@@ -132,7 +132,7 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
         <div className="mb-12">
           <h2 className="text-4xl sm:text-5xl font-light text-[#111111] tracking-wider mb-3">
-            See Purple You in Action
+            See PURPLE YOU in Action
           </h2>
         </div>
         <div className="relative aspect-video bg-[#f8f5f2] overflow-hidden rounded-lg">
