@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, use } from 'react';
 import ProductGrid from "@/components/product/ProductGrid";
 import CollectionFilters from "@/components/collection/CollectionFilters";
 import { products } from "@/lib/data";
 
 type PageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export default function CategoryPage({ params }: PageProps) {
-  const { slug } = params;
+  const { slug } = use(params);
 
   const normalizedCategory = (slug ?? "").toLowerCase();
 
