@@ -1,18 +1,66 @@
-"use client";
-
-import { useState, useMemo, use } from "react";
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import ProductGrid from "@/components/product/ProductGrid";
-import CollectionFilters from "@/components/collection/CollectionFilters";
-import { products } from "@/lib/data";
+import Script from "next/script";
+import { products, categories } from "@/lib/data";
+import {
+  generateCollectionMetadata,
+  generateCollectionSchema,
+} from "@/lib/seo";
+import CollectionFiltersClient from "@/components/collection/CollectionFiltersClient";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export default function CategoryPage({ params }: PageProps) {
-  const { slug } = use(params);
+/**
+ * Generate static parameters for all collection pages
+ * This enables static site generation (SSG) for each category
+ */
+export async function generateStaticParams() {
+  return [
+    { slug: "all" },
+    ...categories.map((cat) => ({ slug: cat.slug })),
+  ];
+}
+
+/**
+ * Dynamic metadata generation for each collection
+ */
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
+  const slug = params.slug;
+
+  const category = categories.find((c) => c.slug === slug);
+
+  if (!category && slug !== "all") {
+    return {
+      title: "Collection Not Found",
+      description: "The collection you're looking for doesn't exist.",
+    };
+  }
+
+  if (slug === "all") {
+    return generateCollectionMetadata(
+      {
+        id: 0,
+        name: "All Products",
+        slug: "all",
+        description: "Browse our complete collection of premium jewelry",
+        image: "/images/hero1.jpg",
+      },
+      products.length
+    );
+  }
+
+  return generateCollectionMetadata(category!, products.length);
+}
+
+// ISR: Revalidate every 1 hour (product additions, price changes, etc.)
+export const revalidate = 3600;
+
+export default async function CategoryPage({ params }: PageProps) {
+  const { slug } = await params;
 
   const normalizedCategory = (slug ?? "").toLowerCase();
 
