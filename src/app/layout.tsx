@@ -2,6 +2,7 @@ import "@/app/globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
