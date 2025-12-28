@@ -161,7 +161,7 @@ export default function HomePage() {
       <section className="bg-[#D3C9FF] py-16 sm:py-24">
         <div className="mx-auto max-w-2xl px-4 text-center">
           <h2 className="text-4xl sm:text-5xl font-light text-[#111111] tracking-wider mb-4">
-            Join the Purple You Club
+            Join the PURPLE YOU Club
           </h2>
           <p className="text-base text-[#111111] font-light mb-8">
             Get exclusive offers, early access to new collections, and styling tips delivered to your inbox.
