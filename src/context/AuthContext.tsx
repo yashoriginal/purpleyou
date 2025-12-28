@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 export interface User {
   phoneNumber: string;
   name?: string;
+  pincode?: string;
 }
 
 interface AuthContextType {
