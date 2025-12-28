@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { HiOutlineHeart, HiOutlineFire } from "react-icons/hi";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { Product } from "@/lib/data";
 
 interface AddToCartButtonProps {
