@@ -114,7 +114,7 @@ export default function Footer() {
         {/* Newsletter Signup */}
         <div className="my-12 py-8 border-t border-b border-[#e6e0da]">
           <h4 className="text-sm font-semibold text-[#111111] uppercase tracking-wider mb-4">
-            Subscribe to Purple You
+            Subscribe to PURPLE YOU
           </h4>
           <form className="flex flex-col sm:flex-row gap-3 max-w-md">
             <input
