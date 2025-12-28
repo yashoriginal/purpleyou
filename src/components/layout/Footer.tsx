@@ -46,27 +46,27 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="text-xs font-semibold text-[#305040] uppercase tracking-wider mb-4">
+            <h4 className="text-xs font-semibold text-[#111111] uppercase tracking-wider mb-4">
               Company
             </h4>
             <ul className="space-y-2 text-xs text-[#6b6b6b]">
               <li>
-                <Link href="/about" className="hover:text-[#305040] transition-colors">
+                <Link href="/about" className="hover:text-[#5540b7] transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-[#305040] transition-colors">
+                <a href="#" className="hover:text-[#5540b7] transition-colors">
                   Sustainability
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#305040] transition-colors">
+                <a href="#" className="hover:text-[#5540b7] transition-colors">
                   Contact
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#305040] transition-colors">
+                <a href="#" className="hover:text-[#5540b7] transition-colors">
                   FAQs
                 </a>
               </li>
