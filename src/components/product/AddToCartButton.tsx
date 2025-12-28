@@ -40,7 +40,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   return (
     <>
       {/* Variants */}
-      {variants && variants.length > 0 && (
+      {product.variants && product.variants.length > 0 && (
         <div className="py-6 border-b border-[#e6e0da]">
           {variants.map((variant, idx) => (
             <div key={idx} className="mb-4 last:mb-0">
