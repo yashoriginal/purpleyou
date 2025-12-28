@@ -146,11 +146,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </p>
           </div>
 
-          <AddToCartButton
-            productId={product.id}
-            productName={product.name}
-            variants={product.variants}
-          />
+          <AddToCartButton product={product} />
         </div>
       </div>
 
