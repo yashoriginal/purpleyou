@@ -1,10 +1,8 @@
-'use client';
-
-import { useState } from 'react';
 import { products } from "@/lib/data"
 import Image from "next/image"
 import Link from "next/link"
 import ProductAccordion from "@/components/product/ProductAccordion"
+import AddToCartButton from "@/components/product/AddToCartButton"
 import { HiOutlineHeart, HiOutlineCheck } from 'react-icons/hi';
 
 type PageProps = {
