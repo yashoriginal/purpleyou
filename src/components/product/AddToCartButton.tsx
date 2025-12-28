@@ -12,11 +12,12 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [selectedVariants, setSelectedVariants] = useState<
     Record<string, string>
   >({});
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const isWishlisted = isInWishlist(product.id);
 
   const handleVariantSelect = (variantName: string, option: string) => {
     setSelectedVariants((prev) => ({
