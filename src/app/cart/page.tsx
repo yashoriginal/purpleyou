@@ -5,6 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { HiOutlineTrash, HiOutlineMinus, HiOutlinePlus } from "react-icons/hi";
+import { Metadata } from "next";
+
+// Note: metadata export doesn't work in client components
+// This metadata should be moved to a layout.tsx if SEO is critical
+// For now, we'll set it via the meta tags below
+const cartMetadata = {
+  title: "Shopping Cart - PURPLE YOU",
+  description: "Review and manage your shopping cart. Proceed to checkout.",
+};
 
 export default function CartPage() {
   const { items, totalPrice, totalItems, removeFromCart, updateQuantity } =
