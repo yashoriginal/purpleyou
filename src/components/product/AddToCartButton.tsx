@@ -120,7 +120,13 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       {/* Wishlist Button */}
       <div className="mt-6 pt-6 border-t border-[#e6e0da]">
         <button
-          onClick={() => setIsWishlisted(!isWishlisted)}
+          onClick={() => {
+            if (isWishlisted) {
+              removeFromWishlist(product.id);
+            } else {
+              addToWishlist(product);
+            }
+          }}
           className="flex items-center justify-center gap-2 w-full text-sm font-medium text-[#6b6b6b] hover:text-[#5540b7] transition-colors"
         >
           <HiOutlineHeart
