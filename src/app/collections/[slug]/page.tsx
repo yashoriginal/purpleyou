@@ -15,6 +15,9 @@ export default function CategoryPage({ params }: PageProps) {
   const normalizedCategory = (slug ?? "").toLowerCase();
 
   const baseProducts = useMemo(() => {
+    if (normalizedCategory === "all") {
+      return products;
+    }
     return products.filter((product) => {
       return (product.category ?? "").toLowerCase() === normalizedCategory;
     });
