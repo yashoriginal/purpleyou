@@ -35,14 +35,14 @@ export default function Header() {
           <div className="flex items-center gap-4">
             {/* mobile only - placeholder for menu button since this is client component issues */}
             <button
-              className="inline-flex sm:hidden text-[#305040]"
+              className="inline-flex sm:hidden text-[#111111]"
               aria-label="Menu"
               onClick={() => setOpen((v) => !v)}
             >
               <HiOutlineMenu className="h-6 w-6" />
             </button>
             <button
-              className="inline-flex sm:hidden text-[#305040]"
+              className="inline-flex sm:hidden text-[#111111]"
               aria-label="Search"
             >
               <HiOutlineSearch className="h-5 w-5" />
@@ -50,8 +50,8 @@ export default function Header() {
 
             {/* desktop logo on left */}
             <Link href="/" className="hidden sm:block">
-              <span className="inline-block text-2xl font-light tracking-[0.15em] text-[#305040]">
-                AURATE
+              <span className="inline-block text-2xl font-light tracking-[0.15em] text-[#5540b7]">
+                PURPLE YOU
               </span>
             </Link>
           </div>
@@ -60,8 +60,8 @@ export default function Header() {
           <div className="flex-1 flex justify-center sm:justify-start sm:ml-8">
             {/* mobile logo in center */}
             <Link href="/" className="sm:hidden">
-              <span className="inline-block text-xl font-light tracking-[0.15em] text-[#305040]">
-                AURATE
+              <span className="inline-block text-xl font-light tracking-[0.15em] text-[#5540b7]">
+                PURPLE YOU
               </span>
             </Link>
 
@@ -71,7 +71,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-[#305040] hover:text-[#6b7b73] transition-colors font-normal"
+                  className="text-[#111111] hover:text-[#5540b7] transition-colors font-normal"
                 >
                   {item.label}
                 </Link>
@@ -84,22 +84,22 @@ export default function Header() {
             {/* desktop search icon */}
             <button
               aria-label="Search"
-              className="hidden sm:inline-flex text-[#305040]"
+              className="hidden sm:inline-flex text-[#111111]"
             >
               <HiOutlineSearch className="h-5 w-5" />
             </button>
             <button
               aria-label="Wishlist"
-              className="text-[#305040]"
+              className="text-[#111111]"
             >
               <HiOutlineHeart className="h-5 w-5" />
             </button>
             <button
               aria-label="Cart"
-              className="relative flex items-center justify-center text-[#305040]"
+              className="relative flex items-center justify-center text-[#111111]"
             >
               <HiOutlineShoppingBag className="h-5 w-5" />
-              <span className="absolute -top-2 -right-2 bg-[#305040] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
+              <span className="absolute -top-2 -right-2 bg-[#5540b7] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
                 0
               </span>
             </button>
@@ -114,7 +114,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="py-3 border-b border-[#f5f2f0] last:border-b-0 text-[#305040]"
+                  className="py-3 border-b border-[#f5f2f0] last:border-b-0 text-[#111111]"
                 >
                   {item.label}
                 </Link>
