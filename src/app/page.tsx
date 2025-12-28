@@ -3,6 +3,14 @@ import ProductGrid from "@/components/product/ProductGrid";
 import { products } from "@/lib/data";
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
+import { generateHomeMetadata, generateOrganizationSchema } from "@/lib/seo";
+import Script from "next/script";
+
+export const metadata: Metadata = generateHomeMetadata();
+
+// ISR: Revalidate every 24 hours (price updates, new products, etc.)
+export const revalidate = 86400;
 
 export default function HomePage() {
   const bestsellers = products.filter((p) => p.isBestseller).slice(0, 6);
