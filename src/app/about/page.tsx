@@ -14,7 +14,7 @@ export default function AboutPage() {
         <div className="relative mx-auto max-w-7xl h-[400px] sm:h-[500px]">
           <Image
             src="/images/hero1.jpg"
-            alt="Aurate jewelry craftsmanship"
+            alt="PURPLE YOU jewelry craftsmanship"
             fill
             className="object-cover"
           />
