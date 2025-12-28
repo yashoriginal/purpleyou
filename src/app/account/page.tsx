@@ -293,7 +293,6 @@ export default function AccountPage() {
           <p className="text-[#6b6b6b] font-light">Sign in to your account</p>
         </div>
 
-
         {/* Form */}
         {step === "phone" && (
           <form onSubmit={handleSendOTP} className="space-y-6">
@@ -330,11 +329,15 @@ export default function AccountPage() {
                 </p>
                 <div className="space-y-2">
                   <div>
-                    <p className="font-medium text-[#111111] text-xs">Existing User:</p>
+                    <p className="font-medium text-[#111111] text-xs">
+                      Existing User:
+                    </p>
                     <p>Phone: 9999999999 | OTP: 9999</p>
                   </div>
                   <div>
-                    <p className="font-medium text-[#111111] text-xs">New User:</p>
+                    <p className="font-medium text-[#111111] text-xs">
+                      New User:
+                    </p>
                     <p>Phone: 8888888888 | OTP: 8888</p>
                   </div>
                 </div>
