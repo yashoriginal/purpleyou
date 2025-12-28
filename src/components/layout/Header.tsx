@@ -5,6 +5,7 @@ import { useState } from "react";
 import { HiOutlineSearch, HiOutlineHeart, HiOutlineMenu } from "react-icons/hi";
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 const navLinks = [
   { label: "Shop", href: "/collections/all" },
