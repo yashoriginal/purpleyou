@@ -121,6 +121,49 @@ export async function verifyOTP(
 }
 
 /**
+ * Dummy API to save user profile data (for new users)
+ * Called after profile step collection (Name and Pincode)
+ *
+ * TODO: Replace with actual backend API
+ * Example:
+ * const response = await fetch('/api/auth/save-profile', {
+ *   method: 'POST',
+ *   headers: { 'Content-Type': 'application/json' },
+ *   body: JSON.stringify({ phoneNumber, name, pincode }),
+ * });
+ * const { saved } = await response.json();
+ */
+export async function saveProfile(
+  phoneNumber: string,
+  name: string,
+  pincode: string,
+): Promise<{ saved: boolean; message: string }> {
+  // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // Validate inputs
+  if (!name || !name.trim()) {
+    return {
+      saved: false,
+      message: "Name is required",
+    };
+  }
+
+  if (!pincode || pincode.length < 6) {
+    return {
+      saved: false,
+      message: "Please enter a valid pincode",
+    };
+  }
+
+  // In a real app, save to database
+  return {
+    saved: true,
+    message: "Profile saved successfully",
+  };
+}
+
+/**
  * Dummy API to send OTP to phone number
  *
  * TODO: Replace with actual backend OTP sending service
