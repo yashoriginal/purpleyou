@@ -117,14 +117,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="flex flex-col">
           {/* Product Header */}
           <div className="pb-6 border-b border-[#e6e0da]">
-            <div className="flex items-start justify-between mb-3">
-              <h1 className="text-3xl sm:text-4xl font-light text-[#111111] tracking-wide flex-1">
-                {product.name}
-              </h1>
-              <button className="text-[#111111] hover:text-[#5540b7] transition-colors">
-                <HiOutlineHeart className="w-6 h-6" />
-              </button>
-            </div>
+            <h1 className="text-3xl sm:text-4xl font-light text-[#111111] tracking-wide mb-3">
+              {product.name}
+            </h1>
 
             {/* Price & Rating */}
             <div className="flex items-baseline gap-3 mb-4">
