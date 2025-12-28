@@ -81,47 +81,107 @@ export default function AccountPage() {
     try {
       const result = await verifyOTP(phoneNumber, otp);
       if (result.isValid) {
-        // Login successful - set auth state
-        login({
-          phoneNumber: phoneNumber,
-          name: `User ${phoneNumber.slice(-4)}`,
-        });
-
-        // Fetch and populate cart data
-        try {
-          const cartData = await fetchUserCart(phoneNumber);
-          clearCart(); // Clear existing cart
-          cartData.forEach((item) => {
-            const product = products.find((p) => p.id === item.productId);
-            if (product) {
-              addToCart(product, item.selectedVariants, item.quantity);
-            }
-          });
-        } catch (cartErr) {
-          console.error("Failed to load cart:", cartErr);
+        // Check if new user
+        if (result.new_user) {
+          // New user - show profile collection screen
+          setIsNewUser(true);
+          setStep("profile");
+          setError("");
+        } else {
+          // Existing user - fetch cart/wishlist and login
+          await handleExistingUserLogin();
         }
-
-        // Fetch and populate wishlist data
-        try {
-          const wishlistData = await fetchUserWishlist(phoneNumber);
-          clearWishlist(); // Clear existing wishlist
-          wishlistData.forEach((item) => {
-            const product = products.find((p) => p.id === item.productId);
-            if (product) {
-              addToWishlist(product);
-            }
-          });
-        } catch (wishlistErr) {
-          console.error("Failed to load wishlist:", wishlistErr);
-        }
-
-        setStep("success");
-        setError("");
       } else {
         setError(result.message);
       }
     } catch (err) {
       setError("Failed to verify OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Helper function to login existing user with cart/wishlist
+  const handleExistingUserLogin = async () => {
+    try {
+      // Login successful - set auth state
+      login({
+        phoneNumber: phoneNumber,
+        name: `User ${phoneNumber.slice(-4)}`,
+      });
+
+      // Fetch and populate cart data
+      try {
+        const cartData = await fetchUserCart(phoneNumber);
+        clearCart(); // Clear existing cart
+        cartData.forEach((item) => {
+          const product = products.find((p) => p.id === item.productId);
+          if (product) {
+            addToCart(product, item.selectedVariants, item.quantity);
+          }
+        });
+      } catch (cartErr) {
+        console.error("Failed to load cart:", cartErr);
+      }
+
+      // Fetch and populate wishlist data
+      try {
+        const wishlistData = await fetchUserWishlist(phoneNumber);
+        clearWishlist(); // Clear existing wishlist
+        wishlistData.forEach((item) => {
+          const product = products.find((p) => p.id === item.productId);
+          if (product) {
+            addToWishlist(product);
+          }
+        });
+      } catch (wishlistErr) {
+        console.error("Failed to load wishlist:", wishlistErr);
+      }
+
+      setStep("success");
+      setError("");
+    } catch (err) {
+      setError("Failed to login. Please try again.");
+      console.error(err);
+    }
+  };
+
+  // Handle profile submission for new users
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    // Validate inputs
+    if (!name || !name.trim()) {
+      setError("Please enter your name");
+      return;
+    }
+
+    if (!pincode || pincode.length < 6) {
+      setError("Please enter a valid pincode (minimum 6 digits)");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Save profile to backend
+      const saveResult = await saveProfile(phoneNumber, name, pincode);
+      if (saveResult.saved) {
+        // Login with profile data
+        login({
+          phoneNumber: phoneNumber,
+          name: name,
+          pincode: pincode,
+        });
+
+        setStep("success");
+        setError("");
+      } else {
+        setError(saveResult.message);
+      }
+    } catch (err) {
+      setError("Failed to save profile. Please try again.");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
