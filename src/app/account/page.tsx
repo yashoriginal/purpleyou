@@ -272,7 +272,7 @@ export default function AccountPage() {
                       : "text-[#111111] hover:bg-white hover:text-[#5540b7]"
                   }`}
                 >
-                  <HiOutlineShoppingBag className="w-5 h-5" />
+                  <span className="text-lg">📦</span>
                   <span className="text-sm font-medium">Orders</span>
                 </button>
 
@@ -284,7 +284,7 @@ export default function AccountPage() {
                       : "text-[#111111] hover:bg-white hover:text-[#5540b7]"
                   }`}
                 >
-                  <HiOutlineMapPin className="w-5 h-5" />
+                  <span className="text-lg">📍</span>
                   <span className="text-sm font-medium">Addresses</span>
                 </button>
 
