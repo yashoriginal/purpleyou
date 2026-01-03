@@ -6,9 +6,6 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import {
-  HiOutlineLogout,
-  HiOutlineShoppingBag,
-  HiOutlineMapPin,
   HiOutlineHeart,
   HiOutlineChevronLeft,
   HiOutlineChevronRight,
