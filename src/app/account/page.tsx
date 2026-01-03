@@ -306,7 +306,7 @@ export default function AccountPage() {
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-2 mt-8 px-4 py-3 border border-[#111111] text-[#111111] rounded-lg hover:bg-[#111111] hover:text-white transition-colors text-sm font-medium"
               >
-                <HiOutlineLogout className="w-5 h-5" />
+                <span className="text-lg">🚪</span>
                 Log Out
               </button>
             </div>
