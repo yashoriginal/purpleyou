@@ -211,14 +211,13 @@ export default function RazorpayCheckout({
             : 'bg-[#5540b7] text-white hover:bg-[#3d2d7f]'
         }`}
       >
-        <HiOutlineLock className="w-4 h-4" />
+        <span className="text-base">🔒</span>
         {isProcessing ? 'Processing Payment...' : `Pay ₹${total.toLocaleString('en-IN')}`}
       </button>
 
       {/* Security Note */}
-      <p className="text-xs text-[#6b6b6b] text-center mt-4 flex items-center justify-center gap-1">
-        <HiOutlineLock className="w-3 h-3" />
-        Secure payment powered by Razorpay
+      <p className="text-xs text-[#6b6b6b] text-center mt-4">
+        🔒 Secure payment powered by Razorpay
       </p>
     </div>
   );
