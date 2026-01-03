@@ -4,519 +4,617 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/CartContext";
-import { useWishlist } from "@/context/WishlistContext";
-import { products } from "@/lib/data";
+import Image from "next/image";
 import {
-  sendOTP,
-  verifyOTP,
-  fetchUserCart,
-  fetchUserWishlist,
-  saveProfile,
-} from "@/lib/dummyApi";
+  HiOutlineLogout,
+  HiOutlineShoppingBag,
+  HiOutlineMapPin,
+  HiOutlineHeart,
+  HiOutlineChevronLeft,
+  HiOutlineChevronRight,
+} from "react-icons/hi";
 
-type AuthStep = "phone" | "otp" | "profile" | "success";
+// Dummy data types
+interface Order {
+  id: string;
+  orderNumber: string;
+  date: string;
+  total: number;
+  status: "confirmed" | "shipped" | "delivered" | "cancelled";
+  items: OrderItem[];
+}
+
+interface OrderItem {
+  productName: string;
+  quantity: number;
+  price: number;
+  image: string;
+}
+
+interface Address {
+  id: string;
+  fullName: string;
+  street: string;
+  city: string;
+  state: string;
+  pinCode: string;
+  phone: string;
+  isDefault: boolean;
+}
+
+interface WishlistItem {
+  id: string;
+  productId: number;
+  productName: string;
+  price: number;
+  image: string;
+  addedDate: string;
+}
+
+// Dummy data - API placeholders
+const DUMMY_ORDERS: Order[] = [
+  {
+    id: "1",
+    orderNumber: "ORD-2025-001",
+    date: "2025-01-02",
+    total: 10029,
+    status: "delivered",
+    items: [
+      {
+        productName: "Layering Necklace Set",
+        quantity: 1,
+        price: 8499,
+        image: "/images/hero1.jpg",
+      },
+    ],
+  },
+  {
+    id: "2",
+    orderNumber: "ORD-2025-002",
+    date: "2024-12-28",
+    total: 5999,
+    status: "shipped",
+    items: [
+      {
+        productName: "Minimalist Stud Earrings",
+        quantity: 1,
+        price: 4499,
+        image: "/images/hero1.jpg",
+      },
+    ],
+  },
+  {
+    id: "3",
+    orderNumber: "ORD-2025-003",
+    date: "2024-12-15",
+    total: 8999,
+    status: "delivered",
+    items: [
+      {
+        productName: "Statement Gold Hoops",
+        quantity: 1,
+        price: 8999,
+        image: "/images/hero1.jpg",
+      },
+    ],
+  },
+  {
+    id: "4",
+    orderNumber: "ORD-2025-004",
+    date: "2024-12-10",
+    total: 4499,
+    status: "delivered",
+    items: [
+      {
+        productName: "Gold Chain Bracelet",
+        quantity: 1,
+        price: 4499,
+        image: "/images/hero1.jpg",
+      },
+    ],
+  },
+];
+
+const DUMMY_ADDRESSES: Address[] = [
+  {
+    id: "1",
+    fullName: "Uvan Shankar",
+    street: "123 Luxury Lane, Apartment 5B",
+    city: "New York",
+    state: "NY",
+    pinCode: "10001",
+    phone: "9999999999",
+    isDefault: true,
+  },
+  {
+    id: "2",
+    fullName: "Uvan Shankar",
+    street: "456 Park Avenue, Suite 200",
+    city: "Manhattan",
+    state: "NY",
+    pinCode: "10022",
+    phone: "9999999999",
+    isDefault: false,
+  },
+];
+
+const DUMMY_WISHLIST: WishlistItem[] = [
+  {
+    id: "1",
+    productId: 1,
+    productName: "Diamond Pendant",
+    price: 12999,
+    image: "/images/hero1.jpg",
+    addedDate: "2025-01-01",
+  },
+  {
+    id: "2",
+    productId: 2,
+    productName: "Pearl Necklace",
+    price: 9999,
+    image: "/images/hero1.jpg",
+    addedDate: "2024-12-28",
+  },
+  {
+    id: "3",
+    productId: 3,
+    productName: "Rose Gold Ring",
+    price: 7999,
+    image: "/images/hero1.jpg",
+    addedDate: "2024-12-20",
+  },
+  {
+    id: "4",
+    productId: 4,
+    productName: "Sapphire Earrings",
+    price: 14999,
+    image: "/images/hero1.jpg",
+    addedDate: "2024-12-15",
+  },
+  {
+    id: "5",
+    productId: 5,
+    productName: "Emerald Bracelet",
+    price: 10999,
+    image: "/images/hero1.jpg",
+    addedDate: "2024-12-10",
+  },
+];
+
+const ITEMS_PER_PAGE = 2;
+
+type Tab = "orders" | "addresses" | "wishlist";
 
 export default function AccountPage() {
   const router = useRouter();
-  const { isLoggedIn, user, login, logout } = useAuth();
-  const { addToCart, clearCart } = useCart();
-  const { addToWishlist, clearWishlist } = useWishlist();
+  const { isLoggedIn, user, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState<Tab>("orders");
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [wishlistPage, setWishlistPage] = useState(1);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
 
-  const [step, setStep] = useState<AuthStep>("phone");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [otp, setOtp] = useState("");
-  const [name, setName] = useState("");
-  const [pincode, setPincode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [isNewUser, setIsNewUser] = useState(false);
-
-  // Auto-redirect to home if already logged in
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (isLoggedIn) {
-      router.push("/collections/all");
+    if (!isLoggedIn) {
+      // Store the current path to redirect back after login
+      sessionStorage.setItem("redirectAfterLogin", "/account");
+      router.push("/account?login=true");
     }
   }, [isLoggedIn, router]);
 
-  // Handle OTP sending
-  const handleSendOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    // Validate phone number
-    if (!phoneNumber || phoneNumber.length !== 10) {
-      setError("Please enter a valid 10-digit phone number");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await sendOTP(phoneNumber);
-      if (result.sent) {
-        setStep("otp");
-        setError("");
-      } else {
-        setError(result.message);
-      }
-    } catch (err) {
-      setError("Failed to send OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle OTP verification and login
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    // Validate OTP
-    if (!otp || otp.length !== 4) {
-      setError("Please enter a valid 4-digit OTP");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await verifyOTP(phoneNumber, otp);
-      if (result.isValid) {
-        // Check if new user
-        if (result.new_user) {
-          // New user - show profile collection screen
-          setIsNewUser(true);
-          setStep("profile");
-          setError("");
-        } else {
-          // Existing user - fetch cart/wishlist and login
-          await handleExistingUserLogin();
-        }
-      } else {
-        setError(result.message);
-      }
-    } catch (err) {
-      setError("Failed to verify OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Helper function to login existing user with cart/wishlist
-  const handleExistingUserLogin = async () => {
-    try {
-      // Login successful - set auth state
-      login({
-        phoneNumber: phoneNumber,
-        name: `User ${phoneNumber.slice(-4)}`,
-      });
-
-      // Fetch and populate cart data
-      try {
-        const cartData = await fetchUserCart(phoneNumber);
-        clearCart(); // Clear existing cart
-        cartData.forEach((item) => {
-          const product = products.find((p) => p.id === item.productId);
-          if (product) {
-            addToCart(product, item.selectedVariants, item.quantity);
-          }
-        });
-      } catch (cartErr) {
-        console.error("Failed to load cart:", cartErr);
-      }
-
-      // Fetch and populate wishlist data
-      try {
-        const wishlistData = await fetchUserWishlist(phoneNumber);
-        clearWishlist(); // Clear existing wishlist
-        wishlistData.forEach((item) => {
-          const product = products.find((p) => p.id === item.productId);
-          if (product) {
-            addToWishlist(product);
-          }
-        });
-      } catch (wishlistErr) {
-        console.error("Failed to load wishlist:", wishlistErr);
-      }
-
-      setStep("success");
-      setError("");
-    } catch (err) {
-      setError("Failed to login. Please try again.");
-      console.error(err);
-    }
-  };
-
-  // Handle profile submission for new users
-  const handleProfileSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    // Validate inputs
-    if (!name || !name.trim()) {
-      setError("Please enter your name");
-      return;
-    }
-
-    if (!pincode || pincode.length < 6) {
-      setError("Please enter a valid pincode (minimum 6 digits)");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Save profile to backend
-      const saveResult = await saveProfile(phoneNumber, name, pincode);
-      if (saveResult.saved) {
-        // Login with profile data
-        login({
-          phoneNumber: phoneNumber,
-          name: name,
-          pincode: pincode,
-        });
-
-        setStep("success");
-        setError("");
-      } else {
-        setError(saveResult.message);
-      }
-    } catch (err) {
-      setError("Failed to save profile. Please try again.");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle logout
   const handleLogout = () => {
     logout();
-    clearCart();
-    clearWishlist();
-    setPhoneNumber("");
-    setOtp("");
-    setStep("phone");
+    router.push("/");
   };
 
-  // Show success screen after login
-  if (step === "success") {
-    // Auto-redirect to home after 2 seconds
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        router.push("/collections/all");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }, [router]);
+  // Pagination calculations
+  const totalOrderPages = Math.ceil(DUMMY_ORDERS.length / ITEMS_PER_PAGE);
+  const totalWishlistPages = Math.ceil(
+    DUMMY_WISHLIST.length / ITEMS_PER_PAGE
+  );
 
-    const isNew = isNewUser;
+  const paginatedOrders = DUMMY_ORDERS.slice(
+    (ordersPage - 1) * ITEMS_PER_PAGE,
+    ordersPage * ITEMS_PER_PAGE
+  );
 
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="max-w-md w-full px-4 py-8 text-center">
-          <div className="w-16 h-16 bg-[#D3C9FF] rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg
-              className="w-8 h-8 text-[#5540b7]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-light text-[#111111] mb-3">
-            {isNew ? "Account Created!" : "Welcome Back!"}
-          </h2>
-          <p className="text-[#6b6b6b] font-light mb-2">
-            Welcome to PURPLE YOU
-          </p>
-          <p className="text-sm text-[#6b6b6b] font-light mb-8">
-            +91 {phoneNumber}
-          </p>
+  const paginatedWishlist = DUMMY_WISHLIST.slice(
+    (wishlistPage - 1) * ITEMS_PER_PAGE,
+    wishlistPage * ITEMS_PER_PAGE
+  );
 
-          {/* Success message */}
-          <div className="bg-[#f8f5f2] rounded-lg p-4 mb-8 text-left space-y-2">
-            {isNew ? (
-              <>
-                <p className="text-sm font-medium text-[#111111]">
-                  ✓ Account created successfully
-                </p>
-                <p className="text-sm font-medium text-[#111111]">
-                  ✓ Profile information saved
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-medium text-[#111111]">
-                  ✓ Cart loaded successfully
-                </p>
-                <p className="text-sm font-medium text-[#111111]">
-                  ✓ Wishlist loaded successfully
-                </p>
-              </>
-            )}
-          </div>
+  const getStatusColor = (status: Order["status"]) => {
+    switch (status) {
+      case "confirmed":
+        return "bg-blue-100 text-blue-700";
+      case "shipped":
+        return "bg-yellow-100 text-yellow-700";
+      case "delivered":
+        return "bg-green-100 text-green-700";
+      case "cancelled":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-[#f8f5f2] text-[#6b6b6b]";
+    }
+  };
 
-          <p className="text-xs text-[#6b6b6b] mb-6 font-light">
-            Redirecting to your account...
-          </p>
-
-          <div className="space-y-3">
-            <Link href="/collections/all">
-              <button className="w-full bg-[#5540b7] text-white py-3 font-medium uppercase tracking-wide hover:bg-[#3d2d7f] transition-colors">
-                Continue Shopping
-              </button>
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="w-full border border-[#111111] text-[#111111] py-3 font-medium uppercase tracking-wide hover:bg-[#111111] hover:text-white transition-colors"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+  if (!isLoggedIn || !user) {
+    return null;
   }
 
   return (
-    <section className="min-h-screen bg-white">
-      <div className="mx-auto max-w-md px-4 py-16 sm:py-24">
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-light text-[#111111] tracking-wide mb-2">
-            PURPLE YOU
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="border-b border-[#e6e0da]">
+        <div className="mx-auto max-w-7xl px-4 py-6">
+          <h1 className="text-3xl sm:text-4xl font-light text-[#111111] tracking-wide">
+            My Account
           </h1>
-          <p className="text-[#6b6b6b] font-light">Sign in to your account</p>
         </div>
+      </div>
 
-        {/* Form */}
-        {step === "phone" && (
-          <form onSubmit={handleSendOTP} className="space-y-6">
-            {/* Phone Number Input */}
-            <div>
-              <label className="block text-sm font-medium text-[#111111] mb-3">
-                Phone Number
-              </label>
-              <div className="flex items-center border border-[#e6e0da] rounded">
-                <span className="px-4 text-[#6b6b6b]">+91</span>
-                <input
-                  type="tel"
-                  placeholder="Enter 10-digit number"
-                  maxLength={10}
-                  value={phoneNumber}
-                  onChange={(e) => {
-                    const value = e.target.value
-                      .replace(/\D/g, "")
-                      .slice(0, 10);
-                    setPhoneNumber(value);
-                  }}
-                  className="flex-1 px-4 py-3 outline-none text-[#111111] placeholder-[#6b6b6b]"
-                  required
-                />
+      {/* Main Content */}
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-[#f8f5f2] rounded-lg p-6 sticky top-24">
+              {/* User Info */}
+              <div className="mb-8 pb-8 border-b border-[#e6e0da]">
+                <p className="text-sm text-[#6b6b6b] font-light">Welcome</p>
+                <h2 className="text-xl font-medium text-[#111111]">
+                  {user.name || `+91 ${user.phoneNumber}`}
+                </h2>
               </div>
-              <p className="text-xs text-[#6b6b6b] mt-2 font-light">
-                We'll send you a One-Time Password to verify your number
-              </p>
 
-              {/* Test Credentials Help Text */}
-              <div className="mt-4 p-3 bg-[#f8f5f2] rounded text-xs text-[#6b6b6b]">
-                <p className="font-medium text-[#111111] mb-2">
-                  Test Credentials:
-                </p>
-                <div className="space-y-2">
-                  <div>
-                    <p className="font-medium text-[#111111] text-xs">
-                      Existing User:
-                    </p>
-                    <p>Phone: 9999999999 | OTP: 9999</p>
-                  </div>
-                  <div>
-                    <p className="font-medium text-[#111111] text-xs">
-                      New User:
-                    </p>
-                    <p>Phone: 8888888888 | OTP: 8888</p>
-                  </div>
+              {/* Navigation Menu */}
+              <nav className="space-y-4">
+                <button
+                  onClick={() => setActiveTab("orders")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                    activeTab === "orders"
+                      ? "bg-white text-[#5540b7]"
+                      : "text-[#111111] hover:bg-white hover:text-[#5540b7]"
+                  }`}
+                >
+                  <HiOutlineShoppingBag className="w-5 h-5" />
+                  <span className="text-sm font-medium">Orders</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("addresses")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                    activeTab === "addresses"
+                      ? "bg-white text-[#5540b7]"
+                      : "text-[#111111] hover:bg-white hover:text-[#5540b7]"
+                  }`}
+                >
+                  <HiOutlineMapPin className="w-5 h-5" />
+                  <span className="text-sm font-medium">Addresses</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("wishlist")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                    activeTab === "wishlist"
+                      ? "bg-white text-[#5540b7]"
+                      : "text-[#111111] hover:bg-white hover:text-[#5540b7]"
+                  }`}
+                >
+                  <HiOutlineHeart className="w-5 h-5" />
+                  <span className="text-sm font-medium">Wishlist</span>
+                </button>
+              </nav>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 mt-8 px-4 py-3 border border-[#111111] text-[#111111] rounded-lg hover:bg-[#111111] hover:text-white transition-colors text-sm font-medium"
+              >
+                <HiOutlineLogout className="w-5 h-5" />
+                Log Out
+              </button>
+            </div>
+          </div>
+
+          {/* Content Area */}
+          <div className="lg:col-span-3">
+            {/* Orders Tab */}
+            {activeTab === "orders" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-light text-[#111111] mb-6 tracking-wide">
+                    Your Orders
+                  </h2>
+
+                  {DUMMY_ORDERS.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-[#6b6b6b] font-light mb-4">
+                        You haven't placed any orders yet
+                      </p>
+                      <Link
+                        href="/collections/all"
+                        className="text-[#5540b7] font-medium hover:underline"
+                      >
+                        Start Shopping
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-4">
+                        {paginatedOrders.map((order) => (
+                          <div
+                            key={order.id}
+                            className="border border-[#e6e0da] rounded-lg p-6"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                              <div>
+                                <h3 className="text-lg font-medium text-[#111111]">
+                                  {order.orderNumber}
+                                </h3>
+                                <p className="text-sm text-[#6b6b6b]">
+                                  {new Date(order.date).toLocaleDateString(
+                                    "en-IN",
+                                    {
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    }
+                                  )}
+                                </p>
+                              </div>
+                              <span
+                                className={`mt-2 sm:mt-0 inline-block px-4 py-2 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}
+                              >
+                                {order.status.charAt(0).toUpperCase() +
+                                  order.status.slice(1)}
+                              </span>
+                            </div>
+
+                            <div className="border-t border-[#e6e0da] pt-4">
+                              {order.items.map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  className="flex gap-4 mb-4 last:mb-0"
+                                >
+                                  <div className="relative w-16 h-16 bg-[#f8f5f2] rounded flex-shrink-0 overflow-hidden">
+                                    <Image
+                                      src={item.image}
+                                      alt={item.productName}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium text-[#111111]">
+                                      {item.productName}
+                                    </p>
+                                    <p className="text-xs text-[#6b6b6b]">
+                                      Qty: {item.quantity}
+                                    </p>
+                                  </div>
+                                  <p className="text-sm font-medium text-[#111111]">
+                                    ₹{item.price.toLocaleString("en-IN")}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="border-t border-[#e6e0da] pt-4 mt-4 flex justify-between">
+                              <span className="text-sm text-[#6b6b6b]">
+                                Order Total
+                              </span>
+                              <span className="text-lg font-semibold text-[#111111]">
+                                ₹{order.total.toLocaleString("en-IN")}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Pagination */}
+                      {totalOrderPages > 1 && (
+                        <div className="flex items-center justify-center gap-4 mt-8">
+                          <button
+                            onClick={() =>
+                              setOrdersPage((p) => Math.max(1, p - 1))
+                            }
+                            disabled={ordersPage === 1}
+                            className="flex items-center gap-1 px-3 py-2 border border-[#e6e0da] text-[#111111] rounded hover:bg-[#f8f5f2] disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <HiOutlineChevronLeft className="w-4 h-4" />
+                            Previous
+                          </button>
+
+                          <div className="text-sm text-[#6b6b6b]">
+                            Page {ordersPage} of {totalOrderPages}
+                          </div>
+
+                          <button
+                            onClick={() =>
+                              setOrdersPage((p) =>
+                                Math.min(totalOrderPages, p + 1)
+                              )
+                            }
+                            disabled={ordersPage === totalOrderPages}
+                            className="flex items-center gap-1 px-3 py-2 border border-[#e6e0da] text-[#111111] rounded hover:bg-[#f8f5f2] disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Next
+                            <HiOutlineChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Error Message */}
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-                {error}
+            {/* Addresses Tab */}
+            {activeTab === "addresses" && (
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-light text-[#111111] tracking-wide">
+                      Saved Addresses
+                    </h2>
+                    <button className="px-4 py-2 bg-[#5540b7] text-white text-sm font-medium rounded hover:bg-[#3d2d7f] transition-colors">
+                      Add New Address
+                    </button>
+                  </div>
+
+                  {DUMMY_ADDRESSES.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-[#6b6b6b] font-light mb-4">
+                        No addresses saved yet
+                      </p>
+                      <button className="text-[#5540b7] font-medium hover:underline">
+                        Add Your First Address
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {DUMMY_ADDRESSES.map((address) => (
+                        <div
+                          key={address.id}
+                          className={`border-2 rounded-lg p-6 ${
+                            address.isDefault
+                              ? "border-[#5540b7] bg-[#D3C9FF]/5"
+                              : "border-[#e6e0da]"
+                          }`}
+                        >
+                          {address.isDefault && (
+                            <span className="inline-block px-3 py-1 bg-[#5540b7] text-white text-xs font-medium rounded mb-3">
+                              Default Address
+                            </span>
+                          )}
+                          <h3 className="text-lg font-medium text-[#111111] mb-3">
+                            {address.fullName}
+                          </h3>
+                          <p className="text-sm text-[#6b6b6b] mb-1">
+                            {address.street}
+                          </p>
+                          <p className="text-sm text-[#6b6b6b] mb-1">
+                            {address.city}, {address.state} {address.pinCode}
+                          </p>
+                          <p className="text-sm text-[#6b6b6b] mb-4">
+                            Phone: {address.phone}
+                          </p>
+                          <div className="flex gap-4 text-sm">
+                            <button className="text-[#5540b7] font-medium hover:underline">
+                              Edit
+                            </button>
+                            <button className="text-red-600 font-medium hover:underline">
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* Send OTP Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#5540b7] text-white py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Sending..." : "Send OTP"}
-            </button>
+            {/* Wishlist Tab */}
+            {activeTab === "wishlist" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-light text-[#111111] mb-6 tracking-wide">
+                    Your Wishlist
+                  </h2>
 
-            {/* Continue as Guest */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#e6e0da]"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-[#6b6b6b]">OR</span>
-              </div>
-            </div>
+                  {DUMMY_WISHLIST.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-[#6b6b6b] font-light mb-4">
+                        Your wishlist is empty
+                      </p>
+                      <Link
+                        href="/collections/all"
+                        className="text-[#5540b7] font-medium hover:underline"
+                      >
+                        Continue Shopping
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {paginatedWishlist.map((item) => (
+                          <div
+                            key={item.id}
+                            className="border border-[#e6e0da] rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                          >
+                            <div className="relative w-full h-48 bg-[#f8f5f2] overflow-hidden">
+                              <Image
+                                src={item.image}
+                                alt={item.productName}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="p-4">
+                              <h3 className="text-base font-medium text-[#111111] mb-2">
+                                {item.productName}
+                              </h3>
+                              <p className="text-xs text-[#6b6b6b] mb-3">
+                                Added on{" "}
+                                {new Date(item.addedDate).toLocaleDateString(
+                                  "en-IN"
+                                )}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <p className="text-lg font-semibold text-[#111111]">
+                                  ₹{item.price.toLocaleString("en-IN")}
+                                </p>
+                                <button className="px-4 py-2 bg-[#5540b7] text-white text-xs font-medium rounded hover:bg-[#3d2d7f] transition-colors">
+                                  Add to Cart
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
 
-            <Link href="/collections/all">
-              <button
-                type="button"
-                className="w-full border border-[#111111] text-[#111111] py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#111111] hover:text-white transition-colors"
-              >
-                Continue as Guest
-              </button>
-            </Link>
-          </form>
-        )}
+                      {/* Pagination */}
+                      {totalWishlistPages > 1 && (
+                        <div className="flex items-center justify-center gap-4 mt-8">
+                          <button
+                            onClick={() =>
+                              setWishlistPage((p) => Math.max(1, p - 1))
+                            }
+                            disabled={wishlistPage === 1}
+                            className="flex items-center gap-1 px-3 py-2 border border-[#e6e0da] text-[#111111] rounded hover:bg-[#f8f5f2] disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <HiOutlineChevronLeft className="w-4 h-4" />
+                            Previous
+                          </button>
 
-        {/* OTP Verification Step */}
-        {step === "otp" && (
-          <form onSubmit={handleVerifyOTP} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-[#111111] mb-3">
-                Enter OTP
-              </label>
-              <p className="text-sm text-[#6b6b6b] font-light mb-4">
-                Enter the 4-digit OTP sent to <strong>+91 {phoneNumber}</strong>
-              </p>
-              <input
-                type="text"
-                placeholder="0000"
-                maxLength={4}
-                value={otp}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "").slice(0, 4);
-                  setOtp(value);
-                }}
-                className="w-full px-4 py-4 border border-[#e6e0da] text-2xl text-center letter-spacing tracking-widest outline-none focus:border-[#5540b7] focus:ring-1 focus:ring-[#5540b7]"
-                required
-              />
-            </div>
+                          <div className="text-sm text-[#6b6b6b]">
+                            Page {wishlistPage} of {totalWishlistPages}
+                          </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-                {error}
-              </div>
-            )}
-
-            {/* Verify Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#5540b7] text-white py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Verifying..." : "Verify OTP"}
-            </button>
-
-            {/* Back Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setStep("phone");
-                setOtp("");
-                setError("");
-              }}
-              className="w-full text-[#5540b7] py-3 text-sm font-medium uppercase tracking-wider hover:underline"
-            >
-              ← Back to Phone Number
-            </button>
-          </form>
-        )}
-
-        {/* Profile Collection Step (for new users) */}
-        {step === "profile" && (
-          <form onSubmit={handleProfileSubmit} className="space-y-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-light text-[#111111] mb-2">
-                Complete Your Profile
-              </h2>
-              <p className="text-sm text-[#6b6b6b] font-light">
-                Help us know you better to personalize your experience
-              </p>
-            </div>
-
-            {/* Full Name Input */}
-            <div>
-              <label className="block text-sm font-medium text-[#111111] mb-3">
-                Full Name
-              </label>
-              <input
-                type="text"
-                placeholder="Enter your full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-[#e6e0da] rounded outline-none focus:border-[#5540b7] focus:ring-1 focus:ring-[#5540b7]"
-                required
-              />
-            </div>
-
-            {/* Pincode Input */}
-            <div>
-              <label className="block text-sm font-medium text-[#111111] mb-3">
-                Pincode
-              </label>
-              <input
-                type="text"
-                placeholder="Enter your 6-digit pincode"
-                maxLength={10}
-                value={pincode}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "").slice(0, 10);
-                  setPincode(value);
-                }}
-                className="w-full px-4 py-3 border border-[#e6e0da] rounded outline-none focus:border-[#5540b7] focus:ring-1 focus:ring-[#5540b7]"
-                required
-              />
-              <p className="text-xs text-[#6b6b6b] mt-2 font-light">
-                This helps us provide accurate shipping estimates
-              </p>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-                {error}
+                          <button
+                            onClick={() =>
+                              setWishlistPage((p) =>
+                                Math.min(totalWishlistPages, p + 1)
+                              )
+                            }
+                            disabled={wishlistPage === totalWishlistPages}
+                            className="flex items-center gap-1 px-3 py-2 border border-[#e6e0da] text-[#111111] rounded hover:bg-[#f8f5f2] disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Next
+                            <HiOutlineChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#5540b7] text-white py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Creating Account..." : "Complete Registration"}
-            </button>
-
-            {/* Back Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setStep("otp");
-                setName("");
-                setPincode("");
-                setError("");
-              }}
-              className="w-full text-[#5540b7] py-3 text-sm font-medium uppercase tracking-wider hover:underline"
-            >
-              ← Back to OTP
-            </button>
-          </form>
-        )}
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
