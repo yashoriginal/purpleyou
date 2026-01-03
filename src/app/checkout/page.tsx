@@ -1,21 +1,48 @@
-'use client';
+"use client";
 
-import { useCart } from '@/context/CartContext';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { HiOutlineChevronLeft, HiOutlineCheck } from 'react-icons/hi';
-import RazorpayCheckout from '@/components/checkout/RazorpayCheckout';
-import Link from 'next/link';
+import { useCart } from "@/context/CartContext";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { HiOutlineChevronLeft, HiOutlineCheck } from "react-icons/hi";
+import RazorpayCheckout from "@/components/checkout/RazorpayCheckout";
+import Link from "next/link";
 
 const INDIAN_STATES = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
-  'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh',
-  'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra',
-  'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-  'Andaman & Nicobar', 'Chandigarh', 'Dadra & Nagar Haveli',
-  'Daman & Diu', 'Lakshadweep', 'Delhi', 'Puducherry'
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Andaman & Nicobar",
+  "Chandigarh",
+  "Dadra & Nagar Haveli",
+  "Daman & Diu",
+  "Lakshadweep",
+  "Delhi",
+  "Puducherry",
 ];
 
 interface AddressForm {
@@ -32,16 +59,18 @@ interface AddressForm {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice } = useCart();
-  const [currentStep, setCurrentStep] = useState<'address' | 'payment'>('address');
+  const [currentStep, setCurrentStep] = useState<"address" | "payment">(
+    "address",
+  );
   const [address, setAddress] = useState<AddressForm>({
-    fullName: '',
-    mobileNumber: '',
-    building: '',
-    street: '',
-    city: '',
-    state: '',
-    pinCode: '',
-    email: '',
+    fullName: "",
+    mobileNumber: "",
+    building: "",
+    street: "",
+    city: "",
+    state: "",
+    pinCode: "",
+    email: "",
   });
 
   const [errors, setErrors] = useState<Partial<AddressForm>>({});
@@ -53,14 +82,17 @@ export default function CheckoutPage() {
   const validateForm = () => {
     const newErrors: Partial<AddressForm> = {};
 
-    if (!address.fullName.trim()) newErrors.fullName = 'Name required';
-    if (address.mobileNumber.length !== 10) newErrors.mobileNumber = '10-digit mobile required';
-    if (!address.building.trim()) newErrors.building = 'Building/House required';
-    if (!address.street.trim()) newErrors.street = 'Street/Locality required';
-    if (!address.city.trim()) newErrors.city = 'City required';
-    if (!address.state) newErrors.state = 'State required';
-    if (address.pinCode.length !== 6) newErrors.pinCode = '6-digit PIN code required';
-    if (!address.email.includes('@')) newErrors.email = 'Valid email required';
+    if (!address.fullName.trim()) newErrors.fullName = "Name required";
+    if (address.mobileNumber.length !== 10)
+      newErrors.mobileNumber = "10-digit mobile required";
+    if (!address.building.trim())
+      newErrors.building = "Building/House required";
+    if (!address.street.trim()) newErrors.street = "Street/Locality required";
+    if (!address.city.trim()) newErrors.city = "City required";
+    if (!address.state) newErrors.state = "State required";
+    if (address.pinCode.length !== 6)
+      newErrors.pinCode = "6-digit PIN code required";
+    if (!address.email.includes("@")) newErrors.email = "Valid email required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -69,14 +101,14 @@ export default function CheckoutPage() {
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      setCurrentStep('payment');
+      setCurrentStep("payment");
     }
   };
 
   const handleInputChange = (field: keyof AddressForm, value: string) => {
-    setAddress(prev => ({ ...prev, [field]: value }));
+    setAddress((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -107,7 +139,11 @@ export default function CheckoutPage() {
       <div className="border-b border-[#e6e0da]">
         <div className="mx-auto max-w-7xl px-4 py-6">
           <button
-            onClick={() => currentStep === 'payment' ? setCurrentStep('address') : router.back()}
+            onClick={() =>
+              currentStep === "payment"
+                ? setCurrentStep("address")
+                : router.back()
+            }
             className="flex items-center gap-2 text-[#5540b7] font-medium mb-4 hover:underline"
           >
             <HiOutlineChevronLeft className="w-5 h-5" />
@@ -128,12 +164,18 @@ export default function CheckoutPage() {
           <div className="flex items-center justify-center sm:justify-start gap-6 sm:gap-12">
             {/* Step 1 */}
             <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-                currentStep === 'address'
-                  ? 'bg-[#5540b7] text-white'
-                  : 'bg-[#e6e0da] text-[#111111]'
-              }`}>
-                {currentStep === 'payment' ? <HiOutlineCheck className="w-5 h-5" /> : '1'}
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
+                  currentStep === "address"
+                    ? "bg-[#5540b7] text-white"
+                    : "bg-[#e6e0da] text-[#111111]"
+                }`}
+              >
+                {currentStep === "payment" ? (
+                  <HiOutlineCheck className="w-5 h-5" />
+                ) : (
+                  "1"
+                )}
               </div>
               <div className="hidden sm:block">
                 <p className="text-xs font-medium text-[#6b6b6b]">Step 1</p>
@@ -146,11 +188,13 @@ export default function CheckoutPage() {
 
             {/* Step 2 */}
             <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-                currentStep === 'payment'
-                  ? 'bg-[#5540b7] text-white'
-                  : 'bg-[#e6e0da] text-[#111111]'
-              }`}>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
+                  currentStep === "payment"
+                    ? "bg-[#5540b7] text-white"
+                    : "bg-[#e6e0da] text-[#111111]"
+                }`}
+              >
                 2
               </div>
               <div className="hidden sm:block">
@@ -167,7 +211,7 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Form Section */}
           <div className="lg:col-span-2">
-            {currentStep === 'address' ? (
+            {currentStep === "address" ? (
               <div className="bg-white border border-[#e6e0da] p-6 sm:p-8 rounded-lg">
                 <h2 className="text-2xl font-light text-[#111111] tracking-wide mb-8">
                   Delivery Address
@@ -181,13 +225,19 @@ export default function CheckoutPage() {
                     <input
                       type="text"
                       value={address.fullName}
-                      onChange={(e) => handleInputChange('fullName', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("fullName", e.target.value)
+                      }
                       className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.fullName ? 'border-red-500' : 'border-[#e6e0da]'
+                        errors.fullName ? "border-red-500" : "border-[#e6e0da]"
                       }`}
                       placeholder="Your full name"
                     />
-                    {errors.fullName && <p className="text-xs text-red-500 mt-1">{errors.fullName}</p>}
+                    {errors.fullName && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.fullName}
+                      </p>
+                    )}
                   </div>
 
                   {/* Email & Mobile - 2 Columns */}
@@ -200,13 +250,19 @@ export default function CheckoutPage() {
                       <input
                         type="email"
                         value={address.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
                         className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                          errors.email ? 'border-red-500' : 'border-[#e6e0da]'
+                          errors.email ? "border-red-500" : "border-[#e6e0da]"
                         }`}
                         placeholder="your@email.com"
                       />
-                      {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+                      {errors.email && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.email}
+                        </p>
+                      )}
                     </div>
 
                     {/* Mobile Number */}
@@ -217,14 +273,25 @@ export default function CheckoutPage() {
                       <input
                         type="tel"
                         value={address.mobileNumber}
-                        onChange={(e) => handleInputChange('mobileNumber', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "mobileNumber",
+                            e.target.value.replace(/\D/g, "").slice(0, 10),
+                          )
+                        }
                         className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                          errors.mobileNumber ? 'border-red-500' : 'border-[#e6e0da]'
+                          errors.mobileNumber
+                            ? "border-red-500"
+                            : "border-[#e6e0da]"
                         }`}
                         placeholder="10-digit number"
                         maxLength={10}
                       />
-                      {errors.mobileNumber && <p className="text-xs text-red-500 mt-1">{errors.mobileNumber}</p>}
+                      {errors.mobileNumber && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.mobileNumber}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -236,13 +303,19 @@ export default function CheckoutPage() {
                     <input
                       type="text"
                       value={address.building}
-                      onChange={(e) => handleInputChange('building', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("building", e.target.value)
+                      }
                       className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.building ? 'border-red-500' : 'border-[#e6e0da]'
+                        errors.building ? "border-red-500" : "border-[#e6e0da]"
                       }`}
                       placeholder="House/Flat no., Building name"
                     />
-                    {errors.building && <p className="text-xs text-red-500 mt-1">{errors.building}</p>}
+                    {errors.building && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.building}
+                      </p>
+                    )}
                   </div>
 
                   {/* Street/Locality */}
@@ -253,13 +326,19 @@ export default function CheckoutPage() {
                     <input
                       type="text"
                       value={address.street}
-                      onChange={(e) => handleInputChange('street', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("street", e.target.value)
+                      }
                       className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.street ? 'border-red-500' : 'border-[#e6e0da]'
+                        errors.street ? "border-red-500" : "border-[#e6e0da]"
                       }`}
                       placeholder="Road/Locality name"
                     />
-                    {errors.street && <p className="text-xs text-red-500 mt-1">{errors.street}</p>}
+                    {errors.street && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.street}
+                      </p>
+                    )}
                   </div>
 
                   {/* City */}
@@ -270,13 +349,17 @@ export default function CheckoutPage() {
                     <input
                       type="text"
                       value={address.city}
-                      onChange={(e) => handleInputChange('city', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("city", e.target.value)
+                      }
                       className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.city ? 'border-red-500' : 'border-[#e6e0da]'
+                        errors.city ? "border-red-500" : "border-[#e6e0da]"
                       }`}
                       placeholder="City"
                     />
-                    {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city}</p>}
+                    {errors.city && (
+                      <p className="text-xs text-red-500 mt-1">{errors.city}</p>
+                    )}
                   </div>
 
                   {/* State & PIN Code */}
@@ -288,9 +371,11 @@ export default function CheckoutPage() {
                       </label>
                       <select
                         value={address.state}
-                        onChange={(e) => handleInputChange('state', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("state", e.target.value)
+                        }
                         className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                          errors.state ? 'border-red-500' : 'border-[#e6e0da]'
+                          errors.state ? "border-red-500" : "border-[#e6e0da]"
                         }`}
                       >
                         <option value="">Select State</option>
@@ -300,7 +385,11 @@ export default function CheckoutPage() {
                           </option>
                         ))}
                       </select>
-                      {errors.state && <p className="text-xs text-red-500 mt-1">{errors.state}</p>}
+                      {errors.state && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.state}
+                        </p>
+                      )}
                     </div>
 
                     {/* PIN Code */}
@@ -311,14 +400,23 @@ export default function CheckoutPage() {
                       <input
                         type="tel"
                         value={address.pinCode}
-                        onChange={(e) => handleInputChange('pinCode', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "pinCode",
+                            e.target.value.replace(/\D/g, "").slice(0, 6),
+                          )
+                        }
                         className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                          errors.pinCode ? 'border-red-500' : 'border-[#e6e0da]'
+                          errors.pinCode ? "border-red-500" : "border-[#e6e0da]"
                         }`}
                         placeholder="6-digit PIN"
                         maxLength={6}
                       />
-                      {errors.pinCode && <p className="text-xs text-red-500 mt-1">{errors.pinCode}</p>}
+                      {errors.pinCode && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.pinCode}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -355,7 +453,10 @@ export default function CheckoutPage() {
               {/* Cart Items */}
               <div className="mb-6 pb-6 border-b border-[#e6e0da] space-y-4 max-h-64 overflow-y-auto">
                 {items.map((item) => (
-                  <div key={item.id} className="flex justify-between items-start">
+                  <div
+                    key={item.id}
+                    className="flex justify-between items-start"
+                  >
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[#111111] line-clamp-2">
                         {item.productName}
@@ -365,7 +466,7 @@ export default function CheckoutPage() {
                       </p>
                     </div>
                     <p className="text-sm font-medium text-[#111111] ml-2 flex-shrink-0">
-                      ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                      ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                     </p>
                   </div>
                 ))}
@@ -375,21 +476,25 @@ export default function CheckoutPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm text-[#6b6b6b]">
                   <span>Subtotal</span>
-                  <span>₹{totalPrice.toLocaleString('en-IN')}</span>
+                  <span>₹{totalPrice.toLocaleString("en-IN")}</span>
                 </div>
                 <div className="flex justify-between text-sm text-[#6b6b6b]">
                   <span>Shipping</span>
-                  <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>
-                    {shippingCost === 0 ? 'Free' : `₹${shippingCost}`}
+                  <span
+                    className={
+                      shippingCost === 0 ? "text-green-600 font-medium" : ""
+                    }
+                  >
+                    {shippingCost === 0 ? "Free" : `₹${shippingCost}`}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm text-[#6b6b6b]">
                   <span>GST (18%)</span>
-                  <span>₹{gst.toLocaleString('en-IN')}</span>
+                  <span>₹{gst.toLocaleString("en-IN")}</span>
                 </div>
                 <div className="border-t border-[#e6e0da] pt-3 flex justify-between font-semibold text-lg text-[#111111]">
                   <span>Total</span>
-                  <span>₹{totalAmount.toLocaleString('en-IN')}</span>
+                  <span>₹{totalAmount.toLocaleString("en-IN")}</span>
                 </div>
               </div>
 

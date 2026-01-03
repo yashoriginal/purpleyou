@@ -5,7 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { HiOutlineTrash, HiOutlineMinus, HiOutlinePlus, HiOutlineArrowLeft } from "react-icons/hi";
+import {
+  HiOutlineTrash,
+  HiOutlineMinus,
+  HiOutlinePlus,
+  HiOutlineArrowLeft,
+} from "react-icons/hi";
 
 export default function CartPage() {
   const { items, totalPrice, totalItems, removeFromCart, updateQuantity } =

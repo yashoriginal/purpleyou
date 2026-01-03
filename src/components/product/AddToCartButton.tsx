@@ -70,7 +70,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
     addToCart(product, selectedVariants, 1);
     // Small delay to ensure cart is updated before redirect
     setTimeout(() => {
-      router.push('/checkout');
+      router.push("/checkout");
     }, 100);
   };
 
