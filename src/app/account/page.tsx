@@ -204,18 +204,16 @@ export default function AccountPage() {
 
   // Pagination calculations
   const totalOrderPages = Math.ceil(DUMMY_ORDERS.length / ITEMS_PER_PAGE);
-  const totalWishlistPages = Math.ceil(
-    DUMMY_WISHLIST.length / ITEMS_PER_PAGE
-  );
+  const totalWishlistPages = Math.ceil(DUMMY_WISHLIST.length / ITEMS_PER_PAGE);
 
   const paginatedOrders = DUMMY_ORDERS.slice(
     (ordersPage - 1) * ITEMS_PER_PAGE,
-    ordersPage * ITEMS_PER_PAGE
+    ordersPage * ITEMS_PER_PAGE,
   );
 
   const paginatedWishlist = DUMMY_WISHLIST.slice(
     (wishlistPage - 1) * ITEMS_PER_PAGE,
-    wishlistPage * ITEMS_PER_PAGE
+    wishlistPage * ITEMS_PER_PAGE,
   );
 
   const getStatusColor = (status: Order["status"]) => {
@@ -354,7 +352,7 @@ export default function AccountPage() {
                                       year: "numeric",
                                       month: "long",
                                       day: "numeric",
-                                    }
+                                    },
                                   )}
                                 </p>
                               </div>
@@ -428,7 +426,7 @@ export default function AccountPage() {
                           <button
                             onClick={() =>
                               setOrdersPage((p) =>
-                                Math.min(totalOrderPages, p + 1)
+                                Math.min(totalOrderPages, p + 1),
                               )
                             }
                             disabled={ordersPage === totalOrderPages}
@@ -554,7 +552,7 @@ export default function AccountPage() {
                               <p className="text-xs text-[#6b6b6b] mb-3">
                                 Added on{" "}
                                 {new Date(item.addedDate).toLocaleDateString(
-                                  "en-IN"
+                                  "en-IN",
                                 )}
                               </p>
                               <div className="flex items-center justify-between">
@@ -591,7 +589,7 @@ export default function AccountPage() {
                           <button
                             onClick={() =>
                               setWishlistPage((p) =>
-                                Math.min(totalWishlistPages, p + 1)
+                                Math.min(totalWishlistPages, p + 1),
                               )
                             }
                             disabled={wishlistPage === totalWishlistPages}
