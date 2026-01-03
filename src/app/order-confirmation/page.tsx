@@ -1,29 +1,25 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  HiOutlineCheck,
-  HiOutlineClock,
-  HiOutlineMapPin,
-} from "react-icons/hi";
+import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { HiOutlineCheck } from 'react-icons/hi';
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [orderData, setOrderData] = useState({
-    orderId: searchParams.get("orderId") || `ORD-${Date.now()}`,
-    email: searchParams.get("email") || "your@email.com",
-    amount: searchParams.get("amount") || "10,029",
-    status: "confirmed",
+    orderId: searchParams.get('orderId') || `ORD-${Date.now()}`,
+    email: searchParams.get('email') || 'your@email.com',
+    amount: searchParams.get('amount') || '10,029',
+    status: 'confirmed',
   });
 
   useEffect(() => {
     // If no order ID in URL, redirect to home after 10 seconds
-    if (!searchParams.get("orderId")) {
+    if (!searchParams.get('orderId')) {
       const timer = setTimeout(() => {
-        router.push("/");
+        router.push('/');
       }, 10000);
       return () => clearTimeout(timer);
     }
@@ -45,8 +41,7 @@ export default function OrderConfirmationPage() {
             Order Confirmed!
           </h1>
           <p className="text-[#6b6b6b] font-light text-lg">
-            Thank you for your purchase. Your order has been successfully
-            placed.
+            Thank you for your purchase. Your order has been successfully placed.
           </p>
         </div>
       </div>
@@ -66,9 +61,7 @@ export default function OrderConfirmationPage() {
                 <HiOutlineMapPin className="w-5 h-5 text-[#5540b7]" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-[#6b6b6b] font-medium mb-1">
-                  Order Number
-                </p>
+                <p className="text-sm text-[#6b6b6b] font-medium mb-1">Order Number</p>
                 <p className="text-lg font-medium text-[#111111] font-mono">
                   {orderData.orderId}
                 </p>
@@ -81,9 +74,7 @@ export default function OrderConfirmationPage() {
                 <HiOutlineClock className="w-5 h-5 text-[#5540b7]" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-[#6b6b6b] font-medium mb-1">
-                  Order Status
-                </p>
+                <p className="text-sm text-[#6b6b6b] font-medium mb-1">Order Status</p>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-600 rounded-full" />
                   <span className="text-lg font-medium text-[#111111] capitalize">
@@ -123,9 +114,7 @@ export default function OrderConfirmationPage() {
             {/* Total Amount */}
             <div className="border-t border-[#e6e0da] pt-6 mt-6">
               <div className="flex items-center justify-between">
-                <p className="text-base font-medium text-[#111111]">
-                  Total Amount
-                </p>
+                <p className="text-base font-medium text-[#111111]">Total Amount</p>
                 <p className="text-2xl font-semibold text-[#5540b7]">
                   ₹{orderData.amount}
                 </p>
@@ -150,8 +139,7 @@ export default function OrderConfirmationPage() {
                   Check Your Email
                 </h3>
                 <p className="text-sm text-[#6b6b6b]">
-                  We've sent an order confirmation and shipping details to your
-                  email address.
+                  We've sent an order confirmation and shipping details to your email address.
                 </p>
               </div>
             </div>
@@ -165,8 +153,7 @@ export default function OrderConfirmationPage() {
                   Order Processing
                 </h3>
                 <p className="text-sm text-[#6b6b6b]">
-                  Your order will be processed and shipped within 3-5 business
-                  days.
+                  Your order will be processed and shipped within 3-5 business days.
                 </p>
               </div>
             </div>
@@ -180,8 +167,7 @@ export default function OrderConfirmationPage() {
                   Track Your Shipment
                 </h3>
                 <p className="text-sm text-[#6b6b6b]">
-                  Once shipped, you'll receive a tracking number to monitor your
-                  delivery.
+                  Once shipped, you'll receive a tracking number to monitor your delivery.
                 </p>
               </div>
             </div>
@@ -191,8 +177,7 @@ export default function OrderConfirmationPage() {
         {/* Policies Section */}
         <div className="bg-[#f8f5f2] border border-[#e6e0da] rounded-lg p-8 mb-8">
           <p className="text-sm text-[#6b6b6b] mb-4">
-            For questions about your order, shipping, returns, or any concerns,
-            please check our:
+            For questions about your order, shipping, returns, or any concerns, please check our:
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
