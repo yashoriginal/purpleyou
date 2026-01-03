@@ -147,9 +147,10 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
         {!isInCart && (
           <button
             onClick={handleBuyNow}
-            className="w-full border border-[#111111] text-[#111111] px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#111111] hover:text-white transition-colors"
+            disabled={isBuying}
+            className="w-full border border-[#111111] text-[#111111] px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#111111] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Buy Now
+            {isBuying ? "Processing..." : "Buy Now"}
           </button>
         )}
       </div>
