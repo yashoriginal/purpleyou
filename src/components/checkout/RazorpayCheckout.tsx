@@ -1,6 +1,9 @@
 'use client';
 
+'use client';
+
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { HiOutlineCheck } from 'react-icons/hi';
 
 interface CheckoutProps {
@@ -18,6 +21,7 @@ export default function RazorpayCheckout({
   customerEmail,
   customerPhone,
 }: CheckoutProps) {
+  const router = useRouter();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('upi');
   const [isProcessing, setIsProcessing] = useState(false);
   const [upiId, setUpiId] = useState('');
@@ -40,19 +44,28 @@ export default function RazorpayCheckout({
 
     setIsProcessing(true);
 
-    // This would integrate with Razorpay API
-    // For now, simulate the payment process
+    // Simulate payment processing
     setTimeout(() => {
+      const shippingCost = amount >= 3000 ? 0 : 99;
+      const gst = Math.round(amount * 0.18);
+      const totalAmount = amount + shippingCost + gst;
+
       console.log('Payment initiated:', {
         method: selectedMethod,
-        amount: gst + amount,
+        amount: totalAmount,
         orderId,
         customerEmail,
         customerPhone,
       });
 
-      alert('Payment flow initiated! In production, this would redirect to Razorpay.');
-      setIsProcessing(false);
+      // In production, this would redirect to Razorpay
+      // For now, redirect to order confirmation
+      const params = new URLSearchParams({
+        orderId: orderId,
+        email: customerEmail,
+        amount: totalAmount.toLocaleString('en-IN'),
+      });
+      router.push(`/order-confirmation?${params.toString()}`);
     }, 1500);
   };
 
