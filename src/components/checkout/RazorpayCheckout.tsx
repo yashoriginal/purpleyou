@@ -1,8 +1,6 @@
 "use client";
 
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { HiOutlineCheck } from "react-icons/hi";
 
@@ -27,58 +25,189 @@ export default function RazorpayCheckout({
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("upi");
   const [isProcessing, setIsProcessing] = useState(false);
   const [upiId, setUpiId] = useState("");
-  const [cardDetails, setCardDetails] = useState({
-    number: "",
-    expiry: "",
-    cvv: "",
-  });
+  const [error, setError] = useState("");
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
-  const handlePayment = async () => {
-    if (!selectedMethod) {
-      alert("Please select a payment method");
-      return;
-    }
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => {
+      setRazorpayLoaded(true);
+    };
+    script.onerror = () => {
+      setError("Failed to load Razorpay. Please refresh and try again.");
+    };
+    document.body.appendChild(script);
 
-    if (selectedMethod === "upi" && !upiId.trim()) {
-      alert("Please enter UPI ID");
-      return;
-    }
-
-    setIsProcessing(true);
-
-    // Simulate payment processing
-    setTimeout(() => {
-      const shippingCost = amount >= 3000 ? 0 : 99;
-      const gst = Math.round(amount * 0.18);
-      const totalAmount = amount + shippingCost + gst;
-
-      console.log("Payment initiated:", {
-        method: selectedMethod,
-        amount: totalAmount,
-        orderId,
-        customerEmail,
-        customerPhone,
-      });
-
-      // Call success callback if provided (e.g., to clear cart)
-      if (onSuccess) {
-        onSuccess();
-      }
-
-      // In production, this would redirect to Razorpay
-      // For now, redirect to order confirmation
-      const params = new URLSearchParams({
-        orderId: orderId,
-        email: customerEmail,
-        amount: totalAmount.toLocaleString("en-IN"),
-      });
-      router.push(`/order-confirmation?${params.toString()}`);
-    }, 1500);
-  };
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const gst = Math.round(amount * 0.18);
   const shippingCost = amount >= 3000 ? 0 : 99;
   const total = amount + shippingCost + gst;
+
+  const handlePayment = async () => {
+    if (!selectedMethod) {
+      setError("Please select a payment method");
+      return;
+    }
+
+    if (selectedMethod === "upi" && !upiId.trim()) {
+      setError("Please enter UPI ID");
+      return;
+    }
+
+    setError("");
+    setIsProcessing(true);
+
+    try {
+      // Step 1: Create order on backend
+      const orderResponse = await fetch("/api/razorpay/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: total, // Total amount in rupees (will be converted to paise on backend)
+          currency: "INR",
+          receipt: `receipt_${orderId}`,
+          notes: {
+            orderId,
+            paymentMethod: selectedMethod,
+          },
+          customerEmail,
+          customerPhone,
+        }),
+      });
+
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        throw new Error(
+          errorData.error || "Failed to create order. Please try again."
+        );
+      }
+
+      const { order } = await orderResponse.json();
+
+      // Step 2: Open Razorpay checkout
+      if (!window.Razorpay) {
+        throw new Error("Razorpay SDK not loaded");
+      }
+
+      const razorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Public key
+        amount: order.amount, // Amount in paise
+        currency: "INR",
+        name: "AURA New York",
+        description: "Premium Jewelry Purchase",
+        order_id: order.id,
+        handler: async (response: any) => {
+          // Step 3: Verify payment on backend
+          try {
+            const verifyResponse = await fetch(
+              "/api/razorpay/verify-payment",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  orderId: order.id,
+                  paymentId: response.razorpay_payment_id,
+                  signature: response.razorpay_signature,
+                }),
+              }
+            );
+
+            if (!verifyResponse.ok) {
+              const errorData = await verifyResponse.json();
+              throw new Error(
+                errorData.error || "Payment verification failed"
+              );
+            }
+
+            // Payment successful
+            if (onSuccess) {
+              onSuccess();
+            }
+
+            // Redirect to order confirmation
+            const params = new URLSearchParams({
+              orderId: order.id,
+              paymentId: response.razorpay_payment_id,
+              email: customerEmail,
+              amount: total.toLocaleString("en-IN"),
+            });
+
+            router.push(`/order-confirmation?${params.toString()}`);
+          } catch (verifyError) {
+            const errorMessage =
+              verifyError instanceof Error
+                ? verifyError.message
+                : "Payment verification failed";
+            setError(errorMessage);
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: customerEmail,
+          email: customerEmail,
+          contact: customerPhone,
+        },
+        notes: {
+          orderId,
+          paymentMethod: selectedMethod,
+        },
+        theme: {
+          color: "#5540b7",
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            setError("Payment cancelled. Please try again.");
+          },
+        },
+      };
+
+      // Map selected method to Razorpay method
+      if (selectedMethod === "upi") {
+        (razorpayOptions as any).method = "upi";
+        (razorpayOptions as any).upi_link = true;
+      } else if (selectedMethod === "card") {
+        (razorpayOptions as any).method = "card";
+      } else if (selectedMethod === "netbanking") {
+        (razorpayOptions as any).method = "netbanking";
+      }
+
+      const razorpay = new window.Razorpay(razorpayOptions);
+
+      razorpay.on("payment.failed", (response: any) => {
+        setError(
+          `Payment failed: ${response.error?.description || "Unknown error"}`
+        );
+        setIsProcessing(false);
+      });
+
+      razorpay.open();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Payment failed. Please try again.";
+      setError(errorMessage);
+      setIsProcessing(false);
+    }
+  };
+
+  if (!razorpayLoaded) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-[#6b6b6b]">Loading payment gateway...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -114,18 +243,6 @@ export default function RazorpayCheckout({
             <p className="text-xs text-[#6b6b6b] mb-3">
               Google Pay, PhonePe, Paytm, BHIM, WhatsApp Pay & more
             </p>
-
-            {selectedMethod === "upi" && (
-              <div className="mt-4 pt-4 border-t border-[#e6e0da]">
-                <input
-                  type="text"
-                  placeholder="yourname@upi"
-                  value={upiId}
-                  onChange={(e) => setUpiId(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#e6e0da] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all"
-                />
-              </div>
-            )}
           </div>
         </label>
 
@@ -157,31 +274,6 @@ export default function RazorpayCheckout({
             <p className="text-xs text-[#6b6b6b] mb-3">
               Visa, Mastercard, RuPay, AmEx & all major cards
             </p>
-
-            {selectedMethod === "card" && (
-              <div className="mt-4 pt-4 border-t border-[#e6e0da] space-y-3">
-                <input
-                  type="text"
-                  placeholder="Card Number"
-                  maxLength={19}
-                  className="w-full px-3 py-2 border border-[#e6e0da] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all"
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="MM/YY"
-                    maxLength={5}
-                    className="px-3 py-2 border border-[#e6e0da] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all"
-                  />
-                  <input
-                    type="text"
-                    placeholder="CVV"
-                    maxLength={4}
-                    className="px-3 py-2 border border-[#e6e0da] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all"
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </label>
 
@@ -223,20 +315,25 @@ export default function RazorpayCheckout({
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-6 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
       {/* Payment Button */}
       <button
         onClick={handlePayment}
-        disabled={isProcessing || !selectedMethod}
+        disabled={isProcessing || !selectedMethod || !razorpayLoaded}
         className={`w-full py-4 text-sm font-semibold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${
-          isProcessing || !selectedMethod
+          isProcessing || !selectedMethod || !razorpayLoaded
             ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
             : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
         }`}
       >
         <span className="text-base">🔒</span>
-        {isProcessing
-          ? "Processing Payment..."
-          : `Pay ₹${total.toLocaleString("en-IN")}`}
+        {isProcessing ? "Processing Payment..." : `Pay ₹${total.toLocaleString("en-IN")}`}
       </button>
 
       {/* Security Note */}
@@ -245,4 +342,11 @@ export default function RazorpayCheckout({
       </p>
     </div>
   );
+}
+
+// Type augmentation for Razorpay SDK
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
 }
