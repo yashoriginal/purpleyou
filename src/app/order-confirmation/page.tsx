@@ -57,8 +57,8 @@ export default function OrderConfirmationPage() {
           <div className="space-y-6">
             {/* Order ID */}
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 mt-1">
-                <HiOutlineMapPin className="w-5 h-5 text-[#5540b7]" />
+              <div className="flex-shrink-0 mt-1 text-xl">
+                📦
               </div>
               <div className="flex-1">
                 <p className="text-sm text-[#6b6b6b] font-medium mb-1">Order Number</p>
@@ -70,8 +70,8 @@ export default function OrderConfirmationPage() {
 
             {/* Order Status */}
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 mt-1">
-                <HiOutlineClock className="w-5 h-5 text-[#5540b7]" />
+              <div className="flex-shrink-0 mt-1 text-xl">
+                ✅
               </div>
               <div className="flex-1">
                 <p className="text-sm text-[#6b6b6b] font-medium mb-1">Order Status</p>
