@@ -60,6 +60,11 @@ export default function RazorpayCheckout({
         customerPhone,
       });
 
+      // Call success callback if provided (e.g., to clear cart)
+      if (onSuccess) {
+        onSuccess();
+      }
+
       // In production, this would redirect to Razorpay
       // For now, redirect to order confirmation
       const params = new URLSearchParams({
