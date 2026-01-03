@@ -58,7 +58,7 @@ interface AddressForm {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, totalPrice } = useCart();
+  const { items, totalPrice, clearCart } = useCart();
   const [currentStep, setCurrentStep] = useState<"address" | "payment">(
     "address",
   );
