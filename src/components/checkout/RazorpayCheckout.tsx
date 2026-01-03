@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { HiOutlineCheck } from 'react-icons/hi';
+import { HiOutlineCheck, HiOutlineLock } from 'react-icons/hi';
 
 interface CheckoutProps {
   amount: number;
@@ -33,14 +33,19 @@ export default function RazorpayCheckout({
       return;
     }
 
+    if (selectedMethod === 'upi' && !upiId.trim()) {
+      alert('Please enter UPI ID');
+      return;
+    }
+
     setIsProcessing(true);
 
     // This would integrate with Razorpay API
-    // For now, we'll show a success message
+    // For now, simulate the payment process
     setTimeout(() => {
       console.log('Payment initiated:', {
         method: selectedMethod,
-        amount,
+        amount: gst + amount,
         orderId,
         customerEmail,
         customerPhone,
@@ -48,43 +53,23 @@ export default function RazorpayCheckout({
 
       alert('Payment flow initiated! In production, this would redirect to Razorpay.');
       setIsProcessing(false);
-    }, 1000);
+    }, 1500);
   };
 
   const gst = Math.round(amount * 0.18);
-  const total = amount + gst;
+  const shippingCost = amount >= 3000 ? 0 : 99;
+  const total = amount + shippingCost + gst;
 
   return (
-    <div className="max-w-md mx-auto">
-      {/* Order Summary */}
-      <div className="bg-[#f8f5f2] p-6 mb-6 rounded-lg">
-        <h3 className="text-sm font-semibold text-[#111111] uppercase tracking-wider mb-4">
-          Order Summary
-        </h3>
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between text-[#6b6b6b]">
-            <span>Subtotal</span>
-            <span>₹{amount.toLocaleString('en-IN')}</span>
-          </div>
-          <div className="flex justify-between text-[#6b6b6b]">
-            <span>GST (18%)</span>
-            <span>₹{gst.toLocaleString('en-IN')}</span>
-          </div>
-          <div className="border-t border-[#e6e0da] pt-3 flex justify-between font-semibold text-[#111111]">
-            <span>Total</span>
-            <span>₹{total.toLocaleString('en-IN')}</span>
-          </div>
-        </div>
-      </div>
-
+    <div>
       {/* Payment Methods */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-[#111111] uppercase tracking-wider mb-4">
+      <div className="space-y-4 mb-8">
+        <h3 className="text-sm font-semibold text-[#111111] uppercase tracking-wider">
           Select Payment Method
         </h3>
 
         {/* UPI */}
-        <label className="block mb-4">
+        <label className="block">
           <input
             type="radio"
             name="payment-method"
@@ -94,30 +79,30 @@ export default function RazorpayCheckout({
             className="hidden"
           />
           <div
-            className={`p-4 border-2 cursor-pointer transition-all ${
+            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
               selectedMethod === 'upi'
                 ? 'border-[#5540b7] bg-[#D3C9FF]/10'
                 : 'border-[#e6e0da] hover:border-[#5540b7]'
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-medium text-[#111111]">UPI</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-semibold text-[#111111]">UPI Payments</span>
               {selectedMethod === 'upi' && (
                 <HiOutlineCheck className="w-5 h-5 text-[#5540b7]" />
               )}
             </div>
             <p className="text-xs text-[#6b6b6b] mb-3">
-              Google Pay, PhonePe, Paytm, BHIM & more
+              Google Pay, PhonePe, Paytm, BHIM, WhatsApp Pay & more
             </p>
 
             {selectedMethod === 'upi' && (
-              <div className="mt-3 pt-3 border-t border-[#e6e0da]">
+              <div className="mt-4 pt-4 border-t border-[#e6e0da]">
                 <input
                   type="text"
                   placeholder="yourname@upi"
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#e6e0da] text-sm focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                  className="w-full px-3 py-2 border border-[#e6e0da] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all"
                 />
               </div>
             )}
@@ -125,7 +110,7 @@ export default function RazorpayCheckout({
         </label>
 
         {/* Cards */}
-        <label className="block mb-4">
+        <label className="block">
           <input
             type="radio"
             name="payment-method"
@@ -135,42 +120,42 @@ export default function RazorpayCheckout({
             className="hidden"
           />
           <div
-            className={`p-4 border-2 cursor-pointer transition-all ${
+            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
               selectedMethod === 'card'
                 ? 'border-[#5540b7] bg-[#D3C9FF]/10'
                 : 'border-[#e6e0da] hover:border-[#5540b7]'
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-medium text-[#111111]">Credit/Debit Card</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-semibold text-[#111111]">Credit/Debit Card</span>
               {selectedMethod === 'card' && (
                 <HiOutlineCheck className="w-5 h-5 text-[#5540b7]" />
               )}
             </div>
             <p className="text-xs text-[#6b6b6b] mb-3">
-              Visa, Mastercard, RuPay, AmEx
+              Visa, Mastercard, RuPay, AmEx & all major cards
             </p>
 
             {selectedMethod === 'card' && (
-              <div className="mt-3 pt-3 border-t border-[#e6e0da] space-y-3">
+              <div className="mt-4 pt-4 border-t border-[#e6e0da] space-y-3">
                 <input
                   type="text"
                   placeholder="Card Number"
                   maxLength={19}
-                  className="w-full px-3 py-2 border border-[#e6e0da] text-sm focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                  className="w-full px-3 py-2 border border-[#e6e0da] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all"
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <input
                     type="text"
                     placeholder="MM/YY"
                     maxLength={5}
-                    className="px-3 py-2 border border-[#e6e0da] text-sm focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                    className="px-3 py-2 border border-[#e6e0da] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all"
                   />
                   <input
                     type="text"
                     placeholder="CVV"
                     maxLength={4}
-                    className="px-3 py-2 border border-[#e6e0da] text-sm focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                    className="px-3 py-2 border border-[#e6e0da] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -178,8 +163,8 @@ export default function RazorpayCheckout({
           </div>
         </label>
 
-        {/* Netbanking */}
-        <label className="block mb-6">
+        {/* Net Banking */}
+        <label className="block">
           <input
             type="radio"
             name="payment-method"
@@ -189,28 +174,28 @@ export default function RazorpayCheckout({
             className="hidden"
           />
           <div
-            className={`p-4 border-2 cursor-pointer transition-all ${
+            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
               selectedMethod === 'netbanking'
                 ? 'border-[#5540b7] bg-[#D3C9FF]/10'
                 : 'border-[#e6e0da] hover:border-[#5540b7]'
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-medium text-[#111111]">Net Banking</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-semibold text-[#111111]">Net Banking</span>
               {selectedMethod === 'netbanking' && (
                 <HiOutlineCheck className="w-5 h-5 text-[#5540b7]" />
               )}
             </div>
             <p className="text-xs text-[#6b6b6b]">
-              ICICI, HDFC, Axis, IDBI & all major banks
+              ICICI, HDFC, Axis, IDBI, SBI & all major Indian banks
             </p>
           </div>
         </label>
 
         {/* COD Info */}
-        <div className="p-4 bg-[#f8f5f2] rounded-lg mb-6">
+        <div className="p-4 bg-[#f8f5f2] rounded-lg border border-[#e6e0da]">
           <p className="text-xs text-[#6b6b6b] flex items-start gap-2">
-            <span className="text-[#5540b7] mt-0.5">•</span>
+            <span className="text-[#5540b7] font-bold mt-0.5">ℹ</span>
             <span>Cash on Delivery available on select locations</span>
           </p>
         </div>
@@ -220,18 +205,20 @@ export default function RazorpayCheckout({
       <button
         onClick={handlePayment}
         disabled={isProcessing || !selectedMethod}
-        className={`w-full py-4 text-sm font-semibold uppercase tracking-wider transition-all ${
+        className={`w-full py-4 text-sm font-semibold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${
           isProcessing || !selectedMethod
             ? 'bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed'
             : 'bg-[#5540b7] text-white hover:bg-[#3d2d7f]'
         }`}
       >
-        {isProcessing ? 'Processing...' : `Pay ₹${total.toLocaleString('en-IN')}`}
+        <HiOutlineLock className="w-4 h-4" />
+        {isProcessing ? 'Processing Payment...' : `Pay ₹${total.toLocaleString('en-IN')}`}
       </button>
 
       {/* Security Note */}
-      <p className="text-xs text-[#6b6b6b] text-center mt-4">
-        🔒 Secure payment powered by Razorpay
+      <p className="text-xs text-[#6b6b6b] text-center mt-4 flex items-center justify-center gap-1">
+        <HiOutlineLock className="w-3 h-3" />
+        Secure payment powered by Razorpay
       </p>
     </div>
   );
