@@ -66,10 +66,12 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   };
 
   const handleBuyNow = () => {
-    // TODO: Implement checkout flow
-    // Once you have a checkout backend:
-    // 1. Add item to cart using addToCart()
-    // 2. Redirect to checkout: window.location.href = '/checkout';
+    setIsBuying(true);
+    addToCart(product, selectedVariants, 1);
+    // Small delay to ensure cart is updated before redirect
+    setTimeout(() => {
+      router.push('/checkout');
+    }, 100);
   };
 
   return (
