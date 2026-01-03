@@ -21,6 +21,7 @@ export default function RazorpayCheckout({
   orderId,
   customerEmail,
   customerPhone,
+  onSuccess,
 }: CheckoutProps) {
   const router = useRouter();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('upi');
