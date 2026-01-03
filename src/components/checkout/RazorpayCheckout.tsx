@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { HiOutlineCheck, HiOutlineLock } from "react-icons/hi";
+import { useState } from 'react';
+import { HiOutlineCheck } from 'react-icons/hi';
 
 interface CheckoutProps {
   amount: number;
@@ -10,7 +10,7 @@ interface CheckoutProps {
   customerPhone: string;
 }
 
-type PaymentMethod = "upi" | "card" | "netbanking" | null;
+type PaymentMethod = 'upi' | 'card' | 'netbanking' | null;
 
 export default function RazorpayCheckout({
   amount,
@@ -18,23 +18,23 @@ export default function RazorpayCheckout({
   customerEmail,
   customerPhone,
 }: CheckoutProps) {
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("upi");
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('upi');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [upiId, setUpiId] = useState("");
+  const [upiId, setUpiId] = useState('');
   const [cardDetails, setCardDetails] = useState({
-    number: "",
-    expiry: "",
-    cvv: "",
+    number: '',
+    expiry: '',
+    cvv: '',
   });
 
   const handlePayment = async () => {
     if (!selectedMethod) {
-      alert("Please select a payment method");
+      alert('Please select a payment method');
       return;
     }
 
-    if (selectedMethod === "upi" && !upiId.trim()) {
-      alert("Please enter UPI ID");
+    if (selectedMethod === 'upi' && !upiId.trim()) {
+      alert('Please enter UPI ID');
       return;
     }
 
@@ -43,7 +43,7 @@ export default function RazorpayCheckout({
     // This would integrate with Razorpay API
     // For now, simulate the payment process
     setTimeout(() => {
-      console.log("Payment initiated:", {
+      console.log('Payment initiated:', {
         method: selectedMethod,
         amount: gst + amount,
         orderId,
@@ -51,9 +51,7 @@ export default function RazorpayCheckout({
         customerPhone,
       });
 
-      alert(
-        "Payment flow initiated! In production, this would redirect to Razorpay.",
-      );
+      alert('Payment flow initiated! In production, this would redirect to Razorpay.');
       setIsProcessing(false);
     }, 1500);
   };
@@ -76,20 +74,20 @@ export default function RazorpayCheckout({
             type="radio"
             name="payment-method"
             value="upi"
-            checked={selectedMethod === "upi"}
-            onChange={() => setSelectedMethod("upi")}
+            checked={selectedMethod === 'upi'}
+            onChange={() => setSelectedMethod('upi')}
             className="hidden"
           />
           <div
             className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-              selectedMethod === "upi"
-                ? "border-[#5540b7] bg-[#D3C9FF]/10"
-                : "border-[#e6e0da] hover:border-[#5540b7]"
+              selectedMethod === 'upi'
+                ? 'border-[#5540b7] bg-[#D3C9FF]/10'
+                : 'border-[#e6e0da] hover:border-[#5540b7]'
             }`}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-semibold text-[#111111]">UPI Payments</span>
-              {selectedMethod === "upi" && (
+              {selectedMethod === 'upi' && (
                 <HiOutlineCheck className="w-5 h-5 text-[#5540b7]" />
               )}
             </div>
@@ -97,7 +95,7 @@ export default function RazorpayCheckout({
               Google Pay, PhonePe, Paytm, BHIM, WhatsApp Pay & more
             </p>
 
-            {selectedMethod === "upi" && (
+            {selectedMethod === 'upi' && (
               <div className="mt-4 pt-4 border-t border-[#e6e0da]">
                 <input
                   type="text"
@@ -117,22 +115,20 @@ export default function RazorpayCheckout({
             type="radio"
             name="payment-method"
             value="card"
-            checked={selectedMethod === "card"}
-            onChange={() => setSelectedMethod("card")}
+            checked={selectedMethod === 'card'}
+            onChange={() => setSelectedMethod('card')}
             className="hidden"
           />
           <div
             className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-              selectedMethod === "card"
-                ? "border-[#5540b7] bg-[#D3C9FF]/10"
-                : "border-[#e6e0da] hover:border-[#5540b7]"
+              selectedMethod === 'card'
+                ? 'border-[#5540b7] bg-[#D3C9FF]/10'
+                : 'border-[#e6e0da] hover:border-[#5540b7]'
             }`}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="font-semibold text-[#111111]">
-                Credit/Debit Card
-              </span>
-              {selectedMethod === "card" && (
+              <span className="font-semibold text-[#111111]">Credit/Debit Card</span>
+              {selectedMethod === 'card' && (
                 <HiOutlineCheck className="w-5 h-5 text-[#5540b7]" />
               )}
             </div>
@@ -140,7 +136,7 @@ export default function RazorpayCheckout({
               Visa, Mastercard, RuPay, AmEx & all major cards
             </p>
 
-            {selectedMethod === "card" && (
+            {selectedMethod === 'card' && (
               <div className="mt-4 pt-4 border-t border-[#e6e0da] space-y-3">
                 <input
                   type="text"
@@ -173,20 +169,20 @@ export default function RazorpayCheckout({
             type="radio"
             name="payment-method"
             value="netbanking"
-            checked={selectedMethod === "netbanking"}
-            onChange={() => setSelectedMethod("netbanking")}
+            checked={selectedMethod === 'netbanking'}
+            onChange={() => setSelectedMethod('netbanking')}
             className="hidden"
           />
           <div
             className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-              selectedMethod === "netbanking"
-                ? "border-[#5540b7] bg-[#D3C9FF]/10"
-                : "border-[#e6e0da] hover:border-[#5540b7]"
+              selectedMethod === 'netbanking'
+                ? 'border-[#5540b7] bg-[#D3C9FF]/10'
+                : 'border-[#e6e0da] hover:border-[#5540b7]'
             }`}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-semibold text-[#111111]">Net Banking</span>
-              {selectedMethod === "netbanking" && (
+              {selectedMethod === 'netbanking' && (
                 <HiOutlineCheck className="w-5 h-5 text-[#5540b7]" />
               )}
             </div>
@@ -211,14 +207,12 @@ export default function RazorpayCheckout({
         disabled={isProcessing || !selectedMethod}
         className={`w-full py-4 text-sm font-semibold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${
           isProcessing || !selectedMethod
-            ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
-            : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
+            ? 'bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed'
+            : 'bg-[#5540b7] text-white hover:bg-[#3d2d7f]'
         }`}
       >
         <HiOutlineLock className="w-4 h-4" />
-        {isProcessing
-          ? "Processing Payment..."
-          : `Pay ₹${total.toLocaleString("en-IN")}`}
+        {isProcessing ? 'Processing Payment...' : `Pay ₹${total.toLocaleString('en-IN')}`}
       </button>
 
       {/* Security Note */}
