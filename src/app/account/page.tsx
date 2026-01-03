@@ -196,9 +196,7 @@ export default function AccountPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoggedIn) {
-      // Store the current path to redirect back after login
-      sessionStorage.setItem("redirectAfterLogin", "/account");
-      router.push("/account?login=true");
+      router.push("/login?redirect=/account");
     }
   }, [isLoggedIn, router]);
 
