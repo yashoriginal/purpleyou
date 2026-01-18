@@ -193,6 +193,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   /**
+   * Update user details
+   */
+  const updateUserDetails = async (data: UpdateUserDetailsRequest): Promise<string> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const userId = await authService.updateUserDetails(data);
+
+      // Update local user state with new data
+      const currentUser = authService.getCurrentUser();
+      if (currentUser) {
+        setUser(convertAuthUserToUser(currentUser));
+      }
+
+      return userId;
+    } catch (err) {
+      const errorMessage = err instanceof AuthServiceError
+        ? err.message
+        : err instanceof Error
+          ? err.message
+          : "Failed to update profile. Please try again.";
+
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
    * Logout user
    */
   const logout = () => {
