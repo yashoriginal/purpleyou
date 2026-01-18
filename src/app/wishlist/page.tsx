@@ -42,6 +42,21 @@ export default function WishlistPage() {
     setTimeout(() => setAddedToCartId(null), 2000);
   };
 
+  if (isLoading) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
+        <div className="text-center">
+          <div className="mb-6">
+            <div className="w-16 h-16 mx-auto border-4 border-[#e6e0da] border-t-[#5540b7] rounded-full animate-spin" />
+          </div>
+          <h1 className="text-3xl font-light text-[#111111] tracking-wide mb-4">
+            Loading Wishlist...
+          </h1>
+        </div>
+      </section>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
