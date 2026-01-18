@@ -128,6 +128,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // Monitor for auth changes (login/logout) and reload cart accordingly
+  useEffect(() => {
+    const checkAuthChanges = setInterval(() => {
+      try {
+        const userStr = localStorage.getItem("auth_user");
+        const currentUserId = userStr ? JSON.parse(userStr)._id || JSON.parse(userStr).id : null;
+
+        if (currentUserId && currentUserId !== userId) {
+          // User logged in
+          setUserId(currentUserId);
+        } else if (!currentUserId && userId) {
+          // User logged out
+          setUserId(null);
+          setItems([]);
+        }
+      } catch (err) {
+        console.error("Error checking auth changes:", err);
+      }
+    }, 1000); // Check every second
+
+    return () => clearInterval(checkAuthChanges);
+  }, [userId]);
+
   // Fetch cart from API when userId changes
   useEffect(() => {
     if (userId && isHydrated) {
