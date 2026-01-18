@@ -266,7 +266,7 @@ export default function LoginPage() {
           <h2 className="text-3xl font-light text-[#111111] mb-3">
             {isNew ? "Account Created!" : "Welcome Back!"}
           </h2>
-          <p className="text-[#6b6b6b] font-light mb-2">Welcome to AURA</p>
+          <p className="text-[#6b6b6b] font-light mb-2">Welcome to Purple You</p>
           <p className="text-sm text-[#6b6b6b] font-light mb-8">
             +91 {phoneNumber}
           </p>
@@ -321,7 +321,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-light text-[#111111] tracking-wide mb-2">
-            AURA
+            Purple You
           </h1>
           <p className="text-[#6b6b6b] font-light">Sign in to your account</p>
         </div>
