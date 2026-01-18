@@ -35,6 +35,8 @@ export interface AuthUser {
   isAdmin: boolean;
   isVerified: boolean;
   _id?: string;
+  id?: string;
+  userId?: string;
   createdAt?: string;
   updatedAt?: string;
 }
