@@ -186,6 +186,8 @@ export default function LoginPage() {
         area: area,
       });
 
+      // Show success screen briefly before redirecting
+      setStep("success");
       setError("");
     } catch (err) {
       const errorMessage =
