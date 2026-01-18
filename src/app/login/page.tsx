@@ -27,21 +27,19 @@ export default function LoginPage() {
   // Auto-redirect after successful login
   useEffect(() => {
     if (isLoggedIn) {
-      const redirectTo = searchParams.get("redirect") || "/";
-      router.push(redirectTo);
+      router.push("/");
     }
-  }, [isLoggedIn, router, searchParams]);
+  }, [isLoggedIn, router]);
 
   // Auto-redirect after success screen is shown (after 2 seconds)
   useEffect(() => {
     if (step === "success") {
       const timer = setTimeout(() => {
-        const redirectTo = searchParams.get("redirect") || "/";
-        router.push(redirectTo);
+        router.push("/");
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [step, router, searchParams]);
+  }, [step, router]);
 
   // Handle Login or Register - Initial step
   const handleSendOTP = async (e: React.FormEvent) => {
