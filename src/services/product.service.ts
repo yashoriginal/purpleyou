@@ -93,6 +93,7 @@ function mapAPIProductToProduct(apiProduct: APIProduct): Product {
 
   return {
     id: parseInt(apiProduct.productId.replace(/\D/g, ""), 10) || Math.random(),
+    productId: apiProduct.productId, // Store original API productId for cart operations
     name: apiProduct.title,
     price: Math.floor(apiProduct.price),
     comparePrice: apiProduct.comparePrice
