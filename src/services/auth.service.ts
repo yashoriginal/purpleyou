@@ -267,7 +267,7 @@ interface RequestOptions {
 }
 
 /**
- * Make HTTP request with automatic retry logic and auth header injection
+ * Make HTTP request with automatic retry logic, auth header injection, and token refresh
  */
 async function makeRequest<T = unknown>(
   endpoint: string,
@@ -299,7 +299,16 @@ async function makeRequest<T = unknown>(
       if (!token) {
         throw new AuthServiceError(401, "No authentication token found");
       }
-      finalHeaders.Authorization = `Bearer ${token}`;
+
+      // Check if token is expired and refresh if needed
+      if (isTokenExpired(token)) {
+        const newToken = await refreshAccessToken();
+        if (!newToken) {
+          throw new AuthServiceError(401, "Token expired and refresh failed");
+        }
+      }
+
+      finalHeaders.Authorization = `Bearer ${getAuthToken()}`;
     }
 
     // Make request
@@ -315,6 +324,19 @@ async function makeRequest<T = unknown>(
 
     // Handle non-successful responses
     if (!response.ok) {
+      // Handle 401 Unauthorized - try token refresh
+      if (response.status === 401 && requiresAuth && retries > 0) {
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          // Retry request with new token
+          return makeRequest<T>(endpoint, { ...options, retries: retries - 1 });
+        } else {
+          // Refresh failed - clear auth and throw error
+          clearCredentials();
+          throw new AuthServiceError(401, "Authentication failed. Please login again.");
+        }
+      }
+
       // Check if it's an API error response with our format
       if (data && typeof data === "object" && "error" in data) {
         throw new AuthServiceError(
