@@ -37,6 +37,22 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 // ============================================================================
 
 /**
+ * Get userId from localStorage, trying multiple possible field names
+ */
+function getUserIdFromLocalStorage(): string | null {
+  try {
+    const userStr = localStorage.getItem("auth_user");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      return user._id || user.id || user.userId || null;
+    }
+  } catch (err) {
+    console.error("Failed to get userId from localStorage:", err);
+  }
+  return null;
+}
+
+/**
  * Generate unique ID for cart items based on product and variants
  */
 function generateCartItemId(
