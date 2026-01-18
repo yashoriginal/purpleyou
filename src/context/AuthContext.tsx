@@ -33,6 +33,7 @@ interface AuthContextType {
   sendOTP: (mobile: string) => Promise<OTPResponse>;
   verifyOTP: (mobile: string, otp: string) => Promise<void>;
   login: (phoneNumber: string) => Promise<void>;
+  updateUserDetails: (data: UpdateUserDetailsRequest) => Promise<string>;
   logout: () => void;
   clearError: () => void;
   restoreSession: () => void;
