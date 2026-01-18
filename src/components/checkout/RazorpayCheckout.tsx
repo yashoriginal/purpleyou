@@ -37,6 +37,11 @@ export default function RazorpayCheckout({
   orderId,
   customerEmail,
   customerPhone,
+  items,
+  address,
+  totalPrice,
+  shippingCost,
+  gst,
   onSuccess,
 }: CheckoutProps) {
   const router = useRouter();
