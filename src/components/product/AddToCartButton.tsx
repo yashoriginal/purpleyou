@@ -52,26 +52,39 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
     return `${product.id}_${variantString}`;
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (isInCart) {
       // Remove from cart
       const itemId = generateCartItemId(selectedVariants);
-      removeFromCart(itemId);
-      // Also remove from wishlist when removing from bag
-      removeFromWishlist(product.id);
+      try {
+        await removeFromCart(itemId);
+        // Also remove from wishlist when removing from bag
+        removeFromWishlist(product.id);
+      } catch (err) {
+        console.error("Failed to remove from cart:", err);
+      }
     } else {
       // Add to cart
-      addToCart(product, selectedVariants, 1);
+      try {
+        await addToCart(product, selectedVariants, 1);
+      } catch (err) {
+        console.error("Failed to add to cart:", err);
+      }
     }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     setIsBuying(true);
-    addToCart(product, selectedVariants, 1);
-    // Small delay to ensure cart is updated before redirect
-    setTimeout(() => {
-      router.push("/checkout");
-    }, 100);
+    try {
+      await addToCart(product, selectedVariants, 1);
+      // Small delay to ensure cart is updated before redirect
+      setTimeout(() => {
+        router.push("/checkout");
+      }, 100);
+    } catch (err) {
+      console.error("Failed to add to cart:", err);
+      setIsBuying(false);
+    }
   };
 
   return (
