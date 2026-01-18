@@ -108,7 +108,14 @@ export default function LoginPage() {
       await contextVerifyOTP(formattedMobile, otp);
 
       // If we reach here, OTP was verified successfully
-      // The context's verifyOTP sets isLoggedIn=true, which triggers the redirect useEffect
+      if (isNewUser) {
+        // New user - show complete profile form
+        setStep("profile");
+      } else {
+        // Existing user - show success screen and redirect
+        setStep("success");
+      }
+
       setError("");
     } catch (err) {
       if (err instanceof AuthServiceError) {
