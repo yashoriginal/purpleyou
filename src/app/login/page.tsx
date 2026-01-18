@@ -4,10 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/CartContext";
-import { useWishlist } from "@/context/WishlistContext";
-import { products } from "@/lib/data";
-import { fetchUserCart, fetchUserWishlist } from "@/lib/dummyApi";
 import { AuthServiceError, authService } from "@/services/auth.service";
 
 type AuthStep = "phone" | "otp" | "profile" | "success";
