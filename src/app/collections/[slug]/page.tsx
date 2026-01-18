@@ -8,7 +8,10 @@ import {
   generateCollectionSchema,
 } from "@/lib/seo";
 import CollectionFiltersClient from "@/components/collection/CollectionFiltersClient";
-import { getAllProducts, getProductsByCollection } from "@/services/product.service";
+import {
+  getAllProducts,
+  getProductsByCollection,
+} from "@/services/product.service";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -38,7 +41,10 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     };
   }
 
-  const products = slug === "all" ? await getAllProducts() : await getProductsByCollection(slug);
+  const products =
+    slug === "all"
+      ? await getAllProducts()
+      : await getProductsByCollection(slug);
 
   if (slug === "all") {
     return generateCollectionMetadata(
@@ -53,10 +59,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     );
   }
 
-  return generateCollectionMetadata(
-    category!,
-    products.length,
-  );
+  return generateCollectionMetadata(category!, products.length);
 }
 
 // ISR: Revalidate every 10 minutes (product additions, price changes, etc.)

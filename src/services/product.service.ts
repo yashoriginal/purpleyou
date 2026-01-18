@@ -1,6 +1,7 @@
 import { Product } from "@/types/product";
 
-const EXTERNAL_API_URL = "https://purpleoneservice.onrender.com/api/v1/products";
+const EXTERNAL_API_URL =
+  "https://purpleoneservice.onrender.com/api/v1/products";
 
 interface APIVariant {
   color: string;
@@ -67,14 +68,17 @@ function validateImageUrl(url?: string): string {
 // Map external API product to frontend Product type
 function mapAPIProductToProduct(apiProduct: APIProduct): Product {
   // Get primary image or first image
-  const primaryImage = apiProduct.images?.find((img) => img.isPrimary) || apiProduct.images?.[0];
+  const primaryImage =
+    apiProduct.images?.find((img) => img.isPrimary) || apiProduct.images?.[0];
   const hoverImage = apiProduct.images?.[1];
 
   return {
     id: parseInt(apiProduct.productId.replace(/\D/g, ""), 10) || Math.random(),
     name: apiProduct.title,
     price: Math.floor(apiProduct.price),
-    comparePrice: apiProduct.comparePrice ? Math.floor(apiProduct.comparePrice) : undefined,
+    comparePrice: apiProduct.comparePrice
+      ? Math.floor(apiProduct.comparePrice)
+      : undefined,
     slug: apiProduct.slug,
     image: validateImageUrl(primaryImage?.url),
     hoverImage: validateImageUrl(hoverImage?.url),
@@ -133,14 +137,18 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   return products.find((p) => p.slug === slug) || null;
 }
 
-export async function getProductsByCollection(collection: string): Promise<Product[]> {
+export async function getProductsByCollection(
+  collection: string,
+): Promise<Product[]> {
   const products = await fetchProductsFromAPI();
 
   if (collection.toLowerCase() === "all") {
     return products;
   }
 
-  return products.filter((product) => product.category.toLowerCase() === collection.toLowerCase());
+  return products.filter(
+    (product) => product.category.toLowerCase() === collection.toLowerCase(),
+  );
 }
 
 export async function getAllProducts(): Promise<Product[]> {

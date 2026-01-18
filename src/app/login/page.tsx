@@ -4,14 +4,22 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { AuthServiceError, authService, type AddressObject } from "@/services/auth.service";
+import {
+  AuthServiceError,
+  authService,
+  type AddressObject,
+} from "@/services/auth.service";
 
 type AuthStep = "phone" | "otp" | "profile" | "success";
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoggedIn, verifyOTP: contextVerifyOTP, register: contextRegister } = useAuth();
+  const {
+    isLoggedIn,
+    verifyOTP: contextVerifyOTP,
+    register: contextRegister,
+  } = useAuth();
 
   const [step, setStep] = useState<AuthStep>("phone");
   const [phoneNumber, setPhoneNumber] = useState("");

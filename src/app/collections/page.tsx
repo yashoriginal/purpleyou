@@ -6,7 +6,7 @@ export const revalidate = 600;
 export default async function CollectionsIndex() {
   const products = await getAllProducts();
   const categories = Array.from(
-    new Set(products.map((p) => p.category.toLowerCase()))
+    new Set(products.map((p) => p.category.toLowerCase())),
   ).sort();
 
   return (
@@ -16,7 +16,8 @@ export default async function CollectionsIndex() {
           Collections
         </h1>
         <p className="text-sm text-[#6b6b6b] font-light max-w-2xl">
-          Browse our premium jewelry collections. Each piece is crafted with care and designed to last.
+          Browse our premium jewelry collections. Each piece is crafted with
+          care and designed to last.
         </p>
       </div>
 
