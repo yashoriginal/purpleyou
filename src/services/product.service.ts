@@ -43,6 +43,17 @@ interface APIResponse {
 // Default fallback image
 const DEFAULT_IMAGE = "/images/hero1.jpg";
 
+// Generate URL-friendly slug from text
+function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+}
+
 // Validate and normalize image URL
 function validateImageUrl(url?: string): string {
   if (!url) return DEFAULT_IMAGE;
@@ -72,6 +83,14 @@ function mapAPIProductToProduct(apiProduct: APIProduct): Product {
     apiProduct.images?.find((img) => img.isPrimary) || apiProduct.images?.[0];
   const hoverImage = apiProduct.images?.[1];
 
+  // Generate slug from title if not provided
+  const slug = apiProduct.slug || generateSlug(apiProduct.title);
+
+  // Validate that slug is a non-empty string
+  if (!slug || typeof slug !== "string") {
+    console.warn(`Product "${apiProduct.title}" has invalid slug:`, slug);
+  }
+
   return {
     id: parseInt(apiProduct.productId.replace(/\D/g, ""), 10) || Math.random(),
     name: apiProduct.title,
@@ -79,7 +98,7 @@ function mapAPIProductToProduct(apiProduct: APIProduct): Product {
     comparePrice: apiProduct.comparePrice
       ? Math.floor(apiProduct.comparePrice)
       : undefined,
-    slug: apiProduct.slug,
+    slug: slug,
     image: validateImageUrl(primaryImage?.url),
     hoverImage: validateImageUrl(hoverImage?.url),
     category: apiProduct.category?.toLowerCase() || "uncategorized",
