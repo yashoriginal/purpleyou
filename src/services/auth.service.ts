@@ -833,10 +833,23 @@ export async function login(phoneNumber: string): Promise<AuthCredentials> {
 }
 
 /**
- * Logout and clear credentials
+ * Logout and clear all local data (credentials, cart, wishlist, etc.)
  */
 export function logout(): void {
   clearCredentials();
+
+  // Clear all app-related localStorage items
+  try {
+    // Wishlist
+    localStorage.removeItem("wishlist_items");
+
+    // Any other app-specific items
+    localStorage.removeItem("cart_items");
+    localStorage.removeItem("user_preferences");
+    localStorage.removeItem("session_data");
+  } catch (error) {
+    console.error("Failed to clear app data on logout:", error);
+  }
 }
 
 /**
