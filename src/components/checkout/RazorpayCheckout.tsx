@@ -69,9 +69,7 @@ export default function RazorpayCheckout({
     };
   }, []);
 
-  const gst = Math.round(amount * 0.18);
-  const shippingCost = amount >= 3000 ? 0 : 99;
-  const total = amount + shippingCost + gst;
+  const total = totalPrice + shippingCost + gst;
 
   const handlePayment = async () => {
     if (!selectedMethod) {
