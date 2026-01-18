@@ -113,9 +113,20 @@ export default function CartPage() {
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
+        {(operationError || error) && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded p-4 text-sm text-red-700">
+            {operationError || error}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2">
+            {isLoading && (
+              <div className="text-center py-8">
+                <p className="text-[#6b6b6b]">Loading your cart...</p>
+              </div>
+            )}
+            {!isLoading && (
             <div className="space-y-4">
               {items.map((item) => (
                 <div
@@ -215,6 +226,7 @@ export default function CartPage() {
                 </div>
               ))}
             </div>
+            )}
           </div>
 
           {/* Order Summary - Sticky */}
