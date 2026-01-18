@@ -50,6 +50,20 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Listen for logout events and clear wishlist
+  useEffect(() => {
+    const checkAuthState = setInterval(() => {
+      const authToken = localStorage.getItem("auth_token");
+      if (!authToken) {
+        // User logged out, clear wishlist
+        setItems([]);
+        localStorage.removeItem(WISHLIST_STORAGE_KEY);
+      }
+    }, 1000);
+
+    return () => clearInterval(checkAuthState);
+  }, []);
+
   // Save wishlist to localStorage whenever it changes
   useEffect(() => {
     if (isHydrated) {
