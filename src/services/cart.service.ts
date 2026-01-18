@@ -76,7 +76,6 @@ async function makeCartRequest<T = unknown>(
   const token = getAuthToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...options.headers,
   };
 
   if (token) {
