@@ -262,15 +262,6 @@ export default function LoginPage() {
 
   // Show success screen after login
   if (step === "success") {
-    // Auto-redirect to account after 2 seconds
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        const redirectTo = searchParams.get("redirect") || "/account";
-        router.push(redirectTo);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }, [router, searchParams]);
-
     const isNew = isNewUser;
 
     return (
