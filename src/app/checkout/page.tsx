@@ -75,10 +75,31 @@ export default function CheckoutPage() {
   });
 
   const [errors, setErrors] = useState<Partial<AddressForm>>({});
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
   const shippingCost = totalPrice >= 3000 ? 0 : 99;
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => {
+      setRazorpayLoaded(true);
+    };
+    script.onerror = () => {
+      setPaymentError("Failed to load Razorpay. Please refresh and try again.");
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const validateForm = () => {
     const newErrors: Partial<AddressForm> = {};
@@ -99,10 +120,137 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddressSubmit = (e: React.FormEvent) => {
+  const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      setCurrentStep("payment");
+    if (!validateForm()) return;
+
+    setPaymentError("");
+    setIsProcessing(true);
+
+    try {
+      // Get userId from localStorage
+      const userStr = localStorage.getItem("auth_user");
+      if (!userStr) {
+        throw new Error("User not authenticated. Please log in again.");
+      }
+
+      const user = JSON.parse(userStr);
+      const userId = user._id || user.id || user.userId;
+      if (!userId) {
+        throw new Error("User ID not found. Please log in again.");
+      }
+
+      // Create order on backend
+      const orderPayload: orderService.CreateOrderPayload = {
+        userId,
+        shopId: "purple_you",
+        status: "pending",
+        items: items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          pricePerUnit: item.price,
+        })),
+        orderDetails: {
+          totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+          totalPrice: totalPrice,
+          paymentMethod: "razorpay",
+        },
+        deliveryDetails: {
+          deliveryDate: new Date().toISOString(),
+          deliveryAddress: `${address.building}, ${address.street}, ${address.city}, ${address.state} ${address.pinCode}`,
+        },
+      };
+
+      const orderResponse = await orderService.createOrder(orderPayload);
+      const razorpayOrder = orderResponse.razorpayOrder;
+
+      // Initialize Razorpay with default UI
+      if (!window.Razorpay) {
+        throw new Error("Razorpay SDK not loaded");
+      }
+
+      const razorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        order_id: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        currency: "INR",
+        handler: async (response: any) => {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await fetch(
+              "/api/razorpay/verify-payment",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  orderId: razorpayOrder.id,
+                  paymentId: response.razorpay_payment_id,
+                  signature: response.razorpay_signature,
+                }),
+              }
+            );
+
+            if (!verifyResponse.ok) {
+              const errorData = await verifyResponse.json();
+              throw new Error(
+                errorData.error || "Payment verification failed"
+              );
+            }
+
+            // Payment successful
+            clearCart();
+
+            // Redirect to order confirmation
+            const params = new URLSearchParams({
+              orderId: razorpayOrder.id,
+              paymentId: response.razorpay_payment_id,
+              email: address.email,
+              amount: totalAmount.toLocaleString("en-IN"),
+            });
+
+            router.push(`/order-confirmation?${params.toString()}`);
+          } catch (verifyError) {
+            const errorMessage =
+              verifyError instanceof Error
+                ? verifyError.message
+                : "Payment verification failed";
+            setPaymentError(errorMessage);
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: address.fullName,
+          email: address.email,
+          contact: address.mobileNumber,
+        },
+        theme: {
+          color: "#5540b7",
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            setPaymentError("Payment cancelled. Please try again.");
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(razorpayOptions);
+
+      razorpay.on("payment.failed", (response: any) => {
+        setPaymentError(
+          `Payment failed: ${response.error?.description || "Unknown error"}`
+        );
+        setIsProcessing(false);
+      });
+
+      razorpay.open();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Payment failed. Please try again.";
+      setPaymentError(errorMessage);
+      setIsProcessing(false);
     }
   };
 
