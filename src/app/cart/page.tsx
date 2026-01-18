@@ -172,9 +172,10 @@ export default function CartPage() {
                       <div className="flex items-center border border-[#e6e0da] bg-white">
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            handleQuantityChange(item.id, item.quantity - 1)
                           }
-                          className="p-2 hover:bg-[#f8f5f2] transition-colors"
+                          disabled={isUpdating === item.id || isLoading}
+                          className="p-2 hover:bg-[#f8f5f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Decrease quantity"
                         >
                           <HiOutlineMinus className="w-4 h-4" />
@@ -184,9 +185,10 @@ export default function CartPage() {
                         </span>
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            handleQuantityChange(item.id, item.quantity + 1)
                           }
-                          className="p-2 hover:bg-[#f8f5f2] transition-colors"
+                          disabled={isUpdating === item.id || isLoading}
+                          className="p-2 hover:bg-[#f8f5f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Increase quantity"
                         >
                           <HiOutlinePlus className="w-4 h-4" />
@@ -194,8 +196,9 @@ export default function CartPage() {
                       </div>
 
                       <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="p-2 text-[#6b6b6b] hover:text-red-600 transition-colors flex-shrink-0"
+                        onClick={() => handleRemoveItem(item.id)}
+                        disabled={isUpdating === item.id || isLoading}
+                        className="p-2 text-[#6b6b6b] hover:text-red-600 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Remove item"
                       >
                         <HiOutlineTrash className="w-5 h-5" />
