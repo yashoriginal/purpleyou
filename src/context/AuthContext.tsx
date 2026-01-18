@@ -29,6 +29,8 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   register: (data: RegisterRequest) => Promise<void>;
+  sendOTP: (mobile: string) => Promise<OTPResponse>;
+  verifyOTP: (mobile: string, otp: string) => Promise<void>;
   login: (phoneNumber: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
