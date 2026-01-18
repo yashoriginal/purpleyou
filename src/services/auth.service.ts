@@ -781,6 +781,43 @@ function validateRegisterInput(data: RegisterRequest): void {
 }
 
 /**
+ * Validate update user details input
+ */
+function validateUpdateUserInput(data: UpdateUserDetailsRequest): void {
+  if (!data.userName?.trim()) {
+    throw new Error("User name is required");
+  }
+
+  if (!data.mobile?.trim()) {
+    throw new Error("Mobile number is required");
+  }
+
+  if (!validatePhoneNumber(data.mobile)) {
+    throw new Error("Invalid mobile number format");
+  }
+
+  if (!data.pincode?.trim()) {
+    throw new Error("Pincode is required");
+  }
+
+  if (!data.address?.trim()) {
+    throw new Error("Address is required");
+  }
+
+  if (!data.latitude?.trim() || !data.longitude?.trim()) {
+    throw new Error("Location coordinates are required");
+  }
+
+  // Validate coordinates
+  const lat = parseFloat(data.latitude);
+  const lon = parseFloat(data.longitude);
+
+  if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    throw new Error("Invalid latitude/longitude coordinates");
+  }
+}
+
+/**
  * Validate phone number format
  * Accepts: 10 digits or +91 followed by 10 digits
  */
