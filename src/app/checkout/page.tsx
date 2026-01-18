@@ -1,11 +1,12 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { HiOutlineChevronLeft, HiOutlineCheck } from "react-icons/hi";
-import RazorpayCheckout from "@/components/checkout/RazorpayCheckout";
 import Link from "next/link";
+import * as orderService from "@/services/order.service";
+import { CartItem } from "@/context/CartContext";
 
 const INDIAN_STATES = [
   "Andhra Pradesh",
@@ -429,23 +430,15 @@ export default function CheckoutPage() {
                 </form>
               </div>
             ) : (
-              <div className="bg-white border border-[#e6e0da] p-6 sm:p-8 rounded-lg">
-                <h2 className="text-2xl font-light text-[#111111] tracking-wide mb-8">
-                  Payment Method
-                </h2>
-                <RazorpayCheckout
-                  amount={totalPrice}
-                  orderId={`order-${Date.now()}`}
-                  customerEmail={address.email}
-                  customerPhone={address.mobileNumber}
-                  items={items}
-                  address={address}
-                  totalPrice={totalPrice}
-                  shippingCost={shippingCost}
-                  gst={gst}
-                  onSuccess={clearCart}
-                />
-              </div>
+              <PaymentSection
+                items={items}
+                address={address}
+                totalPrice={totalPrice}
+                shippingCost={shippingCost}
+                gst={gst}
+                totalAmount={totalAmount}
+                onSuccess={clearCart}
+              />
             )}
           </div>
 
