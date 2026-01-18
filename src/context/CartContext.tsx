@@ -221,7 +221,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const productMap = new Map<string, Product>();
 
       const cartItems = cartData.items.map((apiItem) => {
-        const itemId = generateCartItemId(apiItem.productId, apiItem.variant);
+        // Convert Variant (which has optional properties) to Record<string, string>
+        const selectedVariants: Record<string, string> = {};
+        if (apiItem.variant) {
+          Object.entries(apiItem.variant).forEach(([key, value]) => {
+            if (value !== undefined) {
+              selectedVariants[key] = value;
+            }
+          });
+        }
+
+        const itemId = generateCartItemId(apiItem.productId, selectedVariants);
         return {
           id: itemId,
           productId: apiItem.productId,
@@ -229,7 +239,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           price: apiItem.priceEach,
           image: "/images/hero1.jpg", // Fallback image
           quantity: apiItem.quantity,
-          selectedVariants: apiItem.variant || {},
+          selectedVariants,
         };
       });
 
