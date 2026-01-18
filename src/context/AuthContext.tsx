@@ -254,6 +254,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sendOTP,
     verifyOTP,
     login,
+    updateUserDetails,
     logout,
     clearError,
     restoreSession,
