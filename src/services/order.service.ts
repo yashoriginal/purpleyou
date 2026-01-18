@@ -98,9 +98,8 @@ async function makeOrderRequest<T = unknown>(
   options: RequestInit = {},
 ): Promise<T> {
   const token = getAuthToken();
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...options.headers,
   };
 
   if (token) {
@@ -121,7 +120,7 @@ async function makeOrderRequest<T = unknown>(
     }));
 
     throw new Error(
-      errorData.error || `Order API error: ${response.statusCode}`,
+      errorData.error || `Order API error: ${response.status}`,
     );
   }
 
