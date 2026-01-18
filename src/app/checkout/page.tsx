@@ -180,26 +180,21 @@ export default function CheckoutPage() {
         handler: async (response: any) => {
           try {
             // Verify payment on backend
-            const verifyResponse = await fetch(
-              "/api/razorpay/verify-payment",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  orderId: razorpayOrder.id,
-                  paymentId: response.razorpay_payment_id,
-                  signature: response.razorpay_signature,
-                }),
-              }
-            );
+            const verifyResponse = await fetch("/api/razorpay/verify-payment", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                orderId: razorpayOrder.id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+              }),
+            });
 
             if (!verifyResponse.ok) {
               const errorData = await verifyResponse.json();
-              throw new Error(
-                errorData.error || "Payment verification failed"
-              );
+              throw new Error(errorData.error || "Payment verification failed");
             }
 
             // Payment successful
@@ -243,7 +238,7 @@ export default function CheckoutPage() {
 
       razorpay.on("payment.failed", (response: any) => {
         setPaymentError(
-          `Payment failed: ${response.error?.description || "Unknown error"}`
+          `Payment failed: ${response.error?.description || "Unknown error"}`,
         );
         setIsProcessing(false);
       });
@@ -251,7 +246,9 @@ export default function CheckoutPage() {
       razorpay.open();
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Payment failed. Please try again.";
+        err instanceof Error
+          ? err.message
+          : "Payment failed. Please try again.";
       setPaymentError(errorMessage);
       setIsProcessing(false);
     }
@@ -427,9 +424,7 @@ export default function CheckoutPage() {
                     placeholder="Road/Locality name"
                   />
                   {errors.street && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.street}
-                    </p>
+                    <p className="text-xs text-red-500 mt-1">{errors.street}</p>
                   )}
                 </div>
 
@@ -441,9 +436,7 @@ export default function CheckoutPage() {
                   <input
                     type="text"
                     value={address.city}
-                    onChange={(e) =>
-                      handleInputChange("city", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange("city", e.target.value)}
                     className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
                       errors.city ? "border-red-500" : "border-[#e6e0da]"
                     }`}
@@ -528,7 +521,9 @@ export default function CheckoutPage() {
                   }`}
                 >
                   <span className="text-base">🔒</span>
-                  {isProcessing ? "Processing Payment..." : "Continue to Payment"}
+                  {isProcessing
+                    ? "Processing Payment..."
+                    : "Continue to Payment"}
                 </button>
               </form>
             </div>
