@@ -1,7 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { authService, AuthUser, RegisterRequest, AuthServiceError } from "@/services/auth.service";
+import {
+  authService,
+  AuthUser,
+  RegisterRequest,
+  AuthServiceError,
+  OTPResponse,
+} from "@/services/auth.service";
 
 export interface User {
   phoneNumber: string;
