@@ -218,6 +218,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     error,
     register,
+    sendOTP,
+    verifyOTP,
     login,
     logout,
     clearError,
