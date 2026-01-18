@@ -270,7 +270,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             ...prevItems,
             {
               id: itemId,
-              productId: product.id.toString(),
+              productId: product.productId,
               productName: product.name,
               price: product.price,
               image: product.image,
