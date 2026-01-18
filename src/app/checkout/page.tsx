@@ -307,53 +307,6 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* Step Indicator */}
-      <div className="bg-[#f8f5f2] border-b border-[#e6e0da]">
-        <div className="mx-auto max-w-7xl px-4 py-6">
-          <div className="flex items-center justify-center sm:justify-start gap-6 sm:gap-12">
-            {/* Step 1 */}
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-                  currentStep === "address"
-                    ? "bg-[#5540b7] text-white"
-                    : "bg-[#e6e0da] text-[#111111]"
-                }`}
-              >
-                {currentStep === "payment" ? (
-                  <HiOutlineCheck className="w-5 h-5" />
-                ) : (
-                  "1"
-                )}
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-xs font-medium text-[#6b6b6b]">Step 1</p>
-                <p className="font-medium text-[#111111]">Delivery Address</p>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="hidden sm:block flex-1 h-0.5 bg-[#e6e0da]" />
-
-            {/* Step 2 */}
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-                  currentStep === "payment"
-                    ? "bg-[#5540b7] text-white"
-                    : "bg-[#e6e0da] text-[#111111]"
-                }`}
-              >
-                2
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-xs font-medium text-[#6b6b6b]">Step 2</p>
-                <p className="font-medium text-[#111111]">Payment</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
