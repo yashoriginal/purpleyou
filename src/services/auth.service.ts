@@ -891,6 +891,7 @@ export const authService = {
   getCredentials,
   clearCredentials,
   refreshAccessToken,
+  updateUserDetails,
 };
 
 export default authService;
