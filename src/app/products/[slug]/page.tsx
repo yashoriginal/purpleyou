@@ -21,9 +21,11 @@ type PageProps = {
  */
 export async function generateStaticParams() {
   const products = await getAllProducts();
-  return products.map((product) => ({
-    slug: product.slug,
-  }));
+  return products
+    .filter((product) => product.slug && typeof product.slug === "string")
+    .map((product) => ({
+      slug: product.slug,
+    }));
 }
 
 /**
