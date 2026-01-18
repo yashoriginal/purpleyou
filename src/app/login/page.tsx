@@ -509,6 +509,36 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {/* Address Input */}
+            <div>
+              <label className="block text-sm font-medium text-[#111111] mb-3">
+                Address
+              </label>
+              <textarea
+                placeholder="Enter your complete address (street, building, etc.)"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 border border-[#e6e0da] rounded-lg outline-none focus:border-[#5540b7] focus:ring-2 focus:ring-[#5540b7] resize-none"
+                required
+              />
+            </div>
+
+            {/* Area/City Input */}
+            <div>
+              <label className="block text-sm font-medium text-[#111111] mb-3">
+                Area / City
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., T Nagar, Chennai"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                className="w-full px-4 py-3 border border-[#e6e0da] rounded-lg outline-none focus:border-[#5540b7] focus:ring-2 focus:ring-[#5540b7]"
+                required
+              />
+            </div>
+
             {/* Error Message */}
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
@@ -532,6 +562,8 @@ export default function LoginPage() {
                 setStep("otp");
                 setName("");
                 setPincode("");
+                setAddress("");
+                setArea("");
                 setError("");
               }}
               className="w-full text-[#5540b7] py-3 text-sm font-medium uppercase tracking-wider hover:underline"
