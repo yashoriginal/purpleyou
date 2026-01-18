@@ -107,10 +107,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const credentials = await authService.verifyOTP(mobile, otp);
       setUser(convertAuthUserToUser(credentials.user));
       setIsLoggedIn(true);
-
-      // Trigger cart fetch after successful login
-      // This will be picked up by CartContext through the userId change
-      window.dispatchEvent(new Event("auth-success"));
     } catch (err) {
       const errorMessage =
         err instanceof AuthServiceError
