@@ -89,6 +89,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   /**
+   * Send OTP to phone number
+   */
+  const sendOTP = async (mobile: string): Promise<OTPResponse> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await authService.sendOTP(mobile);
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof AuthServiceError
+        ? err.message
+        : err instanceof Error
+          ? err.message
+          : "Failed to send OTP. Please try again.";
+
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Verify OTP and login user
+   */
+  const verifyOTP = async (mobile: string, otp: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const credentials = await authService.verifyOTP(mobile, otp);
+      setUser(convertAuthUserToUser(credentials.user));
+      setIsLoggedIn(true);
+    } catch (err) {
+      const errorMessage = err instanceof AuthServiceError
+        ? err.message
+        : err instanceof Error
+          ? err.message
+          : "OTP verification failed. Please try again.";
+
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
    * Register a new user
    */
   const register = async (data: RegisterRequest) => {
