@@ -11,6 +11,7 @@ export interface Category {
 
 export interface Product {
   id: number;
+  productId?: string;
   name: string;
   price: number;
   comparePrice?: number;
