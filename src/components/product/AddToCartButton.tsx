@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { HiOutlineHeart, HiOutlineFire } from "react-icons/hi";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { Product } from "@/lib/data";
+import { Product } from "@/types/product";
 
 interface AddToCartButtonProps {
   product: Product;
