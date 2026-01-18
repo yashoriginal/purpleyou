@@ -179,14 +179,18 @@ export async function removeFromCart(
   productId: string,
   variant?: Variant,
 ): Promise<CartData> {
-  const payload = variant ? { variant } : {};
+  const options: RequestInit = {
+    method: "DELETE",
+  };
+
+  // Only include body if variant is provided
+  if (variant) {
+    options.body = JSON.stringify({ variant });
+  }
 
   return makeCartRequest<CartData>(
     `/items/${productId}?userId=${userId}`,
-    {
-      method: "DELETE",
-      body: Object.keys(payload).length > 0 ? JSON.stringify(payload) : null,
-    },
+    options,
   );
 }
 
