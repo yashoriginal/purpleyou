@@ -465,18 +465,204 @@ testRegister();
 
 ---
 
+## OTP Verification (Phone-based Authentication)
+
+### Send OTP
+
+Send an OTP to the user's phone number.
+
+**Function:**
+```typescript
+import { authService } from '@/services/auth.service';
+
+const response = await authService.sendOTP('+919042278689');
+// Returns: { data: "OTP sent", success: true, statusCode: 201 }
+```
+
+**Endpoint:**
+```http
+POST /users/auth/resendOTP
+Content-Type: application/json
+
+{ "mobile": "+919042278689" }
+```
+
+**Response:**
+```json
+{
+  "data": "OTP sent",
+  "success": true,
+  "error": null,
+  "statusCode": 201
+}
+```
+
+### Verify OTP
+
+Verify the OTP and authenticate the user.
+
+**Function:**
+```typescript
+import { authService } from '@/services/auth.service';
+
+const credentials = await authService.verifyOTP('+919042278689', '2643');
+// Returns: { user: AuthUser, token: { accessToken, refreshToken } }
+```
+
+**Endpoint:**
+```http
+POST /users/auth/verifyOTP
+Content-Type: application/json
+
+{
+  "mobile": "+919042278689",
+  "otp": "2643"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "data": {
+    "userId": "6e2f30f7-2829-470e-8788-beda371a6ec2",
+    "mobile": "+919042278689",
+    "userName": "Bujji",
+    "pincode": "600017",
+    "address": "T Nagar",
+    "area": "Chennai",
+    "latitude": "13.04",
+    "longitude": "80.23",
+    "isAdmin": false,
+    "isVerified": true,
+    "createdAt": "2026-01-18T08:02:22.105Z",
+    "updatedAt": "2026-01-18T08:02:22.105Z"
+  },
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "error": null,
+  "statusCode": 200,
+  "success": true
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "data": null,
+  "error": "Account record does not exist or has been already verified. Please sign up or Login",
+  "success": false,
+  "statusCode": 401
+}
+```
+
+### Authentication Flow with OTP
+
+```
+1. User enters phone number
+   ↓
+2. Click "Send OTP"
+   ↓
+3. Backend sends OTP via SMS
+   ↓
+4. User receives SMS and enters OTP
+   ↓
+5. Click "Verify OTP"
+   ↓
+6. Backend verifies OTP
+   ↓
+7. IF valid:
+   - Return user data
+   - Return accessToken & refreshToken
+   - Save to localStorage
+   - Update auth context
+   - Show success screen
+   ↓
+8. IF invalid:
+   - Return error message
+   - User can retry
+```
+
+### Token Management
+
+Tokens are automatically stored and managed:
+
+```typescript
+// Get current access token
+const token = authService.getToken();
+
+// Check if authenticated
+const isAuth = authService.isAuthenticated();
+
+// Logout (clears all tokens)
+authService.logout();
+```
+
+### Using Access Token in API Calls
+
+For authenticated API requests, use the helper:
+
+```typescript
+import { authenticatedFetch, getAuthHeaders } from '@/services/auth.service';
+
+// Option 1: Using authenticatedFetch helper
+const cartData = await authenticatedFetch('/api/user/cart', {
+  method: 'GET'
+});
+
+// Option 2: Using getAuthHeaders helper
+const headers = getAuthHeaders();
+const response = await fetch('/api/user/cart', {
+  method: 'GET',
+  headers
+});
+```
+
+## Token Refresh
+
+### Automatic Refresh
+
+When a request returns 401 (Unauthorized), the service automatically:
+1. Checks if token is expired
+2. Attempts to refresh using refreshToken
+3. Retries the original request with new token
+4. If refresh fails, clears auth and throws error
+
+**When Implemented on Backend:**
+
+```typescript
+// In auth service
+export async function refreshAccessToken(): Promise<AuthToken | null> {
+  const response = await makeRequest<{ accessToken: string }>(
+    `${AUTH_ENDPOINT}/refresh`,
+    {
+      method: "POST",
+      body: { refreshToken: getRefreshToken() },
+    }
+  );
+
+  if (response.success) {
+    const newToken = { ...getToken(), accessToken: response.data.accessToken };
+    updateToken(newToken);
+    return newToken;
+  }
+
+  return null;
+}
+```
+
 ## Future Enhancements
 
 ### Planned Features
 
-1. **OTP Verification Endpoint**
-   - Integrate with backend OTP service (SMS/Email)
-   - Verify OTP before registration
+1. **Token Refresh Endpoint** ✅ Structure Ready
+   - Implement on backend: POST /users/auth/refresh
+   - Client will auto-refresh expired tokens
+   - No manual intervention needed
 
-2. **Login Endpoint**
-   - Implement login with phone + OTP
-   - Token refresh mechanism
-   - Session management
+2. **Login Endpoint (Existing Users)**
+   - Implement when separate from OTP verification
+   - POST /users/auth/login
+   - For users who want traditional login
 
 3. **Profile Update**
    - Allow users to update their profile
