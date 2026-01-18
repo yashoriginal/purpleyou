@@ -10,6 +10,7 @@ import {
   HiOutlineChevronLeft,
   HiOutlineChevronRight,
 } from "react-icons/hi";
+import EditProfileForm from "@/components/profile/EditProfileForm";
 
 // Dummy data types
 interface Order {
