@@ -166,24 +166,48 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      // Save profile to backend
-      const saveResult = await saveProfile(phoneNumber, name, pincode);
-      if (saveResult.saved) {
-        // Login with profile data
-        login({
-          phoneNumber: phoneNumber,
-          name: name,
-          pincode: pincode,
-        });
+      // Get geolocation for API request
+      const position = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve(pos.coords),
+          (err) => {
+            // If geolocation fails, use default coordinates
+            console.warn("Geolocation failed, using default coordinates:", err);
+            resolve({
+              latitude: 0,
+              longitude: 0,
+              accuracy: 0,
+              altitude: null,
+              altitudeAccuracy: null,
+              heading: null,
+              speed: null,
+            } as unknown as GeolocationCoordinates);
+          },
+        );
+      });
 
-        setStep("success");
-        setError("");
-      } else {
-        setError(saveResult.message);
-      }
+      // Call the auth service register function with full profile data
+      await register({
+        userName: name,
+        mobile: `+91${phoneNumber}`,
+        latitude: position.latitude.toString(),
+        longitude: position.longitude.toString(),
+        pincode: pincode,
+        address: `${name}'s Address`, // Placeholder - can be enhanced with additional form field
+        area: "Unknown", // Placeholder - can be enhanced with additional form field
+      });
+
+      setStep("success");
+      setError("");
     } catch (err) {
-      setError("Failed to save profile. Please try again.");
-      console.error(err);
+      const errorMessage =
+        err instanceof AuthServiceError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Failed to create account. Please try again.";
+      setError(errorMessage);
+      console.error("Registration error:", err);
     } finally {
       setIsLoading(false);
     }
