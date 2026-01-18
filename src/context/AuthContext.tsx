@@ -16,6 +16,7 @@ import {
 } from "@/services/auth.service";
 
 export interface User {
+  userId?: string;
   phoneNumber: string;
   name?: string;
   pincode?: string;
