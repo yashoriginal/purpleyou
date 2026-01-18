@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { products } from "@/lib/data";
+import { getAllProducts } from "@/services/product.service";
 
 export const revalidate = 600;
 
-export default function CollectionsIndex() {
+export default async function CollectionsIndex() {
+  const products = await getAllProducts();
   const categories = Array.from(
     new Set(products.map((p) => p.category.toLowerCase()))
-  );
+  ).sort();
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
