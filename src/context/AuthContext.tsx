@@ -51,6 +51,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  */
 function convertAuthUserToUser(authUser: AuthUser): User {
   return {
+    userId: authUser._id || authUser.id || authUser.userId,
     phoneNumber: authUser.mobile,
     name: authUser.userName,
     userName: authUser.userName,
