@@ -185,7 +185,9 @@ export default function LoginPage() {
           (pos) => resolve(pos.coords),
           () => {
             // If geolocation fails, use default coordinates
-            console.warn("Geolocation not available, using default coordinates");
+            console.warn(
+              "Geolocation not available, using default coordinates",
+            );
             resolve({
               latitude: 0,
               longitude: 0,
@@ -356,10 +358,12 @@ export default function LoginPage() {
                 </p>
                 <div className="space-y-2">
                   <p>
-                    <span className="font-medium">Existing Users:</span> Enter phone number and verify with OTP
+                    <span className="font-medium">Existing Users:</span> Enter
+                    phone number and verify with OTP
                   </p>
                   <p>
-                    <span className="font-medium">New Users:</span> First register using the signup flow, then use OTP to login
+                    <span className="font-medium">New Users:</span> First
+                    register using the signup flow, then use OTP to login
                   </p>
                 </div>
               </div>

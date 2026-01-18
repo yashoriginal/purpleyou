@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { AuthServiceError, UpdateUserDetailsRequest } from "@/services/auth.service";
+import {
+  AuthServiceError,
+  UpdateUserDetailsRequest,
+} from "@/services/auth.service";
 
 interface EditProfileFormProps {
   onSuccess?: () => void;
@@ -123,11 +126,12 @@ export default function EditProfileForm({
         onSuccess?.();
       }, 1500);
     } catch (err) {
-      const errorMessage = err instanceof AuthServiceError
-        ? err.message
-        : err instanceof Error
+      const errorMessage =
+        err instanceof AuthServiceError
           ? err.message
-          : "Failed to update profile";
+          : err instanceof Error
+            ? err.message
+            : "Failed to update profile";
       setFormError(errorMessage);
     }
   };

@@ -7,24 +7,27 @@ Complete integration of OTP-based authentication with automatic token handling.
 ## 🎯 What Was Integrated
 
 ### 1. OTP Send/Resend Endpoint
+
 **API:** `POST /api/v1/users/auth/resendOTP`
 
 ```typescript
 // In auth service
-await authService.sendOTP('+919042278689');
+await authService.sendOTP("+919042278689");
 // Sends OTP via SMS to the provided mobile number
 ```
 
 ### 2. OTP Verification Endpoint
+
 **API:** `POST /api/v1/users/auth/verifyOTP`
 
 ```typescript
 // Verify OTP and get tokens
-const credentials = await authService.verifyOTP('+919042278689', '2643');
+const credentials = await authService.verifyOTP("+919042278689", "2643");
 // Returns: { user, token: { accessToken, refreshToken } }
 ```
 
 ### 3. Token Management
+
 - ✅ Automatic token storage in localStorage
 - ✅ Access token extraction for API calls
 - ✅ Refresh token storage for future refreshes
@@ -33,16 +36,17 @@ const credentials = await authService.verifyOTP('+919042278689', '2643');
 - ✅ Automatic token refresh on 401 responses
 
 ### 4. Authenticated API Calls
+
 ```typescript
 // Helper for authenticated requests
-import { authenticatedFetch, getAuthHeaders } from '@/services/auth.service';
+import { authenticatedFetch, getAuthHeaders } from "@/services/auth.service";
 
 // Option 1: Using helper function
-const data = await authenticatedFetch('/api/user/cart');
+const data = await authenticatedFetch("/api/user/cart");
 
 // Option 2: Using headers helper
 const headers = getAuthHeaders();
-const response = await fetch('/api/user/cart', { headers });
+const response = await fetch("/api/user/cart", { headers });
 ```
 
 ---
@@ -50,6 +54,7 @@ const response = await fetch('/api/user/cart', { headers });
 ## 📊 Data Flow
 
 ### Registration Flow
+
 ```
 User Registration Form
       ↓
@@ -70,6 +75,7 @@ User redirected to dashboard
 ```
 
 ### OTP Login Flow
+
 ```
 User enters phone
       ↓
@@ -113,6 +119,7 @@ IF INVALID:
 ```
 
 ### Token Refresh Flow
+
 ```
 User makes authenticated request
       ↓
@@ -139,7 +146,9 @@ IF REQUEST RETURNS 401:
 ## 📁 Files Modified
 
 ### 1. `src/services/auth.service.ts`
+
 **Added:**
+
 - `sendOTP(mobile)` - Send OTP to phone
 - `verifyOTP(mobile, otp)` - Verify OTP and get tokens
 - `refreshAccessToken()` - Refresh expired token
@@ -149,20 +158,26 @@ IF REQUEST RETURNS 401:
 - Token storage/retrieval functions
 
 **Enhanced:**
+
 - `makeRequest()` with token refresh logic
 - Automatic 401 handling with token refresh
 
 ### 2. `src/context/AuthContext.tsx`
+
 **Added:**
+
 - `sendOTP(mobile)` - Send OTP via context
 - `verifyOTP(mobile, otp)` - Verify OTP via context
 
 **Enhanced:**
+
 - Handle token response format from API
 - Session restoration with tokens
 
 ### 3. `src/app/login/page.tsx`
+
 **Modified:**
+
 - Replaced dummy OTP functions with real API calls
 - Uses `sendOTP()` and `verifyOTP()` from auth context
 - Proper error handling for OTP failures
@@ -198,6 +213,7 @@ Tokens are stored in localStorage in this format:
 ## 🔐 Security Features
 
 ✅ **Implemented:**
+
 - Token stored in localStorage (accessible to JS)
 - Authorization header automatically added to authenticated requests
 - Token expiration checking (client-side)
@@ -206,10 +222,12 @@ Tokens are stored in localStorage in this format:
 - Credentials cleared on logout
 
 ⚠️ **Limitations:**
+
 - localStorage can be accessed by any script (XSS vulnerability)
 - Client-side token expiration check is cosmetic only
 
 🔒 **Recommendations for Production:**
+
 1. Use httpOnly cookies instead of localStorage
 2. Implement CSRF protection
 3. Add request signing
@@ -223,21 +241,22 @@ Tokens are stored in localStorage in this format:
 ## 🚀 Usage Examples
 
 ### Example 1: Basic Login Flow
+
 ```typescript
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from "@/context/AuthContext";
 
 export function LoginComponent() {
   const { sendOTP, verifyOTP, isLoading, error } = useAuth();
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
-  const [step, setStep] = useState('phone');
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState("phone");
 
   const handleSendOTP = async () => {
     try {
       await sendOTP(`+91${phone}`);
-      setStep('otp');
+      setStep("otp");
     } catch (err) {
-      console.error('Failed to send OTP:', err);
+      console.error("Failed to send OTP:", err);
     }
   };
 
@@ -248,7 +267,7 @@ export function LoginComponent() {
       // Tokens are automatically saved
       // Auth context is updated
     } catch (err) {
-      console.error('OTP verification failed:', err);
+      console.error("OTP verification failed:", err);
     }
   };
 
@@ -257,33 +276,35 @@ export function LoginComponent() {
 ```
 
 ### Example 2: Authenticated API Call
+
 ```typescript
-import { authenticatedFetch } from '@/services/auth.service';
+import { authenticatedFetch } from "@/services/auth.service";
 
 // Fetch user's cart with automatic token injection
 async function loadUserCart() {
   try {
-    const cartData = await authenticatedFetch('/api/user/cart', {
-      method: 'GET'
+    const cartData = await authenticatedFetch("/api/user/cart", {
+      method: "GET",
     });
-    console.log('Cart:', cartData);
+    console.log("Cart:", cartData);
   } catch (error) {
-    console.error('Failed to load cart:', error);
+    console.error("Failed to load cart:", error);
   }
 }
 ```
 
 ### Example 3: Using Auth Headers
+
 ```typescript
-import { getAuthHeaders } from '@/services/auth.service';
+import { getAuthHeaders } from "@/services/auth.service";
 
 async function updateUserProfile(updates) {
   const headers = getAuthHeaders();
-  
-  const response = await fetch('/api/user/profile', {
-    method: 'PUT',
+
+  const response = await fetch("/api/user/profile", {
+    method: "PUT",
     headers,
-    body: JSON.stringify(updates)
+    body: JSON.stringify(updates),
   });
 
   return response.json();
@@ -291,6 +312,7 @@ async function updateUserProfile(updates) {
 ```
 
 ### Example 4: Checking Authentication
+
 ```typescript
 import { useAuth } from '@/context/AuthContext';
 
@@ -315,6 +337,7 @@ export function ProtectedComponent() {
 ## ✅ Testing the Integration
 
 ### Test OTP Send
+
 ```bash
 curl -X POST https://purpleoneservice.onrender.com/api/v1/users/auth/resendOTP \
   -H "Content-Type: application/json" \
@@ -322,6 +345,7 @@ curl -X POST https://purpleoneservice.onrender.com/api/v1/users/auth/resendOTP \
 ```
 
 ### Test OTP Verification
+
 ```bash
 curl -X POST https://purpleoneservice.onrender.com/api/v1/users/auth/verifyOTP \
   -H "Content-Type: application/json" \
@@ -329,26 +353,33 @@ curl -X POST https://purpleoneservice.onrender.com/api/v1/users/auth/verifyOTP \
 ```
 
 ### Test in Browser Console
+
 ```javascript
 // Open browser DevTools → Console
 
 // Send OTP
-const response = await fetch('https://purpleoneservice.onrender.com/api/v1/users/auth/resendOTP', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ mobile: '+919042278689' })
-});
+const response = await fetch(
+  "https://purpleoneservice.onrender.com/api/v1/users/auth/resendOTP",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mobile: "+919042278689" }),
+  },
+);
 const data = await response.json();
-console.log('Send OTP response:', data);
+console.log("Send OTP response:", data);
 
 // Verify OTP (after you receive OTP in SMS)
-const verifyResponse = await fetch('https://purpleoneservice.onrender.com/api/v1/users/auth/verifyOTP', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ mobile: '+919042278689', otp: '2643' })
-});
+const verifyResponse = await fetch(
+  "https://purpleoneservice.onrender.com/api/v1/users/auth/verifyOTP",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mobile: "+919042278689", otp: "2643" }),
+  },
+);
 const verifyData = await verifyResponse.json();
-console.log('Verify OTP response:', verifyData);
+console.log("Verify OTP response:", verifyData);
 ```
 
 ---
@@ -356,25 +387,30 @@ console.log('Verify OTP response:', verifyData);
 ## 🐛 Troubleshooting
 
 ### "Invalid OTP"
+
 - OTP expired (usually 5-10 minutes)
 - Wrong OTP entered
 - Solution: Click "Resend OTP" to get a new one
 
 ### "Account record does not exist"
+
 - Phone number not registered
 - Solution: User should register first using sign-up flow
 
 ### "Already verified"
+
 - User account already completed verification
 - Solution: Try logging in with a different phone number or check if account is already active
 
 ### "No authentication token found"
+
 - User not logged in
 - localStorage cleared
 - Session expired
 - Solution: User needs to login again
 
 ### "Request timeout"
+
 - Network issue
 - Backend server slow
 - Solution: Check internet connection, try again
@@ -384,6 +420,7 @@ console.log('Verify OTP response:', verifyData);
 ## 📋 API Response Reference
 
 ### Send OTP - Success
+
 ```json
 {
   "data": "OTP sent",
@@ -394,6 +431,7 @@ console.log('Verify OTP response:', verifyData);
 ```
 
 ### Verify OTP - Success
+
 ```json
 {
   "data": {
@@ -419,6 +457,7 @@ console.log('Verify OTP response:', verifyData);
 ```
 
 ### Verify OTP - Error (Account Not Found)
+
 ```json
 {
   "data": null,
@@ -471,12 +510,12 @@ export async function refreshAccessToken(): Promise<AuthToken | null> {
 
 ## 📞 API Endpoint Summary
 
-| Endpoint | Method | Purpose | Auth Required |
-|----------|--------|---------|---|
-| `/users/auth/register` | POST | Register new user | No |
-| `/users/auth/resendOTP` | POST | Send OTP | No |
-| `/users/auth/verifyOTP` | POST | Verify OTP & login | No |
-| `/users/auth/refresh` | POST | Refresh token | Yes (Planned) |
+| Endpoint                | Method | Purpose            | Auth Required |
+| ----------------------- | ------ | ------------------ | ------------- |
+| `/users/auth/register`  | POST   | Register new user  | No            |
+| `/users/auth/resendOTP` | POST   | Send OTP           | No            |
+| `/users/auth/verifyOTP` | POST   | Verify OTP & login | No            |
+| `/users/auth/refresh`   | POST   | Refresh token      | Yes (Planned) |
 
 ---
 

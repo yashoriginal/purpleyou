@@ -5,11 +5,13 @@ This document covers the authentication service implementation for Purple You e-
 ## Overview
 
 The authentication system integrates with the external API at:
+
 ```
 https://purpleoneservice.onrender.com/api/v1/users/auth/register
 ```
 
 ### Key Features
+
 - ✅ User registration with full profile information
 - ✅ Session persistence using localStorage
 - ✅ TypeScript type safety
@@ -30,32 +32,36 @@ The auth service provides a clean separation between API calls and React compone
 #### Key Functions
 
 ##### `register(data: RegisterRequest): Promise<AuthCredentials>`
+
 Registers a new user with the backend API.
 
 **Parameters:**
+
 ```typescript
 interface RegisterRequest {
-  userName: string;           // User's full name
-  mobile: string;             // Phone number (+91XXXXXXXXXX or 10 digits)
-  latitude: string;           // Geographic latitude
-  longitude: string;          // Geographic longitude
-  pincode: string;            // Postal code
-  address: string;            // Street address
-  area: string;               // Area/City name
+  userName: string; // User's full name
+  mobile: string; // Phone number (+91XXXXXXXXXX or 10 digits)
+  latitude: string; // Geographic latitude
+  longitude: string; // Geographic longitude
+  pincode: string; // Postal code
+  address: string; // Street address
+  area: string; // Area/City name
 }
 ```
 
 **Returns:**
+
 ```typescript
 interface AuthCredentials {
-  user: AuthUser;            // User object with all profile data
-  token: AuthToken;          // Authentication token
+  user: AuthUser; // User object with all profile data
+  token: AuthToken; // Authentication token
 }
 ```
 
 **Example:**
+
 ```typescript
-import { authService } from '@/services/auth.service';
+import { authService } from "@/services/auth.service";
 
 try {
   const credentials = await authService.register({
@@ -65,17 +71,18 @@ try {
     longitude: "80.23",
     pincode: "600017",
     address: "T Nagar",
-    area: "Chennai"
+    area: "Chennai",
   });
 
-  console.log('User registered:', credentials.user);
-  console.log('Token:', credentials.token.accessToken);
+  console.log("User registered:", credentials.user);
+  console.log("Token:", credentials.token.accessToken);
 } catch (error) {
-  console.error('Registration failed:', error.message);
+  console.error("Registration failed:", error.message);
 }
 ```
 
 ##### `getCurrentUser(): AuthUser | null`
+
 Retrieves the currently logged-in user from localStorage.
 
 ```typescript
@@ -86,6 +93,7 @@ if (user) {
 ```
 
 ##### `getToken(): string | null`
+
 Retrieves the auth token for API requests.
 
 ```typescript
@@ -93,12 +101,13 @@ const token = authService.getToken();
 if (token) {
   // Use for authenticated API calls
   const headers = {
-    'Authorization': `Bearer ${token}`
+    Authorization: `Bearer ${token}`,
   };
 }
 ```
 
 ##### `logout(): void`
+
 Clears all authentication data from localStorage.
 
 ```typescript
@@ -106,6 +115,7 @@ authService.logout();
 ```
 
 ##### `isAuthenticated(): boolean`
+
 Checks if user is currently authenticated.
 
 ```typescript
@@ -123,16 +133,16 @@ The `AuthContext` provides a React-friendly interface to the auth service.
 #### useAuth() Hook
 
 ```typescript
-const { 
-  isLoggedIn,      // boolean: whether user is logged in
-  user,            // User | null: current user object
-  isLoading,       // boolean: loading state for async operations
-  error,           // string | null: error message
-  register,        // Function: register new user
-  login,           // Function: login user
-  logout,          // Function: logout user
-  clearError,      // Function: clear error message
-  restoreSession   // Function: restore session from localStorage
+const {
+  isLoggedIn, // boolean: whether user is logged in
+  user, // User | null: current user object
+  isLoading, // boolean: loading state for async operations
+  error, // string | null: error message
+  register, // Function: register new user
+  login, // Function: login user
+  logout, // Function: logout user
+  clearError, // Function: clear error message
+  restoreSession, // Function: restore session from localStorage
 } = useAuth();
 ```
 
@@ -198,6 +208,7 @@ NEXT_PUBLIC_API_BASE_URL=https://purpleoneservice.onrender.com/api/v1
 ```
 
 If no environment variable is set, the service defaults to:
+
 ```
 https://purpleoneservice.onrender.com/api/v1
 ```
@@ -211,6 +222,7 @@ https://purpleoneservice.onrender.com/api/v1
 **Base URL:** `https://purpleoneservice.onrender.com/api/v1`
 
 **Request:**
+
 ```http
 POST /users/auth/register
 Content-Type: application/json
@@ -227,6 +239,7 @@ Content-Type: application/json
 ```
 
 **Success Response (201):**
+
 ```json
 {
   "data": {
@@ -250,6 +263,7 @@ Content-Type: application/json
 ```
 
 **Error Response (400/500):**
+
 ```json
 {
   "data": null,
@@ -316,18 +330,20 @@ Component Re-render with Auth State
 The service throws specific error types for different failure scenarios:
 
 #### AuthServiceError
+
 ```typescript
 try {
   await authService.register(data);
 } catch (error) {
   if (error instanceof AuthServiceError) {
     console.error(`API Error (${error.statusCode}): ${error.message}`);
-    console.log('API Response:', error.response);
+    console.log("API Response:", error.response);
   }
 }
 ```
 
 #### NetworkError
+
 ```typescript
 try {
   await authService.register(data);
@@ -341,13 +357,13 @@ try {
 
 ### Common Error Messages
 
-| Scenario | Status Code | Message |
-|----------|-------------|---------|
-| Invalid phone format | 400 | "Invalid phone number format" |
-| Missing required field | 400 | Specific field name required error |
-| Duplicate phone number | 400 | "Mobile number already registered" |
-| Network timeout | 0 | "Request timeout after 30000ms" |
-| Server error | 500 | "Internal server error" |
+| Scenario               | Status Code | Message                            |
+| ---------------------- | ----------- | ---------------------------------- |
+| Invalid phone format   | 400         | "Invalid phone number format"      |
+| Missing required field | 400         | Specific field name required error |
+| Duplicate phone number | 400         | "Mobile number already registered" |
+| Network timeout        | 0           | "Request timeout after 30000ms"    |
+| Server error           | 500         | "Internal server error"            |
 
 ---
 
@@ -356,6 +372,7 @@ try {
 All types are defined in `src/services/auth.service.ts`:
 
 ### AuthUser
+
 ```typescript
 interface AuthUser {
   userName: string;
@@ -367,13 +384,14 @@ interface AuthUser {
   area: string;
   isAdmin: boolean;
   isVerified: boolean;
-  _id?: string;           // Optional: backend user ID
-  createdAt?: string;     // Optional: creation timestamp
-  updatedAt?: string;     // Optional: last update timestamp
+  _id?: string; // Optional: backend user ID
+  createdAt?: string; // Optional: creation timestamp
+  updatedAt?: string; // Optional: last update timestamp
 }
 ```
 
 ### AuthToken
+
 ```typescript
 interface AuthToken {
   accessToken: string;
@@ -384,6 +402,7 @@ interface AuthToken {
 ```
 
 ### ApiResponse
+
 ```typescript
 interface ApiResponse<T = unknown> {
   data?: T;
@@ -399,12 +418,14 @@ interface ApiResponse<T = unknown> {
 ## Security Considerations
 
 ✅ **Implemented:**
+
 - Token stored in localStorage (suitable for web apps)
 - Credentials cleared on logout
 - Input validation before API calls
 - HTTPS-only API communication (production)
 
 ⚠️ **For Production:**
+
 - Consider using httpOnly cookies instead of localStorage
 - Implement token refresh mechanism
 - Add request signing/verification
@@ -419,6 +440,7 @@ interface ApiResponse<T = unknown> {
 The authentication flow is fully integrated in `src/app/login/page.tsx`:
 
 ### Registration for New Users
+
 1. User sees registration form with fields:
    - Full Name
    - Pincode
@@ -432,6 +454,7 @@ The authentication flow is fully integrated in `src/app/login/page.tsx`:
 5. User redirected to dashboard
 
 ### OTP Verification for Existing Users
+
 1. User enters phone number
 2. Clicks "Send OTP" → calls `sendOTP()` → SMS sent by backend
 3. User enters 4-digit OTP
@@ -453,7 +476,7 @@ The authentication flow is fully integrated in `src/app/login/page.tsx`:
 
 ```typescript
 // In your component or console
-import { authService } from '@/services/auth.service';
+import { authService } from "@/services/auth.service";
 
 const testRegister = async () => {
   try {
@@ -464,11 +487,11 @@ const testRegister = async () => {
       longitude: "80.23",
       pincode: "600017",
       address: "Test Address",
-      area: "Test City"
+      area: "Test City",
     });
-    console.log('Success:', result);
+    console.log("Success:", result);
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
   }
 };
 
@@ -484,14 +507,16 @@ testRegister();
 Send an OTP to the user's phone number.
 
 **Function:**
-```typescript
-import { authService } from '@/services/auth.service';
 
-const response = await authService.sendOTP('+919042278689');
+```typescript
+import { authService } from "@/services/auth.service";
+
+const response = await authService.sendOTP("+919042278689");
 // Returns: { data: "OTP sent", success: true, statusCode: 201 }
 ```
 
 **Endpoint:**
+
 ```http
 POST /users/auth/resendOTP
 Content-Type: application/json
@@ -500,6 +525,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "data": "OTP sent",
@@ -514,14 +540,16 @@ Content-Type: application/json
 Verify the OTP and authenticate the user.
 
 **Function:**
-```typescript
-import { authService } from '@/services/auth.service';
 
-const credentials = await authService.verifyOTP('+919042278689', '2643');
+```typescript
+import { authService } from "@/services/auth.service";
+
+const credentials = await authService.verifyOTP("+919042278689", "2643");
 // Returns: { user: AuthUser, token: { accessToken, refreshToken } }
 ```
 
 **Endpoint:**
+
 ```http
 POST /users/auth/verifyOTP
 Content-Type: application/json
@@ -533,6 +561,7 @@ Content-Type: application/json
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "data": {
@@ -558,6 +587,7 @@ Content-Type: application/json
 ```
 
 **Error Response (401):**
+
 ```json
 {
   "data": null,
@@ -614,18 +644,18 @@ authService.logout();
 For authenticated API requests, use the helper:
 
 ```typescript
-import { authenticatedFetch, getAuthHeaders } from '@/services/auth.service';
+import { authenticatedFetch, getAuthHeaders } from "@/services/auth.service";
 
 // Option 1: Using authenticatedFetch helper
-const cartData = await authenticatedFetch('/api/user/cart', {
-  method: 'GET'
+const cartData = await authenticatedFetch("/api/user/cart", {
+  method: "GET",
 });
 
 // Option 2: Using getAuthHeaders helper
 const headers = getAuthHeaders();
-const response = await fetch('/api/user/cart', {
-  method: 'GET',
-  headers
+const response = await fetch("/api/user/cart", {
+  method: "GET",
+  headers,
 });
 ```
 
@@ -634,6 +664,7 @@ const response = await fetch('/api/user/cart', {
 ### Automatic Refresh
 
 When a request returns 401 (Unauthorized), the service automatically:
+
 1. Checks if token is expired
 2. Attempts to refresh using refreshToken
 3. Retries the original request with new token
@@ -649,7 +680,7 @@ export async function refreshAccessToken(): Promise<AuthToken | null> {
     {
       method: "POST",
       body: { refreshToken: getRefreshToken() },
-    }
+    },
   );
 
   if (response.success) {
@@ -694,20 +725,24 @@ export async function refreshAccessToken(): Promise<AuthToken | null> {
 ## Troubleshooting
 
 ### "No authentication token found"
+
 - User is not logged in
 - localStorage may be cleared
 - Call `authService.restore Session()` or `register()` again
 
 ### "Invalid phone number format"
+
 - Phone number must be 10 digits or +91 format
 - Remove any spaces, dashes, or special characters
 
 ### "Network error"
+
 - Check internet connectivity
 - Verify API base URL is correct
 - Check CORS settings on backend
 
 ### "Request timeout"
+
 - Server is slow to respond (30-second timeout)
 - Check backend service status
 - Network connectivity issue
@@ -757,6 +792,7 @@ src/
 ## Support
 
 For issues or questions:
+
 1. Check this guide's Troubleshooting section
 2. Review the error message from the service
 3. Check browser console for detailed error logs

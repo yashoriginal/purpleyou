@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import {
   authService,
   AuthUser,
@@ -101,11 +107,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authService.sendOTP(mobile);
       return response;
     } catch (err) {
-      const errorMessage = err instanceof AuthServiceError
-        ? err.message
-        : err instanceof Error
+      const errorMessage =
+        err instanceof AuthServiceError
           ? err.message
-          : "Failed to send OTP. Please try again.";
+          : err instanceof Error
+            ? err.message
+            : "Failed to send OTP. Please try again.";
 
       setError(errorMessage);
       throw err;
@@ -126,11 +133,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(convertAuthUserToUser(credentials.user));
       setIsLoggedIn(true);
     } catch (err) {
-      const errorMessage = err instanceof AuthServiceError
-        ? err.message
-        : err instanceof Error
+      const errorMessage =
+        err instanceof AuthServiceError
           ? err.message
-          : "OTP verification failed. Please try again.";
+          : err instanceof Error
+            ? err.message
+            : "OTP verification failed. Please try again.";
 
       setError(errorMessage);
       throw err;
@@ -151,11 +159,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(convertAuthUserToUser(credentials.user));
       setIsLoggedIn(true);
     } catch (err) {
-      const errorMessage = err instanceof AuthServiceError
-        ? err.message
-        : err instanceof Error
+      const errorMessage =
+        err instanceof AuthServiceError
           ? err.message
-          : "Registration failed. Please try again.";
+          : err instanceof Error
+            ? err.message
+            : "Registration failed. Please try again.";
 
       setError(errorMessage);
       throw err;
@@ -179,11 +188,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoggedIn(true);
       }
     } catch (err) {
-      const errorMessage = err instanceof AuthServiceError
-        ? err.message
-        : err instanceof Error
+      const errorMessage =
+        err instanceof AuthServiceError
           ? err.message
-          : "Login failed. Please try again.";
+          : err instanceof Error
+            ? err.message
+            : "Login failed. Please try again.";
 
       setError(errorMessage);
       throw err;
@@ -195,7 +205,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /**
    * Update user details
    */
-  const updateUserDetails = async (data: UpdateUserDetailsRequest): Promise<string> => {
+  const updateUserDetails = async (
+    data: UpdateUserDetailsRequest,
+  ): Promise<string> => {
     setIsLoading(true);
     setError(null);
 
@@ -210,11 +222,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return userId;
     } catch (err) {
-      const errorMessage = err instanceof AuthServiceError
-        ? err.message
-        : err instanceof Error
+      const errorMessage =
+        err instanceof AuthServiceError
           ? err.message
-          : "Failed to update profile. Please try again.";
+          : err instanceof Error
+            ? err.message
+            : "Failed to update profile. Please try again.";
 
       setError(errorMessage);
       throw err;

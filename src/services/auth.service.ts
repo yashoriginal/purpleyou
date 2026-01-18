@@ -148,9 +148,10 @@ export interface AuthCredentials {
 // CONFIGURATION
 // ============================================================================
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 
-                     process.env.NEXT_PUBLIC_API_BASE_URL ||
-                     "https://purpleoneservice.onrender.com/api/v1";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://purpleoneservice.onrender.com/api/v1";
 
 const AUTH_ENDPOINT = "/users/auth";
 
@@ -194,8 +195,14 @@ const STORAGE_KEYS = {
  */
 function saveCredentials(credentials: AuthCredentials): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, JSON.stringify(credentials.token));
-    localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(credentials.user));
+    localStorage.setItem(
+      STORAGE_KEYS.AUTH_TOKEN,
+      JSON.stringify(credentials.token),
+    );
+    localStorage.setItem(
+      STORAGE_KEYS.AUTH_USER,
+      JSON.stringify(credentials.user),
+    );
   } catch (error) {
     console.error("Failed to save credentials to localStorage:", error);
   }
@@ -342,7 +349,7 @@ async function makeRequest<T = unknown>(
     });
 
     // Parse response
-    const data = await response.json() as ApiResponse;
+    const data = (await response.json()) as ApiResponse;
 
     // Handle non-successful responses
     if (!response.ok) {
@@ -355,7 +362,10 @@ async function makeRequest<T = unknown>(
         } else {
           // Refresh failed - clear auth and throw error
           clearCredentials();
-          throw new AuthServiceError(401, "Authentication failed. Please login again.");
+          throw new AuthServiceError(
+            401,
+            "Authentication failed. Please login again.",
+          );
         }
       }
 
@@ -392,8 +402,13 @@ async function makeRequest<T = unknown>(
     }
 
     // Retry logic for network errors
-    if (retries > 0 && (error instanceof NetworkError || error instanceof TypeError)) {
-      console.warn(`Request failed, retrying... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
+    if (
+      retries > 0 &&
+      (error instanceof NetworkError || error instanceof TypeError)
+    ) {
+      console.warn(
+        `Request failed, retrying... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`,
+      );
       return makeRequest<T>(endpoint, { ...options, retries: retries - 1 });
     }
 
@@ -465,7 +480,9 @@ export async function refreshAccessToken(): Promise<AuthToken | null> {
  * @param data - Registration form data
  * @returns Registered user and auth token
  */
-export async function register(data: RegisterRequest): Promise<AuthCredentials> {
+export async function register(
+  data: RegisterRequest,
+): Promise<AuthCredentials> {
   try {
     // Validate input
     validateRegisterInput(data);
@@ -477,10 +494,13 @@ export async function register(data: RegisterRequest): Promise<AuthCredentials> 
     };
 
     // Call API
-    const response = await makeRequest<RegisterResponse>(`${AUTH_ENDPOINT}/register`, {
-      method: "POST",
-      body: formattedData,
-    });
+    const response = await makeRequest<RegisterResponse>(
+      `${AUTH_ENDPOINT}/register`,
+      {
+        method: "POST",
+        body: formattedData,
+      },
+    );
 
     // Validate response
     if (!response.success || !response.data) {
@@ -596,10 +616,13 @@ export async function sendOTP(mobile: string): Promise<OTPResponse> {
 
     const formattedMobile = formatMobileNumber(mobile);
 
-    const response = await makeRequest<OTPResponse>(`${AUTH_ENDPOINT}/resendOTP`, {
-      method: "POST",
-      body: { mobile: formattedMobile },
-    });
+    const response = await makeRequest<OTPResponse>(
+      `${AUTH_ENDPOINT}/resendOTP`,
+      {
+        method: "POST",
+        body: { mobile: formattedMobile },
+      },
+    );
 
     if (!response.success) {
       throw new AuthServiceError(
@@ -626,7 +649,10 @@ export async function sendOTP(mobile: string): Promise<OTPResponse> {
  * @param otp - 4-digit OTP
  * @returns User credentials with access and refresh tokens
  */
-export async function verifyOTP(mobile: string, otp: string): Promise<AuthCredentials> {
+export async function verifyOTP(
+  mobile: string,
+  otp: string,
+): Promise<AuthCredentials> {
   try {
     validatePhoneNumber(mobile);
 
@@ -636,13 +662,12 @@ export async function verifyOTP(mobile: string, otp: string): Promise<AuthCreden
 
     const formattedMobile = formatMobileNumber(mobile);
 
-    const response = await makeRequest<VerifyOTPResponse | VerifyOTPErrorResponse>(
-      `${AUTH_ENDPOINT}/verifyOTP`,
-      {
-        method: "POST",
-        body: { mobile: formattedMobile, otp },
-      },
-    );
+    const response = await makeRequest<
+      VerifyOTPResponse | VerifyOTPErrorResponse
+    >(`${AUTH_ENDPOINT}/verifyOTP`, {
+      method: "POST",
+      body: { mobile: formattedMobile, otp },
+    });
 
     // Handle error response
     if (!response.success || !response.data) {
@@ -693,7 +718,9 @@ export async function login(phoneNumber: string): Promise<AuthCredentials> {
     //   body: { phoneNumber },
     // });
 
-    console.warn("Login function not yet implemented - waiting for backend endpoint");
+    console.warn(
+      "Login function not yet implemented - waiting for backend endpoint",
+    );
     throw new AuthServiceError(501, "Login endpoint not yet implemented");
   } catch (error) {
     if (error instanceof AuthServiceError) {
@@ -775,7 +802,14 @@ function validateRegisterInput(data: RegisterRequest): void {
   const lat = parseFloat(data.latitude);
   const lon = parseFloat(data.longitude);
 
-  if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+  if (
+    isNaN(lat) ||
+    isNaN(lon) ||
+    lat < -90 ||
+    lat > 90 ||
+    lon < -180 ||
+    lon > 180
+  ) {
     throw new Error("Invalid latitude/longitude coordinates");
   }
 }
@@ -812,7 +846,14 @@ function validateUpdateUserInput(data: UpdateUserDetailsRequest): void {
   const lat = parseFloat(data.latitude);
   const lon = parseFloat(data.longitude);
 
-  if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+  if (
+    isNaN(lat) ||
+    isNaN(lon) ||
+    lat < -90 ||
+    lat > 90 ||
+    lon < -180 ||
+    lon > 180
+  ) {
     throw new Error("Invalid latitude/longitude coordinates");
   }
 }
@@ -823,7 +864,10 @@ function validateUpdateUserInput(data: UpdateUserDetailsRequest): void {
  */
 function validatePhoneNumber(phoneNumber: string): boolean {
   const cleanNumber = phoneNumber.replace(/\D/g, "");
-  return cleanNumber.length === 10 || (cleanNumber.length === 12 && cleanNumber.startsWith("91"));
+  return (
+    cleanNumber.length === 10 ||
+    (cleanNumber.length === 12 && cleanNumber.startsWith("91"))
+  );
 }
 
 /**
