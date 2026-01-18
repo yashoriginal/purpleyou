@@ -619,6 +619,8 @@ function formatMobileNumber(mobile: string): string {
 
 export const authService = {
   register,
+  sendOTP,
+  verifyOTP,
   login,
   logout,
   isAuthenticated,
