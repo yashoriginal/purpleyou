@@ -2,21 +2,39 @@
 
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
-import { products } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HiOutlineTrash, HiOutlineHeart } from "react-icons/hi";
+import { getAllProducts } from "@/services/product.service";
+import { Product } from "@/types/product";
 
 export default function WishlistPage() {
   const { items, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
   const [addedToCartId, setAddedToCartId] = useState<number | null>(null);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch all products on mount
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const products = await getAllProducts();
+        setAllProducts(products);
+      } catch (error) {
+        console.error("Failed to load products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
 
   // Get full product objects for wishlist items
   const wishlistProducts = items
-    .map((item) => products.find((p) => p.id === item.productId))
-    .filter(Boolean) as typeof products;
+    .map((item) => allProducts.find((p) => p.id === item.productId))
+    .filter(Boolean) as Product[];
 
   const handleAddToCart = (product: (typeof products)[0]) => {
     addToCart(product, {}, 1);
