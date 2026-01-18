@@ -181,12 +181,12 @@ const DUMMY_WISHLIST: WishlistItem[] = [
 
 const ITEMS_PER_PAGE = 2;
 
-type Tab = "orders" | "addresses" | "wishlist";
+type Tab = "profile" | "orders" | "addresses" | "wishlist";
 
 export default function AccountPage() {
   const router = useRouter();
   const { isLoggedIn, user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("orders");
+  const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [ordersPage, setOrdersPage] = useState(1);
   const [wishlistPage, setWishlistPage] = useState(1);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
