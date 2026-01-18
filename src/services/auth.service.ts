@@ -105,6 +105,28 @@ export interface VerifyOTPErrorResponse {
 }
 
 /**
+ * Update user details request
+ */
+export interface UpdateUserDetailsRequest {
+  mobile: string;
+  userName: string;
+  address: string;
+  pincode: string;
+  latitude: string;
+  longitude: string;
+}
+
+/**
+ * Update user details response
+ */
+export interface UpdateUserDetailsResponse {
+  data: string; // userId
+  success: boolean;
+  error: string | null;
+  statusCode: number;
+}
+
+/**
  * Auth token stored in localStorage
  */
 export interface AuthToken {
