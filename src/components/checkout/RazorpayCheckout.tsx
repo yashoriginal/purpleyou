@@ -86,33 +86,40 @@ export default function RazorpayCheckout({
     setIsProcessing(true);
 
     try {
-      // Step 1: Create order on backend
-      const orderResponse = await fetch("/api/razorpay/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: total, // Total amount in rupees (will be converted to paise on backend)
-          currency: "INR",
-          receipt: `receipt_${orderId}`,
-          notes: {
-            orderId,
-            paymentMethod: selectedMethod,
-          },
-          customerEmail,
-          customerPhone,
-        }),
-      });
-
-      if (!orderResponse.ok) {
-        const errorData = await orderResponse.json();
-        throw new Error(
-          errorData.error || "Failed to create order. Please try again."
-        );
+      // Get userId from localStorage
+      const userStr = localStorage.getItem("auth_user");
+      if (!userStr) {
+        throw new Error("User not authenticated. Please log in again.");
       }
 
-      const { order } = await orderResponse.json();
+      const user = JSON.parse(userStr);
+      const userId = user._id || user.id || user.userId;
+      if (!userId) {
+        throw new Error("User ID not found. Please log in again.");
+      }
+
+      // Step 1: Create order on backend using the new /api/v1/orders/ endpoint
+      const orderPayload: orderService.CreateOrderPayload = {
+        userId,
+        status: "pending",
+        items: items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          pricePerUnit: item.price,
+        })),
+        orderDetails: {
+          totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+          totalPrice: totalPrice,
+          paymentMethod: selectedMethod || "upi",
+        },
+        deliveryDetails: {
+          deliveryDate: new Date().toISOString(),
+          deliveryAddress: `${address.building}, ${address.street}, ${address.city}, ${address.state} ${address.pinCode}`,
+        },
+      };
+
+      const orderResponse = await orderService.createOrder(orderPayload);
+      const order = orderResponse.razorpayOrder;
 
       // Step 2: Open Razorpay checkout
       if (!window.Razorpay) {
