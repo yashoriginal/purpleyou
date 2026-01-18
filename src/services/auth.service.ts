@@ -572,6 +572,7 @@ export async function register(
       user: response.data,
       token: {
         accessToken: response.data._id || "", // Use user ID as token if no explicit token provided
+        refreshToken: response.data._id || "", // Use user ID as refresh token as well
         tokenType: "Bearer",
       },
     };

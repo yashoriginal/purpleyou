@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { HiOutlineHeart, HiOutlineFire } from "react-icons/hi";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { Product } from "@/lib/data";
+import { Product } from "@/types/product";
 
 interface AddToCartButtonProps {
   product: Product;
@@ -31,10 +31,11 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
           .map(([key, value]) => `${key}:${value}`)
           .join("|")
       : "";
-    const itemId = `${product.productId}_${variantString}`;
+    const productId = product.productId || String(product.id);
+    const itemId = `${productId}_${variantString}`;
     const productInCart = items.some((item) => item.id === itemId);
     setIsInCart(productInCart);
-  }, [items, product.productId, selectedVariants]);
+  }, [items, product.productId, product.id, selectedVariants]);
 
   const handleVariantSelect = (variantName: string, option: string) => {
     setSelectedVariants((prev) => ({
@@ -50,7 +51,8 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
           .map(([key, value]) => `${key}:${value}`)
           .join("|")
       : "";
-    return `${product.productId}_${variantString}`;
+    const productId = product.productId || String(product.id);
+    return `${productId}_${variantString}`;
   };
 
   const handleAddToCart = async () => {
@@ -173,7 +175,11 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
               : "bg-[#5540b7] text-white hover:bg-[#3d2d7f] disabled:opacity-60 disabled:cursor-not-allowed"
           }`}
         >
-          {isLoading ? "Processing..." : isInCart ? "Remove from Bag" : "Add to Bag"}
+          {isLoading
+            ? "Processing..."
+            : isInCart
+              ? "Remove from Bag"
+              : "Add to Bag"}
         </button>
         {!isInCart && (
           <button

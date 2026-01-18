@@ -1,4 +1,5 @@
-import { Product, products } from "./data";
+import { products } from "./data";
+import { Product } from "@/types/product";
 
 /**
  * Dummy API to fetch user's cart items

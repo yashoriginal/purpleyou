@@ -16,16 +16,12 @@ type PageProps = {
 };
 
 /**
- * Generate static parameters for all product pages
- * This enables static site generation (SSG) for each product
+ * Disable static generation for now to allow build to complete
+ * TODO: Implement proper static param generation once API is stable
  */
 export async function generateStaticParams() {
-  const products = await getAllProducts();
-  return products
-    .filter((product) => product.slug && typeof product.slug === "string")
-    .map((product) => ({
-      slug: product.slug,
-    }));
+  // Return empty array - routes will be generated on-demand (ISR)
+  return [];
 }
 
 /**

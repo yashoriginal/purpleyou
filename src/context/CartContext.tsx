@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { Product } from "@/types/product";
 import * as cartService from "@/services/cart.service";
 
@@ -77,7 +83,18 @@ function mapCartItemsFromAPI(
 ): CartItem[] {
   return apiItems.map((apiItem) => {
     const product = productMap.get(apiItem.productId);
-    const itemId = generateCartItemId(apiItem.productId, apiItem.variant);
+
+    // Convert Variant (which has optional properties) to Record<string, string>
+    const selectedVariants: Record<string, string> = {};
+    if (apiItem.variant) {
+      Object.entries(apiItem.variant).forEach(([key, value]) => {
+        if (value !== undefined) {
+          selectedVariants[key] = value;
+        }
+      });
+    }
+
+    const itemId = generateCartItemId(apiItem.productId, selectedVariants);
 
     return {
       id: itemId,
@@ -86,7 +103,7 @@ function mapCartItemsFromAPI(
       price: apiItem.priceEach,
       image: product?.image || "/images/hero1.jpg",
       quantity: apiItem.quantity,
-      selectedVariants: apiItem.variant || {},
+      selectedVariants,
     };
   });
 }
@@ -149,7 +166,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const checkAuthChanges = setInterval(() => {
       try {
         const userStr = localStorage.getItem("auth_user");
-        const currentUserId = userStr ? JSON.parse(userStr)._id || JSON.parse(userStr).id : null;
+        const currentUserId = userStr
+          ? JSON.parse(userStr)._id || JSON.parse(userStr).id
+          : null;
 
         if (currentUserId && currentUserId !== userId) {
           // User logged in
@@ -196,13 +215,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       const cartData = await cartService.getCart(userId);
-      
+
       // Create a map of products from the cart data
       // Since we don't have full product details from cart API, we'll use partial info
       const productMap = new Map<string, Product>();
 
       const cartItems = cartData.items.map((apiItem) => {
-        const itemId = generateCartItemId(apiItem.productId, apiItem.variant);
+        // Convert Variant (which has optional properties) to Record<string, string>
+        const selectedVariants: Record<string, string> = {};
+        if (apiItem.variant) {
+          Object.entries(apiItem.variant).forEach(([key, value]) => {
+            if (value !== undefined) {
+              selectedVariants[key] = value;
+            }
+          });
+        }
+
+        const itemId = generateCartItemId(apiItem.productId, selectedVariants);
         return {
           id: itemId,
           productId: apiItem.productId,
@@ -210,7 +239,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           price: apiItem.priceEach,
           image: "/images/hero1.jpg", // Fallback image
           quantity: apiItem.quantity,
-          selectedVariants: apiItem.variant || {},
+          selectedVariants,
         };
       });
 
@@ -246,16 +275,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       // Call API to add item
+      const productId = product.productId || String(product.id); // Fallback to numeric id if productId not available
       const cartData = await cartService.addToCart(
         currentUserId,
-        product.productId, // Use original API productId
+        productId,
         quantity,
         product.price,
         selectedVariants,
       );
 
       // Update local state with response
-      const itemId = generateCartItemId(product.productId, selectedVariants);
+      const itemId = generateCartItemId(productId, selectedVariants);
       setItems((prevItems) => {
         const existingIndex = prevItems.findIndex((item) => item.id === itemId);
 
@@ -270,7 +300,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             ...prevItems,
             {
               id: itemId,
-              productId: product.productId,
+              productId,
               productName: product.name,
               price: product.price,
               image: product.image,

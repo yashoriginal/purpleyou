@@ -74,9 +74,8 @@ async function makeCartRequest<T = unknown>(
   options: RequestInit = {},
 ): Promise<T> {
   const token = getAuthToken();
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...options.headers,
   };
 
   if (token) {
@@ -96,9 +95,7 @@ async function makeCartRequest<T = unknown>(
       statusCode: response.status,
     }));
 
-    throw new Error(
-      errorData.error || `Cart API error: ${response.statusCode}`,
-    );
+    throw new Error(errorData.error || `Cart API error: ${response.status}`);
   }
 
   const data: ApiResponse<T> = await response.json();
