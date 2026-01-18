@@ -164,15 +164,25 @@ export default function LoginPage() {
       return;
     }
 
+    if (!address || !address.trim()) {
+      setError("Please enter your address");
+      return;
+    }
+
+    if (!area || !area.trim()) {
+      setError("Please enter your area/city");
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Get geolocation for API request
-      const position = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+      const position = await new Promise<GeolocationCoordinates>((resolve) => {
         navigator.geolocation.getCurrentPosition(
           (pos) => resolve(pos.coords),
-          (err) => {
+          () => {
             // If geolocation fails, use default coordinates
-            console.warn("Geolocation failed, using default coordinates:", err);
+            console.warn("Geolocation not available, using default coordinates");
             resolve({
               latitude: 0,
               longitude: 0,
@@ -193,8 +203,8 @@ export default function LoginPage() {
         latitude: position.latitude.toString(),
         longitude: position.longitude.toString(),
         pincode: pincode,
-        address: `${name}'s Address`, // Placeholder - can be enhanced with additional form field
-        area: "Unknown", // Placeholder - can be enhanced with additional form field
+        address: address,
+        area: area,
       });
 
       setStep("success");
