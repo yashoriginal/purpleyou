@@ -87,26 +87,45 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Initialize userId from localStorage (auth token)
+  // Initialize userId from localStorage and listen for auth changes
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("auth_token");
-      if (token) {
-        // Try to extract userId from the auth storage
-        const userStr = localStorage.getItem("auth_user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          const id = user._id || user.id || user.userId;
-          if (id) {
-            setUserId(id);
+    const initializeUserId = () => {
+      try {
+        const token = localStorage.getItem("auth_token");
+        if (token) {
+          // Try to extract userId from the auth storage
+          const userStr = localStorage.getItem("auth_user");
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            const id = user._id || user.id || user.userId;
+            if (id) {
+              setUserId(id);
+              return;
+            }
           }
         }
+        // If no token or user, clear userId
+        setUserId(null);
+      } catch (err) {
+        console.error("Failed to initialize cart:", err);
+        setUserId(null);
+      } finally {
+        setIsHydrated(true);
       }
-    } catch (err) {
-      console.error("Failed to initialize cart:", err);
-    } finally {
-      setIsHydrated(true);
-    }
+    };
+
+    // Initialize on mount
+    initializeUserId();
+
+    // Listen for storage changes (login/logout from other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "auth_token" || e.key === "auth_user") {
+        initializeUserId();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   // Fetch cart from API when userId changes
