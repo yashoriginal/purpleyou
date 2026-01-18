@@ -105,6 +105,20 @@ export interface VerifyOTPErrorResponse {
 }
 
 /**
+ * Address object for user profile
+ */
+export interface AddressObject {
+  addressId?: string;
+  label: string; // e.g., "Home", "Office", "Mom's House"
+  address: string;
+  area: string;
+  pincode: string;
+  latitude: string;
+  longitude: string;
+  isDefault: boolean;
+}
+
+/**
  * Update user details request
  */
 export interface UpdateUserDetailsRequest {
@@ -114,6 +128,8 @@ export interface UpdateUserDetailsRequest {
   pincode: string;
   latitude: string;
   longitude: string;
+  area?: string;
+  addresses?: AddressObject[];
 }
 
 /**
