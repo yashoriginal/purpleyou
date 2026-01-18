@@ -255,7 +255,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       );
 
       // Update local state with response
-      const itemId = generateCartItemId(product.id, selectedVariants);
+      const itemId = generateCartItemId(product.productId, selectedVariants);
       setItems((prevItems) => {
         const existingIndex = prevItems.findIndex((item) => item.id === itemId);
 
