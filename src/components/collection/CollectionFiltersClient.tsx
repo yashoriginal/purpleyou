@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import CollectionFilters from "./CollectionFilters";
-import { Product } from "@/lib/data";
+import { Product } from "@/types/product";
 
 interface CollectionFiltersClientProps {
   products: Product[];
