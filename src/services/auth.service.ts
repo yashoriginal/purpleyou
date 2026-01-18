@@ -1006,6 +1006,7 @@ export function getAuthHeaders(): Record<string, string> {
 
 export const authService = {
   register,
+  loginOrRegister,
   sendOTP,
   verifyOTP,
   login,
