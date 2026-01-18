@@ -15,7 +15,7 @@ type AuthStep = "phone" | "otp" | "profile" | "success";
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoggedIn, login, logout } = useAuth();
+  const { isLoggedIn, login, logout, verifyOTP: contextVerifyOTP, register: contextRegister } = useAuth();
   const { addToCart, clearCart } = useCart();
   const { addToWishlist, clearWishlist } = useWishlist();
 
