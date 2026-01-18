@@ -438,6 +438,11 @@ export default function CheckoutPage() {
                   orderId={`order-${Date.now()}`}
                   customerEmail={address.email}
                   customerPhone={address.mobileNumber}
+                  items={items}
+                  address={address}
+                  totalPrice={totalPrice}
+                  shippingCost={shippingCost}
+                  gst={gst}
                   onSuccess={clearCart}
                 />
               </div>
