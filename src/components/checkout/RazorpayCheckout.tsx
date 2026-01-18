@@ -3,12 +3,30 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { HiOutlineCheck } from "react-icons/hi";
+import * as orderService from "@/services/order.service";
+import { CartItem } from "@/context/CartContext";
+
+interface AddressForm {
+  fullName: string;
+  mobileNumber: string;
+  building: string;
+  street: string;
+  city: string;
+  state: string;
+  pinCode: string;
+  email: string;
+}
 
 interface CheckoutProps {
   amount: number;
   orderId: string;
   customerEmail: string;
   customerPhone: string;
+  items: CartItem[];
+  address: AddressForm;
+  totalPrice: number;
+  shippingCost: number;
+  gst: number;
   onSuccess?: () => void;
 }
 
