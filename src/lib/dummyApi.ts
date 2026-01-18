@@ -165,12 +165,16 @@ export async function saveProfile(
 /**
  * Dummy API to send OTP to phone number
  *
+ * Test credentials:
+ * - Phone: any 10-digit number (e.g., 9042278688)
+ * - Any OTP will be accepted for demo purposes
+ *
  * TODO: Replace with actual backend OTP sending service
  * Example:
- * const response = await fetch('/api/auth/send-otp', {
+ * const response = await fetch('https://purpleoneservice.onrender.com/api/v1/users/auth/send-otp', {
  *   method: 'POST',
  *   headers: { 'Content-Type': 'application/json' },
- *   body: JSON.stringify({ phoneNumber }),
+ *   body: JSON.stringify({ mobile: phoneNumber }),
  * });
  * const { sent } = await response.json();
  */
@@ -184,7 +188,7 @@ export async function sendOTP(
   if (phoneNumber && phoneNumber.length === 10) {
     return {
       sent: true,
-      message: `OTP sent to +91${phoneNumber}. For testing: use OTP 9999`,
+      message: `OTP sent to +91${phoneNumber}. For testing: use any 4-digit OTP`,
     };
   }
 
