@@ -54,6 +54,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   };
 
   const handleAddToCart = async () => {
+    setLocalError(null);
     if (isInCart) {
       // Remove from cart
       const itemId = generateCartItemId(selectedVariants);
@@ -62,6 +63,9 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
         // Also remove from wishlist when removing from bag
         removeFromWishlist(product.id);
       } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : "Failed to remove from cart";
+        setLocalError(errorMsg);
         console.error("Failed to remove from cart:", err);
       }
     } else {
@@ -69,12 +73,16 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       try {
         await addToCart(product, selectedVariants, 1);
       } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : "Failed to add to cart";
+        setLocalError(errorMsg);
         console.error("Failed to add to cart:", err);
       }
     }
   };
 
   const handleBuyNow = async () => {
+    setLocalError(null);
     setIsBuying(true);
     try {
       await addToCart(product, selectedVariants, 1);
@@ -83,6 +91,9 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
         router.push("/checkout");
       }, 100);
     } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to add to cart";
+      setLocalError(errorMsg);
       console.error("Failed to add to cart:", err);
       setIsBuying(false);
     }
