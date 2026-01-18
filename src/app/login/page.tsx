@@ -29,6 +29,8 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [name, setName] = useState("");
   const [pincode, setPincode] = useState("");
+  const [address, setAddress] = useState("");
+  const [area, setArea] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isNewUser, setIsNewUser] = useState(false);
