@@ -131,49 +131,6 @@ export default function LoginPage() {
     }
   };
 
-  // Helper function to login existing user with cart/wishlist
-  const handleExistingUserLogin = async () => {
-    try {
-      // Update auth state with user info from context
-      // Note: For existing users, we're using the context's user state
-      // which is populated during successful OTP verification
-
-      // Fetch and populate cart data
-      try {
-        const cartData = await fetchUserCart(phoneNumber);
-        clearCart(); // Clear existing cart
-        cartData.forEach((item) => {
-          const product = products.find((p) => p.id === item.productId);
-          if (product) {
-            addToCart(product, item.selectedVariants, item.quantity);
-          }
-        });
-      } catch (cartErr) {
-        console.error("Failed to load cart:", cartErr);
-      }
-
-      // Fetch and populate wishlist data
-      try {
-        const wishlistData = await fetchUserWishlist(phoneNumber);
-        clearWishlist(); // Clear existing wishlist
-        wishlistData.forEach((item) => {
-          const product = products.find((p) => p.id === item.productId);
-          if (product) {
-            addToWishlist(product);
-          }
-        });
-      } catch (wishlistErr) {
-        console.error("Failed to load wishlist:", wishlistErr);
-      }
-
-      setStep("success");
-      setError("");
-    } catch (err) {
-      setError("Failed to login. Please try again.");
-      console.error(err);
-    }
-  };
-
   // Handle profile submission for new users
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
