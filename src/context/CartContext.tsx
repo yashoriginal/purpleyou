@@ -248,7 +248,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // Call API to add item
       const cartData = await cartService.addToCart(
         currentUserId,
-        product.id.toString(),
+        product.productId, // Use original API productId
         quantity,
         product.price,
         selectedVariants,
