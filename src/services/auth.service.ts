@@ -644,6 +644,49 @@ export async function updateUserDetails(
 }
 
 /**
+ * Login or Register - Initial step
+ * Sends phone number to backend to check if user exists
+ * For existing users: returns UUID string and triggers OTP flow
+ * For new users: returns user object with isVerified=false
+ * @param mobile - Phone number in +91XXXXXXXXXX format
+ * @returns Response with either userId (existing) or user object (new)
+ */
+export async function loginOrRegister(
+  mobile: string,
+): Promise<LoginOrRegisterResponse> {
+  try {
+    validatePhoneNumber(mobile);
+
+    const formattedMobile = formatMobileNumber(mobile);
+
+    const response = await makeRequest<LoginOrRegisterResponse>(
+      `${AUTH_ENDPOINT}/login-or-register`,
+      {
+        method: "POST",
+        body: { mobile: formattedMobile },
+      },
+    );
+
+    if (!response.success) {
+      throw new AuthServiceError(
+        response.statusCode || 400,
+        response.error || "Failed to login or register",
+      );
+    }
+
+    return response;
+  } catch (error) {
+    if (error instanceof AuthServiceError) {
+      throw error;
+    }
+    throw new AuthServiceError(
+      500,
+      error instanceof Error ? error.message : "Failed to login or register",
+    );
+  }
+}
+
+/**
  * Send OTP to phone number
  * @param mobile - Phone number in +91XXXXXXXXXX format
  * @returns OTP response with status
