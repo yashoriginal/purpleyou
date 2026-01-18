@@ -13,10 +13,12 @@ import {
 } from "react-icons/hi";
 
 export default function CartPage() {
-  const { items, totalPrice, totalItems, removeFromCart, updateQuantity } =
+  const { items, totalPrice, totalItems, removeFromCart, updateQuantity, isLoading, error } =
     useCart();
   const router = useRouter();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [operationError, setOperationError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
   const shippingCost = totalPrice >= 3000 ? 0 : 99;
   const gst = Math.round(totalPrice * 0.18);
