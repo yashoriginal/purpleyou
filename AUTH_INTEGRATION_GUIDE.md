@@ -416,22 +416,34 @@ interface ApiResponse<T = unknown> {
 
 ## Frontend Integration in Login Page
 
-The registration flow is fully integrated in `src/app/login/page.tsx`:
+The authentication flow is fully integrated in `src/app/login/page.tsx`:
 
-### Profile Collection Step
-When OTP verification succeeds for a new user:
+### Registration for New Users
+1. User sees registration form with fields:
+   - Full Name
+   - Pincode
+   - Address
+   - Area/City
+   - App captures geolocation (latitude/longitude)
 
-1. User sees profile form with fields:
-   - Full Name (required)
-   - Pincode (required, minimum 6 digits)
-   - Address (required, textarea)
-   - Area/City (required)
+2. On submit, calls `register()` which creates account and logs in user
+3. User is immediately logged in with access/refresh tokens
+4. Tokens saved to localStorage automatically
+5. User redirected to dashboard
 
-2. Form automatically captures geolocation (latitude/longitude)
-
-3. On submit, calls `register()` from auth service
-
-4. On success, updates auth context and redirects to dashboard
+### OTP Verification for Existing Users
+1. User enters phone number
+2. Clicks "Send OTP" → calls `sendOTP()` → SMS sent by backend
+3. User enters 4-digit OTP
+4. Clicks "Verify OTP" → calls `verifyOTP()` with phone + OTP
+5. Backend verifies OTP and returns:
+   - User data (with isVerified: true)
+   - accessToken (for API calls)
+   - refreshToken (for token refresh)
+6. Tokens saved to localStorage automatically
+7. User context updated
+8. User redirected to dashboard
+9. User can fetch their cart/wishlist using tokens
 
 ---
 
