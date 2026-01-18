@@ -360,6 +360,59 @@ async function makeRequest<T = unknown>(
 }
 
 // ============================================================================
+// TOKEN REFRESH & EXPIRATION HANDLING
+// ============================================================================
+
+/**
+ * Decode JWT token and check if it's expired
+ * Note: This is a client-side check only and should not be relied upon for security
+ */
+function isTokenExpired(token: string): boolean {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return true;
+
+    const payload = JSON.parse(atob(parts[1]));
+    if (!payload.exp) return false;
+
+    // Check if token expires in less than 1 minute
+    return Date.now() >= payload.exp * 1000 - 60000;
+  } catch (error) {
+    console.error("Failed to decode token:", error);
+    return true;
+  }
+}
+
+/**
+ * Refresh access token using refresh token
+ * TODO: Implement when backend provides refresh endpoint
+ */
+export async function refreshAccessToken(): Promise<AuthToken | null> {
+  try {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+      console.warn("No refresh token available");
+      return null;
+    }
+
+    // TODO: Implement refresh endpoint on backend
+    // const response = await makeRequest<{ accessToken: string }>(`${AUTH_ENDPOINT}/refresh`, {
+    //   method: "POST",
+    //   body: { refreshToken },
+    // });
+
+    // For now, just return null (refresh not implemented yet)
+    console.warn("Token refresh endpoint not yet implemented");
+    return null;
+  } catch (error) {
+    console.error("Token refresh failed:", error);
+    // Clear credentials on refresh failure
+    clearCredentials();
+    return null;
+  }
+}
+
+// ============================================================================
 // AUTH API FUNCTIONS
 // ============================================================================
 
