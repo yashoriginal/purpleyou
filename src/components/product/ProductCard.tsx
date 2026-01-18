@@ -21,6 +21,11 @@ interface Product {
 export default function ProductCard({ product }: { product: Product }) {
   const [isHovering, setIsHovering] = useState(false);
 
+  // Only use hover image if it exists and is different from main image
+  const displayImage = isHovering && product.hoverImage && product.hoverImage !== product.image
+    ? product.hoverImage
+    : product.image;
+
   return (
     <Link href={`/products/${product.slug}`}>
       <div
@@ -30,7 +35,7 @@ export default function ProductCard({ product }: { product: Product }) {
       >
         <div className="relative overflow-hidden bg-[#f8f5f2] aspect-[3/4] mb-4">
           <Image
-            src={isHovering && product.hoverImage ? product.hoverImage : product.image}
+            src={displayImage}
             alt={product.name}
             fill
             className="object-cover transition-all duration-500 group-hover:scale-105"
