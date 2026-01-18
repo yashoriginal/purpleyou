@@ -1,5 +1,6 @@
 import { Metadata } from "next";
-import { Product, Category } from "./data";
+import { Category } from "./data";
+import { Product } from "@/types/product";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://purpleyou.com";
 const SITE_NAME = "PURPLE YOU";
