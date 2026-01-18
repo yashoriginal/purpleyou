@@ -109,21 +109,12 @@ export default function LoginPage() {
     try {
       const formattedMobile = `+91${phoneNumber}`;
 
-      // Call verifyOTP which will automatically update auth context and save tokens
-      await authService.verifyOTP(formattedMobile, otp);
+      // Call context's verifyOTP which updates isLoggedIn and saves tokens
+      await contextVerifyOTP(formattedMobile, otp);
 
       // If we reach here, OTP was verified successfully
-      // Now check if user is verified (existing registered user)
-      const currentUser = authService.getCurrentUser();
-      if (currentUser?.isVerified) {
-        // Existing user - fetch cart/wishlist and show success
-        await handleExistingUserLogin();
-      } else {
-        // New user (not yet verified/completed profile) - show profile form
-        // Note: For new registrations, user should register first, not use OTP flow
-        setIsNewUser(false);
-        setStep("success");
-      }
+      // The context's verifyOTP sets isLoggedIn=true, which triggers the redirect useEffect
+      setError("");
     } catch (err) {
       if (err instanceof AuthServiceError) {
         // Check if it's a "not found" error (new user)
