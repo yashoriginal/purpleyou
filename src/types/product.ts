@@ -11,4 +11,7 @@ export type Product = {
   hoverImage?: string;
   isBestseller?: boolean;
   isNew?: boolean;
+  materials?: string;
+  careInstructions?: string;
+  videoUrl?: string;
 };
