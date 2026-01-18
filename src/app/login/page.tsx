@@ -24,10 +24,10 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isNewUser, setIsNewUser] = useState(false);
 
-  // Auto-redirect to account if already logged in or after successful login
+  // Auto-redirect after successful login
   useEffect(() => {
     if (isLoggedIn) {
-      const redirectTo = searchParams.get("redirect") || "/account";
+      const redirectTo = searchParams.get("redirect") || "/";
       router.push(redirectTo);
     }
   }, [isLoggedIn, router, searchParams]);
@@ -36,7 +36,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (step === "success") {
       const timer = setTimeout(() => {
-        const redirectTo = searchParams.get("redirect") || "/account";
+        const redirectTo = searchParams.get("redirect") || "/";
         router.push(redirectTo);
       }, 2000);
       return () => clearTimeout(timer);
