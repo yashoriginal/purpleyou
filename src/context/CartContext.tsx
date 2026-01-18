@@ -77,7 +77,18 @@ function mapCartItemsFromAPI(
 ): CartItem[] {
   return apiItems.map((apiItem) => {
     const product = productMap.get(apiItem.productId);
-    const itemId = generateCartItemId(apiItem.productId, apiItem.variant);
+
+    // Convert Variant (which has optional properties) to Record<string, string>
+    const selectedVariants: Record<string, string> = {};
+    if (apiItem.variant) {
+      Object.entries(apiItem.variant).forEach(([key, value]) => {
+        if (value !== undefined) {
+          selectedVariants[key] = value;
+        }
+      });
+    }
+
+    const itemId = generateCartItemId(apiItem.productId, selectedVariants);
 
     return {
       id: itemId,
@@ -86,7 +97,7 @@ function mapCartItemsFromAPI(
       price: apiItem.priceEach,
       image: product?.image || "/images/hero1.jpg",
       quantity: apiItem.quantity,
-      selectedVariants: apiItem.variant || {},
+      selectedVariants,
     };
   });
 }
