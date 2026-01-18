@@ -349,24 +349,18 @@ export default function LoginPage() {
                 We'll send you a One-Time Password to verify your number
               </p>
 
-              {/* Test Credentials Help Text */}
+              {/* Info Help Text */}
               <div className="mt-4 p-3 bg-[#f8f5f2] rounded-lg text-xs text-[#6b6b6b]">
                 <p className="font-medium text-[#111111] mb-2">
-                  Test Credentials:
+                  Authentication Flow:
                 </p>
                 <div className="space-y-2">
-                  <div>
-                    <p className="font-medium text-[#111111] text-xs">
-                      Existing User:
-                    </p>
-                    <p>Phone: 9999999999 | OTP: 9999</p>
-                  </div>
-                  <div>
-                    <p className="font-medium text-[#111111] text-xs">
-                      New User:
-                    </p>
-                    <p>Phone: 8888888888 | OTP: 8888</p>
-                  </div>
+                  <p>
+                    <span className="font-medium">Existing Users:</span> Enter phone number and verify with OTP
+                  </p>
+                  <p>
+                    <span className="font-medium">New Users:</span> First register using the signup flow, then use OTP to login
+                  </p>
                 </div>
               </div>
             </div>
