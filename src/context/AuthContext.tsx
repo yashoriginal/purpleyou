@@ -12,7 +12,6 @@ import {
   AuthUser,
   RegisterRequest,
   AuthServiceError,
-  OTPResponse,
   UpdateUserDetailsRequest,
 } from "@/services/auth.service";
 
