@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { Product } from "@/types/product";
 import * as cartService from "@/services/cart.service";
 
@@ -160,7 +166,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const checkAuthChanges = setInterval(() => {
       try {
         const userStr = localStorage.getItem("auth_user");
-        const currentUserId = userStr ? JSON.parse(userStr)._id || JSON.parse(userStr).id : null;
+        const currentUserId = userStr
+          ? JSON.parse(userStr)._id || JSON.parse(userStr).id
+          : null;
 
         if (currentUserId && currentUserId !== userId) {
           // User logged in
@@ -207,7 +215,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       const cartData = await cartService.getCart(userId);
-      
+
       // Create a map of products from the cart data
       // Since we don't have full product details from cart API, we'll use partial info
       const productMap = new Map<string, Product>();

@@ -175,7 +175,11 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
               : "bg-[#5540b7] text-white hover:bg-[#3d2d7f] disabled:opacity-60 disabled:cursor-not-allowed"
           }`}
         >
-          {isLoading ? "Processing..." : isInCart ? "Remove from Bag" : "Add to Bag"}
+          {isLoading
+            ? "Processing..."
+            : isInCart
+              ? "Remove from Bag"
+              : "Add to Bag"}
         </button>
         {!isInCart && (
           <button

@@ -66,14 +66,14 @@ export interface VerifyPaymentParams {
  * Call this from your backend API route
  */
 export async function createRazorpayOrder(
-  params: CreateOrderParams
+  params: CreateOrderParams,
 ): Promise<RazorpayOrder> {
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
     throw new Error(
-      "Razorpay credentials not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables."
+      "Razorpay credentials not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.",
     );
   }
 
@@ -97,7 +97,7 @@ export async function createRazorpayOrder(
     if (!response.ok) {
       const error = await response.json();
       throw new Error(
-        `Failed to create order: ${error.error?.description || "Unknown error"}`
+        `Failed to create order: ${error.error?.description || "Unknown error"}`,
       );
     }
 
@@ -113,9 +113,7 @@ export async function createRazorpayOrder(
  * Verify payment signature
  * This ensures the payment came from Razorpay and hasn't been tampered with
  */
-export function verifyPaymentSignature(
-  params: VerifyPaymentParams
-): boolean {
+export function verifyPaymentSignature(params: VerifyPaymentParams): boolean {
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keySecret) {
@@ -136,14 +134,14 @@ export function verifyPaymentSignature(
  * Optional: Use this to get additional payment information
  */
 export async function fetchRazorpayPayment(
-  paymentId: string
+  paymentId: string,
 ): Promise<RazorpayPayment> {
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
     throw new Error(
-      "Razorpay credentials not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables."
+      "Razorpay credentials not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.",
     );
   }
 
@@ -157,7 +155,7 @@ export async function fetchRazorpayPayment(
         headers: {
           Authorization: `Basic ${auth}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -177,7 +175,7 @@ export async function fetchRazorpayPayment(
  */
 export async function refundRazorpayPayment(
   paymentId: string,
-  amount?: number
+  amount?: number,
 ): Promise<any> {
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -200,7 +198,7 @@ export async function refundRazorpayPayment(
         body: JSON.stringify({
           ...(amount && { amount }), // Optional: partial refund amount in paise
         }),
-      }
+      },
     );
 
     if (!response.ok) {
