@@ -1,5 +1,7 @@
 // src/lib/data.ts
 
+import { Product } from "@/types/product";
+
 export interface Category {
   id: number;
   name: string;
@@ -7,26 +9,6 @@ export interface Category {
   description: string;
   image: string;
   productCount?: number;
-}
-
-export interface Product {
-  id: number;
-  name: string;
-  price: number;
-  comparePrice?: number;
-  slug: string;
-  image: string;
-  hoverImage?: string;
-  videoUrl?: string;
-  category: string;
-  subcategory?: string;
-  description: string;
-  isBestseller?: boolean;
-  isNew?: boolean;
-  variants?: Array<{ name: string; options: string[] }>;
-  materials?: string;
-  careInstructions?: string;
-  productId?: string;
 }
 
 export const categories: Category[] = [
