@@ -2,27 +2,60 @@
 
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
-import { products } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HiOutlineTrash, HiOutlineHeart } from "react-icons/hi";
+import { getAllProducts } from "@/services/product.service";
+import { Product } from "@/types/product";
 
 export default function WishlistPage() {
   const { items, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
   const [addedToCartId, setAddedToCartId] = useState<number | null>(null);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch all products on mount
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const products = await getAllProducts();
+        setAllProducts(products);
+      } catch (error) {
+        console.error("Failed to load products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
 
   // Get full product objects for wishlist items
   const wishlistProducts = items
-    .map((item) => products.find((p) => p.id === item.productId))
-    .filter(Boolean) as typeof products;
+    .map((item) => allProducts.find((p) => p.id === item.productId))
+    .filter(Boolean) as Product[];
 
-  const handleAddToCart = (product: (typeof products)[0]) => {
+  const handleAddToCart = (product: Product) => {
     addToCart(product, {}, 1);
     setAddedToCartId(product.id);
     setTimeout(() => setAddedToCartId(null), 2000);
   };
+
+  if (isLoading) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
+        <div className="text-center">
+          <div className="mb-6">
+            <div className="w-16 h-16 mx-auto border-4 border-[#e6e0da] border-t-[#5540b7] rounded-full animate-spin" />
+          </div>
+          <h1 className="text-3xl font-light text-[#111111] tracking-wide mb-4">
+            Loading Wishlist...
+          </h1>
+        </div>
+      </section>
+    );
+  }
 
   if (items.length === 0) {
     return (

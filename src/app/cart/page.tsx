@@ -13,14 +13,51 @@ import {
 } from "react-icons/hi";
 
 export default function CartPage() {
-  const { items, totalPrice, totalItems, removeFromCart, updateQuantity } =
+  const { items, totalPrice, totalItems, removeFromCart, updateQuantity, isLoading, error } =
     useCart();
   const router = useRouter();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [operationError, setOperationError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
   const shippingCost = totalPrice >= 3000 ? 0 : 99;
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
+
+  const handleQuantityChange = async (itemId: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      await handleRemoveItem(itemId);
+      return;
+    }
+
+    setOperationError(null);
+    setIsUpdating(itemId);
+    try {
+      await updateQuantity(itemId, newQuantity);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to update quantity";
+      setOperationError(errorMsg);
+      console.error("Failed to update quantity:", err);
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    setOperationError(null);
+    setIsUpdating(itemId);
+    try {
+      await removeFromCart(itemId);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to remove item";
+      setOperationError(errorMsg);
+      console.error("Failed to remove item:", err);
+    } finally {
+      setIsUpdating(null);
+    }
+  };
 
   const handleCheckout = () => {
     setIsCheckingOut(true);
@@ -76,9 +113,20 @@ export default function CartPage() {
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
+        {(operationError || error) && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded p-4 text-sm text-red-700">
+            {operationError || error}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2">
+            {isLoading && (
+              <div className="text-center py-8">
+                <p className="text-[#6b6b6b]">Loading your cart...</p>
+              </div>
+            )}
+            {!isLoading && (
             <div className="space-y-4">
               {items.map((item) => (
                 <div
@@ -135,9 +183,10 @@ export default function CartPage() {
                       <div className="flex items-center border border-[#e6e0da] bg-white">
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            handleQuantityChange(item.id, item.quantity - 1)
                           }
-                          className="p-2 hover:bg-[#f8f5f2] transition-colors"
+                          disabled={isUpdating === item.id || isLoading}
+                          className="p-2 hover:bg-[#f8f5f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Decrease quantity"
                         >
                           <HiOutlineMinus className="w-4 h-4" />
@@ -147,9 +196,10 @@ export default function CartPage() {
                         </span>
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            handleQuantityChange(item.id, item.quantity + 1)
                           }
-                          className="p-2 hover:bg-[#f8f5f2] transition-colors"
+                          disabled={isUpdating === item.id || isLoading}
+                          className="p-2 hover:bg-[#f8f5f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Increase quantity"
                         >
                           <HiOutlinePlus className="w-4 h-4" />
@@ -157,8 +207,9 @@ export default function CartPage() {
                       </div>
 
                       <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="p-2 text-[#6b6b6b] hover:text-red-600 transition-colors flex-shrink-0"
+                        onClick={() => handleRemoveItem(item.id)}
+                        disabled={isUpdating === item.id || isLoading}
+                        className="p-2 text-[#6b6b6b] hover:text-red-600 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Remove item"
                       >
                         <HiOutlineTrash className="w-5 h-5" />
@@ -175,6 +226,7 @@ export default function CartPage() {
                 </div>
               ))}
             </div>
+            )}
           </div>
 
           {/* Order Summary - Sticky */}

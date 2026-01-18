@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { products } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
@@ -10,6 +9,7 @@ import {
   generateProductSchema,
   generateBreadcrumbSchema,
 } from "@/lib/seo";
+import { getAllProducts, getProductBySlug } from "@/services/product.service";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -20,9 +20,12 @@ type PageProps = {
  * This enables static site generation (SSG) for each product
  */
 export async function generateStaticParams() {
-  return products.map((product) => ({
-    slug: product.slug,
-  }));
+  const products = await getAllProducts();
+  return products
+    .filter((product) => product.slug && typeof product.slug === "string")
+    .map((product) => ({
+      slug: product.slug,
+    }));
 }
 
 /**
@@ -30,7 +33,7 @@ export async function generateStaticParams() {
  */
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
-  const product = products.find((p) => p.slug === params.slug);
+  const product = await getProductBySlug(params.slug);
 
   if (!product) {
     return {
@@ -48,14 +51,8 @@ export const revalidate = 1800;
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  // TODO: API Integration - Replace mock data with backend API
-  // Example API call:
-  // const product = await fetch(
-  //   `https://api.example.com/products/${slug}`,
-  //   { headers: { Authorization: `Bearer ${process.env.API_KEY}` } }
-  // ).then((res) => res.json());
-
-  const product = products.find((p) => p.slug === slug);
+  const product = await getProductBySlug(slug);
+  const allProducts = await getAllProducts();
 
   if (!product) {
     return (
@@ -234,7 +231,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           You May Also Like
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {products
+          {allProducts
             .filter(
               (p) => p.category === product.category && p.id !== product.id,
             )

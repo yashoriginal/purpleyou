@@ -4,44 +4,52 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/CartContext";
-import { useWishlist } from "@/context/WishlistContext";
-import { products } from "@/lib/data";
 import {
-  sendOTP,
-  verifyOTP,
-  fetchUserCart,
-  fetchUserWishlist,
-  saveProfile,
-} from "@/lib/dummyApi";
+  AuthServiceError,
+  authService,
+  type AddressObject,
+} from "@/services/auth.service";
 
 type AuthStep = "phone" | "otp" | "profile" | "success";
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoggedIn, login, logout } = useAuth();
-  const { addToCart, clearCart } = useCart();
-  const { addToWishlist, clearWishlist } = useWishlist();
+  const {
+    isLoggedIn,
+    verifyOTP: contextVerifyOTP,
+    register: contextRegister,
+  } = useAuth();
 
   const [step, setStep] = useState<AuthStep>("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [name, setName] = useState("");
   const [pincode, setPincode] = useState("");
+  const [address, setAddress] = useState("");
+  const [area, setArea] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isNewUser, setIsNewUser] = useState(false);
 
-  // Auto-redirect to account if already logged in
+  // Auto-redirect after successful login
   useEffect(() => {
     if (isLoggedIn) {
-      const redirectTo = searchParams.get("redirect") || "/account";
-      router.push(redirectTo);
+      router.push("/");
     }
-  }, [isLoggedIn, router, searchParams]);
+  }, [isLoggedIn, router]);
 
-  // Handle OTP sending
+  // Auto-redirect after success screen is shown (after 2 seconds)
+  useEffect(() => {
+    if (step === "success") {
+      const timer = setTimeout(() => {
+        router.push("/");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, router]);
+
+  // Handle Login or Register - Initial step
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -54,15 +62,34 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const result = await sendOTP(phoneNumber);
-      if (result.sent) {
+      const formattedMobile = `+91${phoneNumber}`;
+      const response = await authService.loginOrRegister(formattedMobile);
+
+      // Check if response data is a string (existing user) or object (new user)
+      if (typeof response.data === "string") {
+        // Existing user - UUID returned, mark as existing and show OTP form
+        setIsNewUser(false);
         setStep("otp");
-        setError("");
+      } else if (
+        typeof response.data === "object" &&
+        response.data &&
+        "isVerified" in response.data
+      ) {
+        // New user - user object returned with isVerified=false
+        // Still show OTP form, not profile form
+        setIsNewUser(true);
+        setStep("otp");
       } else {
-        setError(result.message);
+        throw new Error("Unexpected response format from login endpoint");
       }
+
+      setError("");
     } catch (err) {
-      setError("Failed to send OTP. Please try again.");
+      if (err instanceof AuthServiceError) {
+        setError(err.message);
+      } else {
+        setError("Failed to process login. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -81,70 +108,34 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const result = await verifyOTP(phoneNumber, otp);
-      if (result.isValid) {
-        // Check if new user
-        if (result.new_user) {
-          // New user - show profile collection screen
-          setIsNewUser(true);
-          setStep("profile");
-          setError("");
-        } else {
-          // Existing user - fetch cart/wishlist and login
-          await handleExistingUserLogin();
-        }
+      const formattedMobile = `+91${phoneNumber}`;
+
+      // Call context's verifyOTP which updates isLoggedIn and saves tokens
+      await contextVerifyOTP(formattedMobile, otp);
+
+      // If we reach here, OTP was verified successfully
+      if (isNewUser) {
+        // New user - show complete profile form
+        setStep("profile");
       } else {
-        setError(result.message);
-      }
-    } catch (err) {
-      setError("Failed to verify OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Helper function to login existing user with cart/wishlist
-  const handleExistingUserLogin = async () => {
-    try {
-      // Login successful - set auth state
-      login({
-        phoneNumber: phoneNumber,
-        name: `User ${phoneNumber.slice(-4)}`,
-      });
-
-      // Fetch and populate cart data
-      try {
-        const cartData = await fetchUserCart(phoneNumber);
-        clearCart(); // Clear existing cart
-        cartData.forEach((item) => {
-          const product = products.find((p) => p.id === item.productId);
-          if (product) {
-            addToCart(product, item.selectedVariants, item.quantity);
-          }
-        });
-      } catch (cartErr) {
-        console.error("Failed to load cart:", cartErr);
+        // Existing user - show success screen and redirect
+        setStep("success");
       }
 
-      // Fetch and populate wishlist data
-      try {
-        const wishlistData = await fetchUserWishlist(phoneNumber);
-        clearWishlist(); // Clear existing wishlist
-        wishlistData.forEach((item) => {
-          const product = products.find((p) => p.id === item.productId);
-          if (product) {
-            addToWishlist(product);
-          }
-        });
-      } catch (wishlistErr) {
-        console.error("Failed to load wishlist:", wishlistErr);
-      }
-
-      setStep("success");
       setError("");
     } catch (err) {
-      setError("Failed to login. Please try again.");
-      console.error(err);
+      if (err instanceof AuthServiceError) {
+        // Check if it's a "not found" error (new user)
+        if (err.statusCode === 401 && err.message.includes("does not exist")) {
+          setError("Mobile number not found. Please register first.");
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError("Failed to verify OTP. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -164,26 +155,87 @@ export default function LoginPage() {
       return;
     }
 
+    if (!address || !address.trim()) {
+      setError("Please enter your address");
+      return;
+    }
+
+    if (!area || !area.trim()) {
+      setError("Please enter your area/city");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Save profile to backend
-      const saveResult = await saveProfile(phoneNumber, name, pincode);
-      if (saveResult.saved) {
-        // Login with profile data
-        login({
-          phoneNumber: phoneNumber,
-          name: name,
-          pincode: pincode,
-        });
+      // Get geolocation for API request
+      const position = await new Promise<GeolocationCoordinates>((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve(pos.coords),
+          () => {
+            // If geolocation fails, use default coordinates
+            console.warn(
+              "Geolocation not available, using default coordinates",
+            );
+            resolve({
+              latitude: 0,
+              longitude: 0,
+              accuracy: 0,
+              altitude: null,
+              altitudeAccuracy: null,
+              heading: null,
+              speed: null,
+            } as unknown as GeolocationCoordinates);
+          },
+        );
+      });
 
-        setStep("success");
-        setError("");
-      } else {
-        setError(saveResult.message);
-      }
+      // Step 1: Register the user
+      await contextRegister({
+        userName: name,
+        mobile: `+91${phoneNumber}`,
+        latitude: position.latitude.toString(),
+        longitude: position.longitude.toString(),
+        pincode: pincode,
+        address: address,
+        area: area,
+      });
+
+      // Step 2: Create address object with the entered address as default
+      const primaryAddress: AddressObject = {
+        addressId: `addr_primary_${Date.now()}`,
+        label: "Primary Address",
+        address: address,
+        area: area,
+        pincode: pincode,
+        latitude: position.latitude.toString(),
+        longitude: position.longitude.toString(),
+        isDefault: true,
+      };
+
+      // Step 3: Call update-user-details with addresses array
+      await authService.updateUserDetails({
+        mobile: `+91${phoneNumber}`,
+        userName: name,
+        address: address,
+        pincode: pincode,
+        latitude: position.latitude.toString(),
+        longitude: position.longitude.toString(),
+        area: area,
+        addresses: [primaryAddress],
+      });
+
+      // Show success screen briefly before redirecting
+      setStep("success");
+      setError("");
     } catch (err) {
-      setError("Failed to save profile. Please try again.");
-      console.error(err);
+      const errorMessage =
+        err instanceof AuthServiceError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Failed to create account. Please try again.";
+      setError(errorMessage);
+      console.error("Registration error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -191,15 +243,6 @@ export default function LoginPage() {
 
   // Show success screen after login
   if (step === "success") {
-    // Auto-redirect to account after 2 seconds
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        const redirectTo = searchParams.get("redirect") || "/account";
-        router.push(redirectTo);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }, [router, searchParams]);
-
     const isNew = isNewUser;
 
     return (
@@ -223,7 +266,9 @@ export default function LoginPage() {
           <h2 className="text-3xl font-light text-[#111111] mb-3">
             {isNew ? "Account Created!" : "Welcome Back!"}
           </h2>
-          <p className="text-[#6b6b6b] font-light mb-2">Welcome to AURA</p>
+          <p className="text-[#6b6b6b] font-light mb-2">
+            Welcome to Purple You
+          </p>
           <p className="text-sm text-[#6b6b6b] font-light mb-8">
             +91 {phoneNumber}
           </p>
@@ -278,7 +323,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-light text-[#111111] tracking-wide mb-2">
-            AURA
+            Purple You
           </h1>
           <p className="text-[#6b6b6b] font-light">Sign in to your account</p>
         </div>
@@ -312,24 +357,20 @@ export default function LoginPage() {
                 We'll send you a One-Time Password to verify your number
               </p>
 
-              {/* Test Credentials Help Text */}
+              {/* Info Help Text */}
               <div className="mt-4 p-3 bg-[#f8f5f2] rounded-lg text-xs text-[#6b6b6b]">
                 <p className="font-medium text-[#111111] mb-2">
-                  Test Credentials:
+                  Authentication Flow:
                 </p>
                 <div className="space-y-2">
-                  <div>
-                    <p className="font-medium text-[#111111] text-xs">
-                      Existing User:
-                    </p>
-                    <p>Phone: 9999999999 | OTP: 9999</p>
-                  </div>
-                  <div>
-                    <p className="font-medium text-[#111111] text-xs">
-                      New User:
-                    </p>
-                    <p>Phone: 8888888888 | OTP: 8888</p>
-                  </div>
+                  <p>
+                    <span className="font-medium">Existing Users:</span> Enter
+                    phone number and verify with OTP
+                  </p>
+                  <p>
+                    <span className="font-medium">New Users:</span> First
+                    register using the signup flow, then use OTP to login
+                  </p>
                 </div>
               </div>
             </div>
@@ -475,6 +516,36 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {/* Address Input */}
+            <div>
+              <label className="block text-sm font-medium text-[#111111] mb-3">
+                Address
+              </label>
+              <textarea
+                placeholder="Enter your complete address (street, building, etc.)"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 border border-[#e6e0da] rounded-lg outline-none focus:border-[#5540b7] focus:ring-2 focus:ring-[#5540b7] resize-none"
+                required
+              />
+            </div>
+
+            {/* Area/City Input */}
+            <div>
+              <label className="block text-sm font-medium text-[#111111] mb-3">
+                Area / City
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., T Nagar, Chennai"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                className="w-full px-4 py-3 border border-[#e6e0da] rounded-lg outline-none focus:border-[#5540b7] focus:ring-2 focus:ring-[#5540b7]"
+                required
+              />
+            </div>
+
             {/* Error Message */}
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
@@ -498,6 +569,8 @@ export default function LoginPage() {
                 setStep("otp");
                 setName("");
                 setPincode("");
+                setAddress("");
+                setArea("");
                 setError("");
               }}
               className="w-full text-[#5540b7] py-3 text-sm font-medium uppercase tracking-wider hover:underline"

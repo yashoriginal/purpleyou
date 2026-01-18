@@ -228,7 +228,7 @@ export default function OrderConfirmationPage() {
             Contact our customer support team:
           </p>
           <p className="text-lg font-medium text-[#111111]">
-            support@auratenewyork.com
+            support@purpleyou.com
           </p>
         </div>
       </div>

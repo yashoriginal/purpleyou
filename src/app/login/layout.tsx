@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Login | AURA New York",
-  description: "Sign in to your AURA New York account",
+  title: "Login | Purple You",
+  description: "Sign in to your Purple You account",
   robots: {
     index: false,
     follow: false,

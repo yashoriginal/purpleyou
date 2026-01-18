@@ -1,7 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { Product } from "@/lib/data";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { Product } from "@/types/product";
 
 export interface WishlistItem {
   productId: number;
@@ -21,8 +27,53 @@ const WishlistContext = createContext<WishlistContextType | undefined>(
   undefined,
 );
 
+const WISHLIST_STORAGE_KEY = "wishlist_items";
+
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Load wishlist from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
+      if (saved) {
+        const parsedItems = JSON.parse(saved);
+        if (Array.isArray(parsedItems)) {
+          setItems(parsedItems);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load wishlist from localStorage:", error);
+    } finally {
+      setIsHydrated(true);
+    }
+  }, []);
+
+  // Listen for logout events and clear wishlist
+  useEffect(() => {
+    const checkAuthState = setInterval(() => {
+      const authToken = localStorage.getItem("auth_token");
+      if (!authToken) {
+        // User logged out, clear wishlist
+        setItems([]);
+        localStorage.removeItem(WISHLIST_STORAGE_KEY);
+      }
+    }, 1000);
+
+    return () => clearInterval(checkAuthState);
+  }, []);
+
+  // Save wishlist to localStorage whenever it changes
+  useEffect(() => {
+    if (isHydrated) {
+      try {
+        localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(items));
+      } catch (error) {
+        console.error("Failed to save wishlist to localStorage:", error);
+      }
+    }
+  }, [items, isHydrated]);
 
   const itemCount = items.length;
 

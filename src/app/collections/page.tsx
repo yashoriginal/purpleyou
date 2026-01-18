@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { products } from "@/lib/data";
+import { getAllProducts } from "@/services/product.service";
 
 export const revalidate = 600;
 
-export default function CollectionsIndex() {
+export default async function CollectionsIndex() {
+  const products = await getAllProducts();
   const categories = Array.from(
-    new Set(products.map((p) => p.category.toLowerCase()))
-  );
+    new Set(products.map((p) => p.category.toLowerCase())),
+  ).sort();
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
@@ -15,7 +16,8 @@ export default function CollectionsIndex() {
           Collections
         </h1>
         <p className="text-sm text-[#6b6b6b] font-light max-w-2xl">
-          Browse our premium jewelry collections. Each piece is crafted with care and designed to last.
+          Browse our premium jewelry collections. Each piece is crafted with
+          care and designed to last.
         </p>
       </div>
 

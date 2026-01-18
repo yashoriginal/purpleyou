@@ -2,12 +2,16 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
-import { products, categories } from "@/lib/data";
+import { categories } from "@/lib/data";
 import {
   generateCollectionMetadata,
   generateCollectionSchema,
 } from "@/lib/seo";
 import CollectionFiltersClient from "@/components/collection/CollectionFiltersClient";
+import {
+  getAllProducts,
+  getProductsByCollection,
+} from "@/services/product.service";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -37,6 +41,11 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     };
   }
 
+  const products =
+    slug === "all"
+      ? await getAllProducts()
+      : await getProductsByCollection(slug);
+
   if (slug === "all") {
     return generateCollectionMetadata(
       {
@@ -53,27 +62,19 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   return generateCollectionMetadata(category!, products.length);
 }
 
-// ISR: Revalidate every 1 hour (product additions, price changes, etc.)
-export const revalidate = 3600;
+// ISR: Revalidate every 10 minutes (product additions, price changes, etc.)
+export const revalidate = 600;
 
 export default async function CategoryPage({ params }: PageProps) {
   const { slug } = await params;
 
   const normalizedCategory = (slug ?? "").toLowerCase();
 
-  // TODO: API Integration - Replace mock data with backend API
-  // Example API call:
-  // const baseProducts = await fetch(
-  //   `https://api.example.com/products?category=${normalizedCategory}`,
-  //   { headers: { Authorization: `Bearer ${process.env.API_KEY}` } }
-  // ).then((res) => res.json());
-
+  // Fetch products from the external API service
   const baseProducts =
     normalizedCategory === "all"
-      ? products
-      : products.filter((product) => {
-          return (product.category ?? "").toLowerCase() === normalizedCategory;
-        });
+      ? await getAllProducts()
+      : await getProductsByCollection(normalizedCategory);
 
   if (baseProducts.length === 0) {
     return (

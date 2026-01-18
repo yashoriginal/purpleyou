@@ -1,5 +1,6 @@
 export type Product = {
-  id: number;
+  id: number; // Numeric ID for internal use
+  productId: string; // Original API product ID (UUID or string identifier)
   name: string;
   price: number;
   slug: string;

@@ -1,11 +1,11 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { HiOutlineChevronLeft, HiOutlineCheck } from "react-icons/hi";
-import RazorpayCheckout from "@/components/checkout/RazorpayCheckout";
+import { HiOutlineChevronLeft } from "react-icons/hi";
 import Link from "next/link";
+import * as orderService from "@/services/order.service";
 
 const INDIAN_STATES = [
   "Andhra Pradesh",
@@ -59,9 +59,6 @@ interface AddressForm {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
-  const [currentStep, setCurrentStep] = useState<"address" | "payment">(
-    "address",
-  );
   const [address, setAddress] = useState<AddressForm>({
     fullName: "",
     mobileNumber: "",
@@ -74,10 +71,31 @@ export default function CheckoutPage() {
   });
 
   const [errors, setErrors] = useState<Partial<AddressForm>>({});
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
   const shippingCost = totalPrice >= 3000 ? 0 : 99;
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => {
+      setRazorpayLoaded(true);
+    };
+    script.onerror = () => {
+      setPaymentError("Failed to load Razorpay. Please refresh and try again.");
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const validateForm = () => {
     const newErrors: Partial<AddressForm> = {};
@@ -98,17 +116,141 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddressSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setCurrentStep("payment");
-    }
-  };
-
   const handleInputChange = (field: keyof AddressForm, value: string) => {
     setAddress((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleAddressSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setPaymentError("");
+    setIsProcessing(true);
+
+    try {
+      // Get userId from localStorage
+      const userStr = localStorage.getItem("auth_user");
+      if (!userStr) {
+        throw new Error("User not authenticated. Please log in again.");
+      }
+
+      const user = JSON.parse(userStr);
+      const userId = user._id || user.id || user.userId;
+      if (!userId) {
+        throw new Error("User ID not found. Please log in again.");
+      }
+
+      // Create order on backend
+      const orderPayload: orderService.CreateOrderPayload = {
+        userId,
+        shopId: "purple_you",
+        status: "pending",
+        items: items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          pricePerUnit: item.price,
+        })),
+        orderDetails: {
+          totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+          totalPrice: totalPrice,
+          paymentMethod: "razorpay",
+        },
+        deliveryDetails: {
+          deliveryDate: new Date().toISOString(),
+          deliveryAddress: `${address.building}, ${address.street}, ${address.city}, ${address.state} ${address.pinCode}`,
+        },
+      };
+
+      const orderResponse = await orderService.createOrder(orderPayload);
+      const razorpayOrder = orderResponse.razorpayOrder;
+
+      // Initialize Razorpay with default UI
+      if (!window.Razorpay) {
+        throw new Error("Razorpay SDK not loaded");
+      }
+
+      const razorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        order_id: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        currency: "INR",
+        handler: async (response: any) => {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await fetch("/api/razorpay/verify-payment", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                orderId: razorpayOrder.id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+              }),
+            });
+
+            if (!verifyResponse.ok) {
+              const errorData = await verifyResponse.json();
+              throw new Error(errorData.error || "Payment verification failed");
+            }
+
+            // Payment successful
+            clearCart();
+
+            // Redirect to order confirmation
+            const params = new URLSearchParams({
+              orderId: razorpayOrder.id,
+              paymentId: response.razorpay_payment_id,
+              email: address.email,
+              amount: totalAmount.toLocaleString("en-IN"),
+            });
+
+            router.push(`/order-confirmation?${params.toString()}`);
+          } catch (verifyError) {
+            const errorMessage =
+              verifyError instanceof Error
+                ? verifyError.message
+                : "Payment verification failed";
+            setPaymentError(errorMessage);
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: address.fullName,
+          email: address.email,
+          contact: address.mobileNumber,
+        },
+        theme: {
+          color: "#5540b7",
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            setPaymentError("Payment cancelled. Please try again.");
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(razorpayOptions);
+
+      razorpay.on("payment.failed", (response: any) => {
+        setPaymentError(
+          `Payment failed: ${response.error?.description || "Unknown error"}`,
+        );
+        setIsProcessing(false);
+      });
+
+      razorpay.open();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Payment failed. Please try again.";
+      setPaymentError(errorMessage);
+      setIsProcessing(false);
     }
   };
 
@@ -139,11 +281,7 @@ export default function CheckoutPage() {
       <div className="border-b border-[#e6e0da]">
         <div className="mx-auto max-w-7xl px-4 py-6">
           <button
-            onClick={() =>
-              currentStep === "payment"
-                ? setCurrentStep("address")
-                : router.back()
-            }
+            onClick={() => router.back()}
             className="flex items-center gap-2 text-[#5540b7] font-medium mb-4 hover:underline"
           >
             <HiOutlineChevronLeft className="w-5 h-5" />
@@ -158,290 +296,237 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* Step Indicator */}
-      <div className="bg-[#f8f5f2] border-b border-[#e6e0da]">
-        <div className="mx-auto max-w-7xl px-4 py-6">
-          <div className="flex items-center justify-center sm:justify-start gap-6 sm:gap-12">
-            {/* Step 1 */}
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-                  currentStep === "address"
-                    ? "bg-[#5540b7] text-white"
-                    : "bg-[#e6e0da] text-[#111111]"
-                }`}
-              >
-                {currentStep === "payment" ? (
-                  <HiOutlineCheck className="w-5 h-5" />
-                ) : (
-                  "1"
-                )}
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-xs font-medium text-[#6b6b6b]">Step 1</p>
-                <p className="font-medium text-[#111111]">Delivery Address</p>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="hidden sm:block flex-1 h-0.5 bg-[#e6e0da]" />
-
-            {/* Step 2 */}
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${
-                  currentStep === "payment"
-                    ? "bg-[#5540b7] text-white"
-                    : "bg-[#e6e0da] text-[#111111]"
-                }`}
-              >
-                2
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-xs font-medium text-[#6b6b6b]">Step 2</p>
-                <p className="font-medium text-[#111111]">Payment</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Form Section */}
           <div className="lg:col-span-2">
-            {currentStep === "address" ? (
-              <div className="bg-white border border-[#e6e0da] p-6 sm:p-8 rounded-lg">
-                <h2 className="text-2xl font-light text-[#111111] tracking-wide mb-8">
-                  Delivery Address
-                </h2>
-                <form onSubmit={handleAddressSubmit} className="space-y-6">
-                  {/* Full Name */}
+            <div className="bg-white border border-[#e6e0da] p-6 sm:p-8 rounded-lg">
+              <h2 className="text-2xl font-light text-[#111111] tracking-wide mb-8">
+                Delivery Address
+              </h2>
+              <form onSubmit={handleAddressSubmit} className="space-y-6">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-sm font-medium text-[#111111] mb-2">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={address.fullName}
+                    onChange={(e) =>
+                      handleInputChange("fullName", e.target.value)
+                    }
+                    className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                      errors.fullName ? "border-red-500" : "border-[#e6e0da]"
+                    }`}
+                    placeholder="Your full name"
+                  />
+                  {errors.fullName && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.fullName}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email & Mobile - 2 Columns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-[#111111] mb-2">
-                      Full Name *
+                      Email *
                     </label>
                     <input
-                      type="text"
-                      value={address.fullName}
+                      type="email"
+                      value={address.email}
                       onChange={(e) =>
-                        handleInputChange("fullName", e.target.value)
+                        handleInputChange("email", e.target.value)
                       }
                       className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.fullName ? "border-red-500" : "border-[#e6e0da]"
+                        errors.email ? "border-red-500" : "border-[#e6e0da]"
                       }`}
-                      placeholder="Your full name"
+                      placeholder="your@email.com"
                     />
-                    {errors.fullName && (
+                    {errors.email && (
                       <p className="text-xs text-red-500 mt-1">
-                        {errors.fullName}
+                        {errors.email}
                       </p>
                     )}
                   </div>
 
-                  {/* Email & Mobile - 2 Columns */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {/* Email */}
-                    <div>
-                      <label className="block text-sm font-medium text-[#111111] mb-2">
-                        Email *
-                      </label>
-                      <input
-                        type="email"
-                        value={address.email}
-                        onChange={(e) =>
-                          handleInputChange("email", e.target.value)
-                        }
-                        className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                          errors.email ? "border-red-500" : "border-[#e6e0da]"
-                        }`}
-                        placeholder="your@email.com"
-                      />
-                      {errors.email && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.email}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Mobile Number */}
-                    <div>
-                      <label className="block text-sm font-medium text-[#111111] mb-2">
-                        Mobile Number (10 digits) *
-                      </label>
-                      <input
-                        type="tel"
-                        value={address.mobileNumber}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "mobileNumber",
-                            e.target.value.replace(/\D/g, "").slice(0, 10),
-                          )
-                        }
-                        className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                          errors.mobileNumber
-                            ? "border-red-500"
-                            : "border-[#e6e0da]"
-                        }`}
-                        placeholder="10-digit number"
-                        maxLength={10}
-                      />
-                      {errors.mobileNumber && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.mobileNumber}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Building/House */}
+                  {/* Mobile Number */}
                   <div>
                     <label className="block text-sm font-medium text-[#111111] mb-2">
-                      House/Flat/Building *
+                      Mobile Number (10 digits) *
                     </label>
                     <input
-                      type="text"
-                      value={address.building}
+                      type="tel"
+                      value={address.mobileNumber}
                       onChange={(e) =>
-                        handleInputChange("building", e.target.value)
+                        handleInputChange(
+                          "mobileNumber",
+                          e.target.value.replace(/\D/g, "").slice(0, 10),
+                        )
                       }
                       className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.building ? "border-red-500" : "border-[#e6e0da]"
+                        errors.mobileNumber
+                          ? "border-red-500"
+                          : "border-[#e6e0da]"
                       }`}
-                      placeholder="House/Flat no., Building name"
+                      placeholder="10-digit number"
+                      maxLength={10}
                     />
-                    {errors.building && (
+                    {errors.mobileNumber && (
                       <p className="text-xs text-red-500 mt-1">
-                        {errors.building}
+                        {errors.mobileNumber}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Building/House */}
+                <div>
+                  <label className="block text-sm font-medium text-[#111111] mb-2">
+                    House/Flat/Building *
+                  </label>
+                  <input
+                    type="text"
+                    value={address.building}
+                    onChange={(e) =>
+                      handleInputChange("building", e.target.value)
+                    }
+                    className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                      errors.building ? "border-red-500" : "border-[#e6e0da]"
+                    }`}
+                    placeholder="House/Flat no., Building name"
+                  />
+                  {errors.building && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.building}
+                    </p>
+                  )}
+                </div>
+
+                {/* Street/Locality */}
+                <div>
+                  <label className="block text-sm font-medium text-[#111111] mb-2">
+                    Street/Locality *
+                  </label>
+                  <input
+                    type="text"
+                    value={address.street}
+                    onChange={(e) =>
+                      handleInputChange("street", e.target.value)
+                    }
+                    className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                      errors.street ? "border-red-500" : "border-[#e6e0da]"
+                    }`}
+                    placeholder="Road/Locality name"
+                  />
+                  {errors.street && (
+                    <p className="text-xs text-red-500 mt-1">{errors.street}</p>
+                  )}
+                </div>
+
+                {/* City */}
+                <div>
+                  <label className="block text-sm font-medium text-[#111111] mb-2">
+                    City *
+                  </label>
+                  <input
+                    type="text"
+                    value={address.city}
+                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                      errors.city ? "border-red-500" : "border-[#e6e0da]"
+                    }`}
+                    placeholder="City"
+                  />
+                  {errors.city && (
+                    <p className="text-xs text-red-500 mt-1">{errors.city}</p>
+                  )}
+                </div>
+
+                {/* State & PIN Code */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* State */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#111111] mb-2">
+                      State *
+                    </label>
+                    <select
+                      value={address.state}
+                      onChange={(e) =>
+                        handleInputChange("state", e.target.value)
+                      }
+                      className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                        errors.state ? "border-red-500" : "border-[#e6e0da]"
+                      }`}
+                    >
+                      <option value="">Select State</option>
+                      {INDIAN_STATES.map((state) => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.state && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.state}
                       </p>
                     )}
                   </div>
 
-                  {/* Street/Locality */}
+                  {/* PIN Code */}
                   <div>
                     <label className="block text-sm font-medium text-[#111111] mb-2">
-                      Street/Locality *
+                      PIN Code (6 digits) *
                     </label>
                     <input
-                      type="text"
-                      value={address.street}
+                      type="tel"
+                      value={address.pinCode}
                       onChange={(e) =>
-                        handleInputChange("street", e.target.value)
+                        handleInputChange(
+                          "pinCode",
+                          e.target.value.replace(/\D/g, "").slice(0, 6),
+                        )
                       }
                       className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.street ? "border-red-500" : "border-[#e6e0da]"
+                        errors.pinCode ? "border-red-500" : "border-[#e6e0da]"
                       }`}
-                      placeholder="Road/Locality name"
+                      placeholder="6-digit PIN"
+                      maxLength={6}
                     />
-                    {errors.street && (
+                    {errors.pinCode && (
                       <p className="text-xs text-red-500 mt-1">
-                        {errors.street}
+                        {errors.pinCode}
                       </p>
                     )}
                   </div>
+                </div>
 
-                  {/* City */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#111111] mb-2">
-                      City *
-                    </label>
-                    <input
-                      type="text"
-                      value={address.city}
-                      onChange={(e) =>
-                        handleInputChange("city", e.target.value)
-                      }
-                      className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.city ? "border-red-500" : "border-[#e6e0da]"
-                      }`}
-                      placeholder="City"
-                    />
-                    {errors.city && (
-                      <p className="text-xs text-red-500 mt-1">{errors.city}</p>
-                    )}
+                {paymentError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                    {paymentError}
                   </div>
+                )}
 
-                  {/* State & PIN Code */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {/* State */}
-                    <div>
-                      <label className="block text-sm font-medium text-[#111111] mb-2">
-                        State *
-                      </label>
-                      <select
-                        value={address.state}
-                        onChange={(e) =>
-                          handleInputChange("state", e.target.value)
-                        }
-                        className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                          errors.state ? "border-red-500" : "border-[#e6e0da]"
-                        }`}
-                      >
-                        <option value="">Select State</option>
-                        {INDIAN_STATES.map((state) => (
-                          <option key={state} value={state}>
-                            {state}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.state && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.state}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* PIN Code */}
-                    <div>
-                      <label className="block text-sm font-medium text-[#111111] mb-2">
-                        PIN Code (6 digits) *
-                      </label>
-                      <input
-                        type="tel"
-                        value={address.pinCode}
-                        onChange={(e) =>
-                          handleInputChange(
-                            "pinCode",
-                            e.target.value.replace(/\D/g, "").slice(0, 6),
-                          )
-                        }
-                        className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                          errors.pinCode ? "border-red-500" : "border-[#e6e0da]"
-                        }`}
-                        placeholder="6-digit PIN"
-                        maxLength={6}
-                      />
-                      {errors.pinCode && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.pinCode}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-[#5540b7] text-white py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors mt-8 rounded-lg"
-                  >
-                    Continue to Payment
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <div className="bg-white border border-[#e6e0da] p-6 sm:p-8 rounded-lg">
-                <h2 className="text-2xl font-light text-[#111111] tracking-wide mb-8">
-                  Payment Method
-                </h2>
-                <RazorpayCheckout
-                  amount={totalPrice}
-                  orderId={`order-${Date.now()}`}
-                  customerEmail={address.email}
-                  customerPhone={address.mobileNumber}
-                  onSuccess={clearCart}
-                />
-              </div>
-            )}
+                <button
+                  type="submit"
+                  disabled={isProcessing || !razorpayLoaded}
+                  className={`w-full py-4 text-sm font-semibold uppercase tracking-wider mt-8 rounded-lg transition-all flex items-center justify-center gap-2 ${
+                    isProcessing || !razorpayLoaded
+                      ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
+                      : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
+                  }`}
+                >
+                  <span className="text-base">🔒</span>
+                  {isProcessing
+                    ? "Processing Payment..."
+                    : "Continue to Payment"}
+                </button>
+              </form>
+            </div>
           </div>
 
           {/* Order Summary - Sticky */}
@@ -508,4 +593,10 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
+}
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
 }

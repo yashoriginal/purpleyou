@@ -10,6 +10,7 @@ import {
   HiOutlineChevronLeft,
   HiOutlineChevronRight,
 } from "react-icons/hi";
+import EditProfileForm from "@/components/profile/EditProfileForm";
 
 // Dummy data types
 interface Order {
@@ -180,12 +181,12 @@ const DUMMY_WISHLIST: WishlistItem[] = [
 
 const ITEMS_PER_PAGE = 2;
 
-type Tab = "orders" | "addresses" | "wishlist";
+type Tab = "profile" | "orders" | "addresses" | "wishlist";
 
 export default function AccountPage() {
   const router = useRouter();
   const { isLoggedIn, user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("orders");
+  const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [ordersPage, setOrdersPage] = useState(1);
   const [wishlistPage, setWishlistPage] = useState(1);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -263,6 +264,18 @@ export default function AccountPage() {
               {/* Navigation Menu */}
               <nav className="space-y-4">
                 <button
+                  onClick={() => setActiveTab("profile")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                    activeTab === "profile"
+                      ? "bg-white text-[#5540b7]"
+                      : "text-[#111111] hover:bg-white hover:text-[#5540b7]"
+                  }`}
+                >
+                  <span className="text-lg">👤</span>
+                  <span className="text-sm font-medium">Profile</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab("orders")}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
                     activeTab === "orders"
@@ -312,6 +325,13 @@ export default function AccountPage() {
 
           {/* Content Area */}
           <div className="lg:col-span-3">
+            {/* Profile Tab */}
+            {activeTab === "profile" && (
+              <div className="bg-white rounded-lg border border-[#e6e0da] p-6 sm:p-8">
+                <EditProfileForm onCancel={() => setActiveTab("orders")} />
+              </div>
+            )}
+
             {/* Orders Tab */}
             {activeTab === "orders" && (
               <div className="space-y-6">

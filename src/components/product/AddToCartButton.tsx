@@ -13,13 +13,14 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const router = useRouter();
-  const { addToCart, removeFromCart, items } = useCart();
+  const { addToCart, removeFromCart, items, isLoading, error } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [selectedVariants, setSelectedVariants] = useState<
     Record<string, string>
   >({});
   const [isInCart, setIsInCart] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   const isWishlisted = isInWishlist(product.id);
 
   // Check if product is in cart
@@ -30,10 +31,10 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
           .map(([key, value]) => `${key}:${value}`)
           .join("|")
       : "";
-    const itemId = `${product.id}_${variantString}`;
+    const itemId = `${product.productId}_${variantString}`;
     const productInCart = items.some((item) => item.id === itemId);
     setIsInCart(productInCart);
-  }, [items, product.id, selectedVariants]);
+  }, [items, product.productId, selectedVariants]);
 
   const handleVariantSelect = (variantName: string, option: string) => {
     setSelectedVariants((prev) => ({
@@ -49,29 +50,53 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
           .map(([key, value]) => `${key}:${value}`)
           .join("|")
       : "";
-    return `${product.id}_${variantString}`;
+    return `${product.productId}_${variantString}`;
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    setLocalError(null);
     if (isInCart) {
       // Remove from cart
       const itemId = generateCartItemId(selectedVariants);
-      removeFromCart(itemId);
-      // Also remove from wishlist when removing from bag
-      removeFromWishlist(product.id);
+      try {
+        await removeFromCart(itemId);
+        // Also remove from wishlist when removing from bag
+        removeFromWishlist(product.id);
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : "Failed to remove from cart";
+        setLocalError(errorMsg);
+        console.error("Failed to remove from cart:", err);
+      }
     } else {
       // Add to cart
-      addToCart(product, selectedVariants, 1);
+      try {
+        await addToCart(product, selectedVariants, 1);
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : "Failed to add to cart";
+        setLocalError(errorMsg);
+        console.error("Failed to add to cart:", err);
+      }
     }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
+    setLocalError(null);
     setIsBuying(true);
-    addToCart(product, selectedVariants, 1);
-    // Small delay to ensure cart is updated before redirect
-    setTimeout(() => {
-      router.push("/checkout");
-    }, 100);
+    try {
+      await addToCart(product, selectedVariants, 1);
+      // Small delay to ensure cart is updated before redirect
+      setTimeout(() => {
+        router.push("/checkout");
+      }, 100);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to add to cart";
+      setLocalError(errorMsg);
+      console.error("Failed to add to cart:", err);
+      setIsBuying(false);
+    }
   };
 
   return (
@@ -134,20 +159,26 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
 
       {/* Add to Cart Section */}
       <div className="border-t border-[#e6e0da] pt-6 space-y-3">
+        {(localError || error) && (
+          <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-700">
+            {localError || error}
+          </div>
+        )}
         <button
           onClick={handleAddToCart}
+          disabled={isLoading || isBuying}
           className={`w-full px-8 py-4 text-sm font-semibold uppercase tracking-wider transition-colors ${
             isInCart
-              ? "bg-red-600 text-white hover:bg-red-700"
-              : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
+              ? "bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
+              : "bg-[#5540b7] text-white hover:bg-[#3d2d7f] disabled:opacity-60 disabled:cursor-not-allowed"
           }`}
         >
-          {isInCart ? "Remove from Bag" : "Add to Bag"}
+          {isLoading ? "Processing..." : isInCart ? "Remove from Bag" : "Add to Bag"}
         </button>
         {!isInCart && (
           <button
             onClick={handleBuyNow}
-            disabled={isBuying}
+            disabled={isBuying || isLoading}
             className="w-full border border-[#111111] text-[#111111] px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#111111] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isBuying ? "Processing..." : "Buy Now"}
