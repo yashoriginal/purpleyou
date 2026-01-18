@@ -49,18 +49,20 @@ export default function LoginPage() {
       return;
     }
 
+    setIsLoading(true);
     try {
       const formattedMobile = `+91${phoneNumber}`;
-      await sendOTP(formattedMobile);
+      await authService.sendOTP(formattedMobile);
       setStep("otp");
       setError("");
     } catch (err) {
-      // Error is already set by the context
       if (err instanceof AuthServiceError) {
         setError(err.message);
       } else {
         setError("Failed to send OTP. Please try again.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,11 +77,12 @@ export default function LoginPage() {
       return;
     }
 
+    setIsLoading(true);
     try {
       const formattedMobile = `+91${phoneNumber}`;
 
       // Call verifyOTP which will automatically update auth context and save tokens
-      await verifyOTP(formattedMobile, otp);
+      await authService.verifyOTP(formattedMobile, otp);
 
       // If we reach here, OTP was verified successfully
       // Now check if user is verified (existing registered user)
@@ -94,7 +97,6 @@ export default function LoginPage() {
         setStep("success");
       }
     } catch (err) {
-      // Error is already set by the context, but we can override if needed
       if (err instanceof AuthServiceError) {
         // Check if it's a "not found" error (new user)
         if (err.statusCode === 401 && err.message.includes("does not exist")) {
@@ -105,6 +107,8 @@ export default function LoginPage() {
       } else {
         setError("Failed to verify OTP. Please try again.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -202,7 +206,7 @@ export default function LoginPage() {
       });
 
       // Call the auth service register function with full profile data
-      await register({
+      await authService.register({
         userName: name,
         mobile: `+91${phoneNumber}`,
         latitude: position.latitude.toString(),
