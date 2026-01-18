@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { AuthServiceError, authService } from "@/services/auth.service";
+import { AuthServiceError, authService, type AddressObject } from "@/services/auth.service";
 
 type AuthStep = "phone" | "otp" | "profile" | "success";
 
