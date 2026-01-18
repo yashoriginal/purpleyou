@@ -175,7 +175,7 @@ export default function LoginPage() {
         );
       });
 
-      // Call context's register function which updates isLoggedIn and saves credentials
+      // Step 1: Register the user
       await contextRegister({
         userName: name,
         mobile: `+91${phoneNumber}`,
@@ -184,6 +184,30 @@ export default function LoginPage() {
         pincode: pincode,
         address: address,
         area: area,
+      });
+
+      // Step 2: Create address object with the entered address as default
+      const primaryAddress: AddressObject = {
+        addressId: `addr_primary_${Date.now()}`,
+        label: "Primary Address",
+        address: address,
+        area: area,
+        pincode: pincode,
+        latitude: position.latitude.toString(),
+        longitude: position.longitude.toString(),
+        isDefault: true,
+      };
+
+      // Step 3: Call update-user-details with addresses array
+      await authService.updateUserDetails({
+        mobile: `+91${phoneNumber}`,
+        userName: name,
+        address: address,
+        pincode: pincode,
+        latitude: position.latitude.toString(),
+        longitude: position.longitude.toString(),
+        area: area,
+        addresses: [primaryAddress],
       });
 
       // Show success screen briefly before redirecting
