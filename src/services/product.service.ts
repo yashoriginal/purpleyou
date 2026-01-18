@@ -120,9 +120,15 @@ async function fetchProductsFromAPI(): Promise<Product[]> {
   }
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const res = await fetch(EXTERNAL_API_URL, {
       next: { revalidate: 600 },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
       console.error("Failed to fetch products from API:", res.status);
