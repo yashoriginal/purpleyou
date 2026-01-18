@@ -24,6 +24,41 @@ export default function CartPage() {
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
 
+  const handleQuantityChange = async (itemId: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      await handleRemoveItem(itemId);
+      return;
+    }
+
+    setOperationError(null);
+    setIsUpdating(itemId);
+    try {
+      await updateQuantity(itemId, newQuantity);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to update quantity";
+      setOperationError(errorMsg);
+      console.error("Failed to update quantity:", err);
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    setOperationError(null);
+    setIsUpdating(itemId);
+    try {
+      await removeFromCart(itemId);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to remove item";
+      setOperationError(errorMsg);
+      console.error("Failed to remove item:", err);
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
   const handleCheckout = () => {
     setIsCheckingOut(true);
     router.push("/checkout");
