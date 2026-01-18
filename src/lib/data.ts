@@ -11,7 +11,6 @@ export interface Category {
 
 export interface Product {
   id: number;
-  productId?: string;
   name: string;
   price: number;
   comparePrice?: number;
@@ -27,6 +26,7 @@ export interface Product {
   variants?: Array<{ name: string; options: string[] }>;
   materials?: string;
   careInstructions?: string;
+  productId?: string;
 }
 
 export const categories: Category[] = [
