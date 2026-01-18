@@ -30,13 +30,24 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isNewUser, setIsNewUser] = useState(false);
 
-  // Auto-redirect to account if already logged in
+  // Auto-redirect to account if already logged in or after successful login
   useEffect(() => {
     if (isLoggedIn) {
       const redirectTo = searchParams.get("redirect") || "/account";
       router.push(redirectTo);
     }
   }, [isLoggedIn, router, searchParams]);
+
+  // Auto-redirect after success screen is shown (after 2 seconds)
+  useEffect(() => {
+    if (step === "success") {
+      const timer = setTimeout(() => {
+        const redirectTo = searchParams.get("redirect") || "/account";
+        router.push(redirectTo);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, router, searchParams]);
 
   // Handle Login or Register - Initial step
   const handleSendOTP = async (e: React.FormEvent) => {
