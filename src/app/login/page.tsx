@@ -106,11 +106,9 @@ export default function LoginPage() {
   // Helper function to login existing user with cart/wishlist
   const handleExistingUserLogin = async () => {
     try {
-      // Login successful - set auth state
-      login({
-        phoneNumber: phoneNumber,
-        name: `User ${phoneNumber.slice(-4)}`,
-      });
+      // Update auth state with user info from context
+      // Note: For existing users, we're using the context's user state
+      // which is populated during successful OTP verification
 
       // Fetch and populate cart data
       try {
