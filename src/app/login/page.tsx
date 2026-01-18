@@ -61,7 +61,7 @@ export default function LoginPage() {
 
       // Check if response data is a string (existing user) or object (new user)
       if (typeof response.data === "string") {
-        // Existing user - UUID returned, show OTP verification form
+        // Existing user - UUID returned, mark as existing and show OTP form
         setIsNewUser(false);
         setStep("otp");
       } else if (
@@ -69,9 +69,10 @@ export default function LoginPage() {
         response.data &&
         "isVerified" in response.data
       ) {
-        // New user - user object returned with isVerified=false, show registration form
+        // New user - user object returned with isVerified=false
+        // Still show OTP form, not profile form
         setIsNewUser(true);
-        setStep("profile");
+        setStep("otp");
       } else {
         throw new Error("Unexpected response format from login endpoint");
       }
