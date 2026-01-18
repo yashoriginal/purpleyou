@@ -159,20 +159,26 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
 
       {/* Add to Cart Section */}
       <div className="border-t border-[#e6e0da] pt-6 space-y-3">
+        {(localError || error) && (
+          <div className="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-700">
+            {localError || error}
+          </div>
+        )}
         <button
           onClick={handleAddToCart}
+          disabled={isLoading || isBuying}
           className={`w-full px-8 py-4 text-sm font-semibold uppercase tracking-wider transition-colors ${
             isInCart
-              ? "bg-red-600 text-white hover:bg-red-700"
-              : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
+              ? "bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
+              : "bg-[#5540b7] text-white hover:bg-[#3d2d7f] disabled:opacity-60 disabled:cursor-not-allowed"
           }`}
         >
-          {isInCart ? "Remove from Bag" : "Add to Bag"}
+          {isLoading ? "Processing..." : isInCart ? "Remove from Bag" : "Add to Bag"}
         </button>
         {!isInCart && (
           <button
             onClick={handleBuyNow}
-            disabled={isBuying}
+            disabled={isBuying || isLoading}
             className="w-full border border-[#111111] text-[#111111] px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-[#111111] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isBuying ? "Processing..." : "Buy Now"}
