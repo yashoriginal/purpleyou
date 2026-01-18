@@ -275,9 +275,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       // Call API to add item
+      const productId = product.productId || String(product.id); // Fallback to numeric id if productId not available
       const cartData = await cartService.addToCart(
         currentUserId,
-        product.productId, // Use original API productId
+        productId,
         quantity,
         product.price,
         selectedVariants,
