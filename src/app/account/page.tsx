@@ -264,6 +264,18 @@ export default function AccountPage() {
               {/* Navigation Menu */}
               <nav className="space-y-4">
                 <button
+                  onClick={() => setActiveTab("profile")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                    activeTab === "profile"
+                      ? "bg-white text-[#5540b7]"
+                      : "text-[#111111] hover:bg-white hover:text-[#5540b7]"
+                  }`}
+                >
+                  <span className="text-lg">👤</span>
+                  <span className="text-sm font-medium">Profile</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab("orders")}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
                     activeTab === "orders"
