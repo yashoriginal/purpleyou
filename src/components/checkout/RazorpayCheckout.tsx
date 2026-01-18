@@ -101,6 +101,7 @@ export default function RazorpayCheckout({
       // Step 1: Create order on backend using the new /api/v1/orders/ endpoint
       const orderPayload: orderService.CreateOrderPayload = {
         userId,
+        shopId: "purple_you",
         status: "pending",
         items: items.map((item) => ({
           productId: item.productId,
