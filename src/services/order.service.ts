@@ -119,9 +119,7 @@ async function makeOrderRequest<T = unknown>(
       statusCode: response.status,
     }));
 
-    throw new Error(
-      errorData.error || `Order API error: ${response.status}`,
-    );
+    throw new Error(errorData.error || `Order API error: ${response.status}`);
   }
 
   const data: ApiResponse<T> = await response.json();

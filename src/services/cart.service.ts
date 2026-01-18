@@ -95,9 +95,7 @@ async function makeCartRequest<T = unknown>(
       statusCode: response.status,
     }));
 
-    throw new Error(
-      errorData.error || `Cart API error: ${response.status}`,
-    );
+    throw new Error(errorData.error || `Cart API error: ${response.status}`);
   }
 
   const data: ApiResponse<T> = await response.json();
