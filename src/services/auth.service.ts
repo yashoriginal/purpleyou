@@ -56,11 +56,60 @@ export interface ApiResponse<T = unknown> {
 export type RegisterResponse = ApiResponse<AuthUser>;
 
 /**
+ * OTP send request
+ */
+export interface SendOTPRequest {
+  mobile: string;
+}
+
+/**
+ * OTP send/resend response
+ */
+export interface OTPResponse {
+  data: string; // "OTP sent" or similar message
+  success: boolean;
+  error: string | null;
+  statusCode: number;
+}
+
+/**
+ * OTP verification request
+ */
+export interface VerifyOTPRequest {
+  mobile: string;
+  otp: string;
+}
+
+/**
+ * OTP verification response - successful
+ */
+export interface VerifyOTPResponse {
+  data: AuthUser;
+  accessToken: string;
+  refreshToken: string;
+  error: null;
+  statusCode: 200;
+  success: true;
+}
+
+/**
+ * OTP verification response - error
+ */
+export interface VerifyOTPErrorResponse {
+  data: null;
+  accessToken?: never;
+  refreshToken?: never;
+  error: string;
+  statusCode: number;
+  success: false;
+}
+
+/**
  * Auth token stored in localStorage
  */
 export interface AuthToken {
   accessToken: string;
-  refreshToken?: string;
+  refreshToken: string;
   expiresIn?: number;
   tokenType: string;
 }
