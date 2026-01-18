@@ -325,6 +325,13 @@ export default function AccountPage() {
 
           {/* Content Area */}
           <div className="lg:col-span-3">
+            {/* Profile Tab */}
+            {activeTab === "profile" && (
+              <div className="bg-white rounded-lg border border-[#e6e0da] p-6 sm:p-8">
+                <EditProfileForm onCancel={() => setActiveTab("orders")} />
+              </div>
+            )}
+
             {/* Orders Tab */}
             {activeTab === "orders" && (
               <div className="space-y-6">
