@@ -31,7 +31,6 @@ export interface RazorpayPayment {
   amount_refunded: number;
   refund_status: string | null;
   captured: boolean;
-  description: string | null;
   card_id: string | null;
   bank: string | null;
   wallet: string | null;
