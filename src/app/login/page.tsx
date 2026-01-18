@@ -49,19 +49,18 @@ export default function LoginPage() {
       return;
     }
 
-    setIsLoading(true);
     try {
-      const result = await sendOTP(phoneNumber);
-      if (result.sent) {
-        setStep("otp");
-        setError("");
-      } else {
-        setError(result.message);
-      }
+      const formattedMobile = `+91${phoneNumber}`;
+      await sendOTP(formattedMobile);
+      setStep("otp");
+      setError("");
     } catch (err) {
-      setError("Failed to send OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
+      // Error is already set by the context
+      if (err instanceof AuthServiceError) {
+        setError(err.message);
+      } else {
+        setError("Failed to send OTP. Please try again.");
+      }
     }
   };
 
