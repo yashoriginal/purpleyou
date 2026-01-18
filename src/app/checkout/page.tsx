@@ -507,3 +507,224 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+interface PaymentSectionProps {
+  items: CartItem[];
+  address: AddressForm;
+  totalPrice: number;
+  shippingCost: number;
+  gst: number;
+  totalAmount: number;
+  onSuccess: () => void;
+}
+
+function PaymentSection({
+  items,
+  address,
+  totalPrice,
+  shippingCost,
+  gst,
+  totalAmount,
+  onSuccess,
+}: PaymentSectionProps) {
+  const router = useRouter();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState("");
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => {
+      setRazorpayLoaded(true);
+    };
+    script.onerror = () => {
+      setError("Failed to load Razorpay. Please refresh and try again.");
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handlePayment = async () => {
+    setError("");
+    setIsProcessing(true);
+
+    try {
+      // Get userId from localStorage
+      const userStr = localStorage.getItem("auth_user");
+      if (!userStr) {
+        throw new Error("User not authenticated. Please log in again.");
+      }
+
+      const user = JSON.parse(userStr);
+      const userId = user._id || user.id || user.userId;
+      if (!userId) {
+        throw new Error("User ID not found. Please log in again.");
+      }
+
+      // Create order on backend
+      const orderPayload: orderService.CreateOrderPayload = {
+        userId,
+        shopId: "purple_you",
+        status: "pending",
+        items: items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          pricePerUnit: item.price,
+        })),
+        orderDetails: {
+          totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+          totalPrice: totalPrice,
+          paymentMethod: "razorpay",
+        },
+        deliveryDetails: {
+          deliveryDate: new Date().toISOString(),
+          deliveryAddress: `${address.building}, ${address.street}, ${address.city}, ${address.state} ${address.pinCode}`,
+        },
+      };
+
+      const orderResponse = await orderService.createOrder(orderPayload);
+      const razorpayOrder = orderResponse.razorpayOrder;
+
+      // Initialize Razorpay with default UI
+      if (!window.Razorpay) {
+        throw new Error("Razorpay SDK not loaded");
+      }
+
+      const razorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        order_id: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        currency: "INR",
+        handler: async (response: any) => {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await fetch(
+              "/api/razorpay/verify-payment",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  orderId: razorpayOrder.id,
+                  paymentId: response.razorpay_payment_id,
+                  signature: response.razorpay_signature,
+                }),
+              }
+            );
+
+            if (!verifyResponse.ok) {
+              const errorData = await verifyResponse.json();
+              throw new Error(
+                errorData.error || "Payment verification failed"
+              );
+            }
+
+            // Payment successful
+            if (onSuccess) {
+              onSuccess();
+            }
+
+            // Redirect to order confirmation
+            const params = new URLSearchParams({
+              orderId: razorpayOrder.id,
+              paymentId: response.razorpay_payment_id,
+              email: address.email,
+              amount: totalAmount.toLocaleString("en-IN"),
+            });
+
+            router.push(`/order-confirmation?${params.toString()}`);
+          } catch (verifyError) {
+            const errorMessage =
+              verifyError instanceof Error
+                ? verifyError.message
+                : "Payment verification failed";
+            setError(errorMessage);
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: address.fullName,
+          email: address.email,
+          contact: address.mobileNumber,
+        },
+        theme: {
+          color: "#5540b7",
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            setError("Payment cancelled. Please try again.");
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(razorpayOptions);
+
+      razorpay.on("payment.failed", (response: any) => {
+        setError(
+          `Payment failed: ${response.error?.description || "Unknown error"}`
+        );
+        setIsProcessing(false);
+      });
+
+      razorpay.open();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Payment failed. Please try again.";
+      setError(errorMessage);
+      setIsProcessing(false);
+    }
+  };
+
+  if (!razorpayLoaded) {
+    return (
+      <div className="bg-white border border-[#e6e0da] p-6 sm:p-8 rounded-lg">
+        <p className="text-center text-[#6b6b6b]">Loading payment gateway...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white border border-[#e6e0da] p-6 sm:p-8 rounded-lg">
+      <h2 className="text-2xl font-light text-[#111111] tracking-wide mb-8">
+        Payment
+      </h2>
+
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-6 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
+      <button
+        onClick={handlePayment}
+        disabled={isProcessing}
+        className={`w-full py-4 text-sm font-semibold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${
+          isProcessing
+            ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
+            : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
+        }`}
+      >
+        <span className="text-base">🔒</span>
+        {isProcessing ? "Processing Payment..." : `Pay ₹${totalAmount.toLocaleString("en-IN")}`}
+      </button>
+
+      <p className="text-xs text-[#6b6b6b] text-center mt-4">
+        🔒 Secure payment powered by Razorpay
+      </p>
+    </div>
+  );
+}
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
