@@ -20,18 +20,9 @@ type PageProps = {
  * This enables static site generation (SSG) for each product
  */
 export async function generateStaticParams() {
-  try {
-    const products = await getAllProducts();
-    return products
-      .filter((product) => product.slug && typeof product.slug === "string")
-      .slice(0, 5) // Limit to first 5 products during build to avoid timeout
-      .map((product) => ({
-        slug: product.slug,
-      }));
-  } catch (error) {
-    console.error("Error generating static params:", error);
-    return []; // Return empty array if fetch fails
-  }
+  // Return empty array to avoid hanging during build
+  // Dynamic routes will be generated on-demand instead
+  return [];
 }
 
 /**
