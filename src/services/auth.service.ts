@@ -715,6 +715,38 @@ function formatMobileNumber(mobile: string): string {
 }
 
 // ============================================================================
+// AUTHENTICATED FETCH HELPERS (for use in other services)
+// ============================================================================
+
+/**
+ * Create an authenticated fetch request with automatic token injection
+ * Usage: const response = await authenticatedFetch('/api/user/cart')
+ */
+export async function authenticatedFetch<T = unknown>(
+  endpoint: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  return makeRequest<T>(endpoint, { ...options, requiresAuth: true });
+}
+
+/**
+ * Create fetch headers with authorization token
+ * Usage: const headers = getAuthHeaders(); // { Authorization: 'Bearer ...' }
+ */
+export function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  const token = getAuthToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -729,6 +761,7 @@ export const authService = {
   getToken,
   getCredentials,
   clearCredentials,
+  refreshAccessToken,
 };
 
 export default authService;
