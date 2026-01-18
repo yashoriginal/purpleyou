@@ -1,6 +1,6 @@
 export type Product = {
   id: number; // Numeric ID for internal use
-  productId: string; // Original API product ID (UUID or string identifier)
+  productId?: string; // Original API product ID (UUID or string identifier)
   name: string;
   price: number;
   slug: string;
@@ -14,4 +14,6 @@ export type Product = {
   materials?: string;
   careInstructions?: string;
   videoUrl?: string;
+  subcategory?: string;
+  variants?: Array<{ name: string; options: string[] }>;
 };
