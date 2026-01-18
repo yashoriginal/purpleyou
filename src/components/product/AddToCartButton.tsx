@@ -50,7 +50,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
           .map(([key, value]) => `${key}:${value}`)
           .join("|")
       : "";
-    return `${product.id}_${variantString}`;
+    return `${product.productId}_${variantString}`;
   };
 
   const handleAddToCart = async () => {
