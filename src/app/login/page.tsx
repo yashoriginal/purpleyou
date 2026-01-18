@@ -75,27 +75,36 @@ export default function LoginPage() {
       return;
     }
 
-    setIsLoading(true);
     try {
-      const result = await verifyOTP(phoneNumber, otp);
-      if (result.isValid) {
-        // Check if new user
-        if (result.new_user) {
-          // New user - show profile collection screen
-          setIsNewUser(true);
-          setStep("profile");
-          setError("");
-        } else {
-          // Existing user - fetch cart/wishlist and login
-          await handleExistingUserLogin();
-        }
+      const formattedMobile = `+91${phoneNumber}`;
+
+      // Call verifyOTP which will automatically update auth context and save tokens
+      await verifyOTP(formattedMobile, otp);
+
+      // If we reach here, OTP was verified successfully
+      // Now check if user is verified (existing registered user)
+      const currentUser = authService.getCurrentUser();
+      if (currentUser?.isVerified) {
+        // Existing user - fetch cart/wishlist and show success
+        await handleExistingUserLogin();
       } else {
-        setError(result.message);
+        // New user (not yet verified/completed profile) - show profile form
+        // Note: For new registrations, user should register first, not use OTP flow
+        setIsNewUser(false);
+        setStep("success");
       }
     } catch (err) {
-      setError("Failed to verify OTP. Please try again.");
-    } finally {
-      setIsLoading(false);
+      // Error is already set by the context, but we can override if needed
+      if (err instanceof AuthServiceError) {
+        // Check if it's a "not found" error (new user)
+        if (err.statusCode === 401 && err.message.includes("does not exist")) {
+          setError("Mobile number not found. Please register first.");
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError("Failed to verify OTP. Please try again.");
+      }
     }
   };
 
