@@ -393,8 +393,101 @@ export async function register(data: RegisterRequest): Promise<AuthCredentials> 
 }
 
 /**
+ * Send OTP to phone number
+ * @param mobile - Phone number in +91XXXXXXXXXX format
+ * @returns OTP response with status
+ */
+export async function sendOTP(mobile: string): Promise<OTPResponse> {
+  try {
+    validatePhoneNumber(mobile);
+
+    const formattedMobile = formatMobileNumber(mobile);
+
+    const response = await makeRequest<OTPResponse>(`${AUTH_ENDPOINT}/resendOTP`, {
+      method: "POST",
+      body: { mobile: formattedMobile },
+    });
+
+    if (!response.success) {
+      throw new AuthServiceError(
+        response.statusCode || 400,
+        response.error || "Failed to send OTP",
+      );
+    }
+
+    return response;
+  } catch (error) {
+    if (error instanceof AuthServiceError) {
+      throw error;
+    }
+    throw new AuthServiceError(
+      500,
+      error instanceof Error ? error.message : "Failed to send OTP",
+    );
+  }
+}
+
+/**
+ * Verify OTP and login user
+ * @param mobile - Phone number in +91XXXXXXXXXX format
+ * @param otp - 4-digit OTP
+ * @returns User credentials with access and refresh tokens
+ */
+export async function verifyOTP(mobile: string, otp: string): Promise<AuthCredentials> {
+  try {
+    validatePhoneNumber(mobile);
+
+    if (!otp || otp.length !== 4) {
+      throw new Error("OTP must be 4 digits");
+    }
+
+    const formattedMobile = formatMobileNumber(mobile);
+
+    const response = await makeRequest<VerifyOTPResponse | VerifyOTPErrorResponse>(
+      `${AUTH_ENDPOINT}/verifyOTP`,
+      {
+        method: "POST",
+        body: { mobile: formattedMobile, otp },
+      },
+    );
+
+    // Handle error response
+    if (!response.success || !response.data) {
+      throw new AuthServiceError(
+        response.statusCode || 401,
+        (response as VerifyOTPErrorResponse).error || "OTP verification failed",
+      );
+    }
+
+    // Handle success response
+    const successResponse = response as VerifyOTPResponse;
+    const credentials: AuthCredentials = {
+      user: successResponse.data,
+      token: {
+        accessToken: successResponse.accessToken,
+        refreshToken: successResponse.refreshToken,
+        tokenType: "Bearer",
+      },
+    };
+
+    // Save to localStorage
+    saveCredentials(credentials);
+
+    return credentials;
+  } catch (error) {
+    if (error instanceof AuthServiceError) {
+      throw error;
+    }
+    throw new AuthServiceError(
+      500,
+      error instanceof Error ? error.message : "OTP verification failed",
+    );
+  }
+}
+
+/**
  * Login with phone number and OTP
- * Call this after OTP verification
+ * Alias for verifyOTP - same functionality
  */
 export async function login(phoneNumber: string): Promise<AuthCredentials> {
   try {
