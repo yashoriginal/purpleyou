@@ -39,11 +39,36 @@ interface APIResponse {
   success: boolean;
 }
 
+// Default fallback image
+const DEFAULT_IMAGE = "/images/hero1.jpg";
+
+// Validate and normalize image URL
+function validateImageUrl(url?: string): string {
+  if (!url) return DEFAULT_IMAGE;
+
+  // If it's a local path, use it as-is
+  if (url.startsWith("/")) {
+    return url;
+  }
+
+  // If it's a valid external URL, use it
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    try {
+      new URL(url);
+      return url;
+    } catch {
+      return DEFAULT_IMAGE;
+    }
+  }
+
+  return DEFAULT_IMAGE;
+}
+
 // Map external API product to frontend Product type
 function mapAPIProductToProduct(apiProduct: APIProduct): Product {
   // Get primary image or first image
-  const primaryImage = apiProduct.images.find((img) => img.isPrimary) || apiProduct.images[0];
-  const hoverImage = apiProduct.images[1];
+  const primaryImage = apiProduct.images?.find((img) => img.isPrimary) || apiProduct.images?.[0];
+  const hoverImage = apiProduct.images?.[1];
 
   return {
     id: parseInt(apiProduct.productId.replace(/\D/g, ""), 10) || Math.random(),
@@ -51,8 +76,8 @@ function mapAPIProductToProduct(apiProduct: APIProduct): Product {
     price: Math.floor(apiProduct.price),
     comparePrice: apiProduct.comparePrice ? Math.floor(apiProduct.comparePrice) : undefined,
     slug: apiProduct.slug,
-    image: primaryImage?.url || "/images/hero1.jpg",
-    hoverImage: hoverImage?.url,
+    image: validateImageUrl(primaryImage?.url),
+    hoverImage: validateImageUrl(hoverImage?.url),
     category: apiProduct.category?.toLowerCase() || "uncategorized",
     description: apiProduct.description,
     isBestseller: apiProduct.isBestseller ?? false,
