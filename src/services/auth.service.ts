@@ -127,6 +127,44 @@ export interface UpdateUserDetailsResponse {
 }
 
 /**
+ * Login or Register request
+ */
+export interface LoginOrRegisterRequest {
+  mobile: string;
+}
+
+/**
+ * Login or Register response for existing user (returns userId string)
+ */
+export interface LoginOrRegisterExistingUserResponse {
+  data: string; // UUID of existing user
+  success: boolean;
+  error: null;
+  statusCode: 201;
+}
+
+/**
+ * Login or Register response for new user (returns user object)
+ */
+export interface LoginOrRegisterNewUserResponse {
+  data: {
+    mobile: string;
+    isAdmin: boolean;
+    isVerified: boolean;
+  };
+  success: boolean;
+  error: null;
+  statusCode: 201;
+}
+
+/**
+ * Login or Register response (union of both types)
+ */
+export type LoginOrRegisterResponse =
+  | LoginOrRegisterExistingUserResponse
+  | LoginOrRegisterNewUserResponse;
+
+/**
  * Auth token stored in localStorage
  */
 export interface AuthToken {
