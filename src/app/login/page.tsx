@@ -8,7 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { products } from "@/lib/data";
 import { fetchUserCart, fetchUserWishlist } from "@/lib/dummyApi";
-import { AuthServiceError } from "@/services/auth.service";
+import { AuthServiceError, authService } from "@/services/auth.service";
 
 type AuthStep = "phone" | "otp" | "profile" | "success";
 
