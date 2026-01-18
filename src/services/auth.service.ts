@@ -227,6 +227,32 @@ function getAuthToken(): string | null {
   }
 }
 
+/**
+ * Get refresh token
+ */
+function getRefreshToken(): string | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored) as AuthToken;
+    return parsed.refreshToken || null;
+  } catch (error) {
+    console.error("Failed to get refresh token:", error);
+    return null;
+  }
+}
+
+/**
+ * Update stored token (e.g., after refresh)
+ */
+function updateToken(token: AuthToken): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, JSON.stringify(token));
+  } catch (error) {
+    console.error("Failed to update token:", error);
+  }
+}
+
 // ============================================================================
 // HTTP UTILITIES
 // ============================================================================
