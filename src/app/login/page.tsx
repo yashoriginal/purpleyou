@@ -38,7 +38,7 @@ export default function LoginPage() {
     }
   }, [isLoggedIn, router, searchParams]);
 
-  // Handle OTP sending
+  // Handle Login or Register - Initial step
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -52,14 +52,31 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const formattedMobile = `+91${phoneNumber}`;
-      await authService.sendOTP(formattedMobile);
-      setStep("otp");
+      const response = await authService.loginOrRegister(formattedMobile);
+
+      // Check if response data is a string (existing user) or object (new user)
+      if (typeof response.data === "string") {
+        // Existing user - UUID returned, show OTP verification form
+        setIsNewUser(false);
+        setStep("otp");
+      } else if (
+        typeof response.data === "object" &&
+        response.data &&
+        "isVerified" in response.data
+      ) {
+        // New user - user object returned with isVerified=false, show registration form
+        setIsNewUser(true);
+        setStep("profile");
+      } else {
+        throw new Error("Unexpected response format from login endpoint");
+      }
+
       setError("");
     } catch (err) {
       if (err instanceof AuthServiceError) {
         setError(err.message);
       } else {
-        setError("Failed to send OTP. Please try again.");
+        setError("Failed to process login. Please try again.");
       }
     } finally {
       setIsLoading(false);
