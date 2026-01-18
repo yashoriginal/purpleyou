@@ -12,8 +12,8 @@ import {
   verifyOTP,
   fetchUserCart,
   fetchUserWishlist,
-  saveProfile,
 } from "@/lib/dummyApi";
+import { AuthServiceError } from "@/services/auth.service";
 
 type AuthStep = "phone" | "otp" | "profile" | "success";
 
