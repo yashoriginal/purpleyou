@@ -1,61 +1,170 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { authService, AuthUser, RegisterRequest, AuthServiceError } from "@/services/auth.service";
 
 export interface User {
   phoneNumber: string;
   name?: string;
   pincode?: string;
+  userName?: string;
+  mobile?: string;
+  address?: string;
+  area?: string;
+  latitude?: string;
+  longitude?: string;
+  isAdmin?: boolean;
+  isVerified?: boolean;
 }
 
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
-  login: (user: User) => void;
+  isLoading: boolean;
+  error: string | null;
+  register: (data: RegisterRequest) => Promise<void>;
+  login: (phoneNumber: string) => Promise<void>;
   logout: () => void;
+  clearError: () => void;
+  restoreSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Convert AuthUser from API to our User interface
+ */
+function convertAuthUserToUser(authUser: AuthUser): User {
+  return {
+    phoneNumber: authUser.mobile,
+    name: authUser.userName,
+    userName: authUser.userName,
+    mobile: authUser.mobile,
+    pincode: authUser.pincode,
+    address: authUser.address,
+    area: authUser.area,
+    latitude: authUser.latitude,
+    longitude: authUser.longitude,
+    isAdmin: authUser.isAdmin,
+    isVerified: authUser.isVerified,
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const login = (userData: User) => {
-    setIsLoggedIn(true);
-    setUser(userData);
+  /**
+   * Restore session from localStorage on mount
+   */
+  useEffect(() => {
+    restoreSession();
+  }, []);
 
-    // TODO: API Integration - Save authentication token
-    // Once you have a backend:
-    // const response = await fetch('/api/auth/login', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     phoneNumber: userData.phoneNumber,
-    //   }),
-    // });
-    // const { token, user } = await response.json();
-    // localStorage.setItem('authToken', token);
-    // setUser(user);
+  /**
+   * Restore existing session from localStorage
+   */
+  const restoreSession = () => {
+    try {
+      const currentUser = authService.getCurrentUser();
+      if (currentUser) {
+        setUser(convertAuthUserToUser(currentUser));
+        setIsLoggedIn(true);
+      }
+    } catch (err) {
+      console.error("Failed to restore session:", err);
+      // Clear corrupted session
+      authService.logout();
+    }
   };
 
-  const logout = () => {
-    setIsLoggedIn(false);
-    setUser(null);
+  /**
+   * Register a new user
+   */
+  const register = async (data: RegisterRequest) => {
+    setIsLoading(true);
+    setError(null);
 
-    // TODO: API Integration - Clear authentication token
-    // await fetch('/api/auth/logout', {
-    //   method: 'POST',
-    //   headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
-    // });
-    // localStorage.removeItem('authToken');
+    try {
+      const credentials = await authService.register(data);
+      setUser(convertAuthUserToUser(credentials.user));
+      setIsLoggedIn(true);
+    } catch (err) {
+      const errorMessage = err instanceof AuthServiceError
+        ? err.message
+        : err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again.";
+
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Login user
+   */
+  const login = async (phoneNumber: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await authService.login(phoneNumber);
+      const currentUser = authService.getCurrentUser();
+      if (currentUser) {
+        setUser(convertAuthUserToUser(currentUser));
+        setIsLoggedIn(true);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof AuthServiceError
+        ? err.message
+        : err instanceof Error
+          ? err.message
+          : "Login failed. Please try again.";
+
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Logout user
+   */
+  const logout = () => {
+    setIsLoading(true);
+    try {
+      authService.logout();
+      setIsLoggedIn(false);
+      setUser(null);
+      setError(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Clear error message
+   */
+  const clearError = () => {
+    setError(null);
   };
 
   const value: AuthContextType = {
     isLoggedIn,
     user,
+    isLoading,
+    error,
+    register,
     login,
     logout,
+    clearError,
+    restoreSession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
