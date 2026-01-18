@@ -224,8 +224,8 @@ export default function LoginPage() {
         );
       });
 
-      // Call the auth service register function with full profile data
-      await authService.register({
+      // Call context's register function which updates isLoggedIn and saves credentials
+      await contextRegister({
         userName: name,
         mobile: `+91${phoneNumber}`,
         latitude: position.latitude.toString(),
@@ -235,7 +235,6 @@ export default function LoginPage() {
         area: area,
       });
 
-      setStep("success");
       setError("");
     } catch (err) {
       const errorMessage =
