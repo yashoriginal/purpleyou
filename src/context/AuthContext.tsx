@@ -7,6 +7,7 @@ import {
   RegisterRequest,
   AuthServiceError,
   OTPResponse,
+  UpdateUserDetailsRequest,
 } from "@/services/auth.service";
 
 export interface User {
