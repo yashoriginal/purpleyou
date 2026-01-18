@@ -93,7 +93,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const token = localStorage.getItem("auth_token");
       if (token) {
         // Try to extract userId from the auth storage
-        const userStr = localStorage.getItem("current_user");
+        const userStr = localStorage.getItem("auth_user");
         if (userStr) {
           const user = JSON.parse(userStr);
           const id = user._id || user.id || user.userId;
