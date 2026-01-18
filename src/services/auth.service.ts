@@ -516,6 +516,76 @@ export async function register(data: RegisterRequest): Promise<AuthCredentials> 
 }
 
 /**
+ * Update existing user details
+ * @param data - User details to update
+ * @returns Updated user ID
+ */
+export async function updateUserDetails(
+  data: UpdateUserDetailsRequest,
+): Promise<string> {
+  try {
+    // Validate input
+    validateUpdateUserInput(data);
+
+    // Format mobile number
+    const formattedData: UpdateUserDetailsRequest = {
+      ...data,
+      mobile: formatMobileNumber(data.mobile),
+    };
+
+    // Call API - requires authentication
+    const response = await makeRequest<UpdateUserDetailsResponse>(
+      "/users/update-user-details",
+      {
+        method: "POST",
+        body: formattedData,
+        requiresAuth: true,
+      },
+    );
+
+    // Validate response
+    if (!response.success || !response.data) {
+      throw new AuthServiceError(
+        response.statusCode || 400,
+        response.error || "Failed to update user details",
+      );
+    }
+
+    // Update current user in localStorage with new data
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      const updatedUser: AuthUser = {
+        ...currentUser,
+        userName: data.userName,
+        mobile: formattedData.mobile,
+        address: data.address,
+        pincode: data.pincode,
+        latitude: data.latitude,
+        longitude: data.longitude,
+      };
+      saveCredentials({
+        user: updatedUser,
+        token: {
+          accessToken: getAuthToken() || "",
+          refreshToken: getRefreshToken() || "",
+          tokenType: "Bearer",
+        },
+      });
+    }
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AuthServiceError) {
+      throw error;
+    }
+    throw new AuthServiceError(
+      500,
+      error instanceof Error ? error.message : "Failed to update user details",
+    );
+  }
+}
+
+/**
  * Send OTP to phone number
  * @param mobile - Phone number in +91XXXXXXXXXX format
  * @returns OTP response with status
