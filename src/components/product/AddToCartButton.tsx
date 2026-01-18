@@ -13,13 +13,14 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const router = useRouter();
-  const { addToCart, removeFromCart, items } = useCart();
+  const { addToCart, removeFromCart, items, isLoading, error } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [selectedVariants, setSelectedVariants] = useState<
     Record<string, string>
   >({});
   const [isInCart, setIsInCart] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   const isWishlisted = isInWishlist(product.id);
 
   // Check if product is in cart
