@@ -137,26 +137,21 @@ export default function RazorpayCheckout({
         handler: async (response: any) => {
           // Step 3: Verify payment on backend
           try {
-            const verifyResponse = await fetch(
-              "/api/razorpay/verify-payment",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  orderId: order.id,
-                  paymentId: response.razorpay_payment_id,
-                  signature: response.razorpay_signature,
-                }),
-              }
-            );
+            const verifyResponse = await fetch("/api/razorpay/verify-payment", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                orderId: order.id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+              }),
+            });
 
             if (!verifyResponse.ok) {
               const errorData = await verifyResponse.json();
-              throw new Error(
-                errorData.error || "Payment verification failed"
-              );
+              throw new Error(errorData.error || "Payment verification failed");
             }
 
             // Payment successful
@@ -216,7 +211,7 @@ export default function RazorpayCheckout({
 
       razorpay.on("payment.failed", (response: any) => {
         setError(
-          `Payment failed: ${response.error?.description || "Unknown error"}`
+          `Payment failed: ${response.error?.description || "Unknown error"}`,
         );
         setIsProcessing(false);
       });
@@ -224,7 +219,9 @@ export default function RazorpayCheckout({
       razorpay.open();
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Payment failed. Please try again.";
+        err instanceof Error
+          ? err.message
+          : "Payment failed. Please try again.";
       setError(errorMessage);
       setIsProcessing(false);
     }
@@ -362,7 +359,9 @@ export default function RazorpayCheckout({
         }`}
       >
         <span className="text-base">🔒</span>
-        {isProcessing ? "Processing Payment..." : `Pay ₹${total.toLocaleString("en-IN")}`}
+        {isProcessing
+          ? "Processing Payment..."
+          : `Pay ₹${total.toLocaleString("en-IN")}`}
       </button>
 
       {/* Security Note */}
