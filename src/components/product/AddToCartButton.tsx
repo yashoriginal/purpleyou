@@ -31,10 +31,11 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
           .map(([key, value]) => `${key}:${value}`)
           .join("|")
       : "";
-    const itemId = `${product.productId}_${variantString}`;
+    const productId = product.productId || String(product.id);
+    const itemId = `${productId}_${variantString}`;
     const productInCart = items.some((item) => item.id === itemId);
     setIsInCart(productInCart);
-  }, [items, product.productId, selectedVariants]);
+  }, [items, product.productId, product.id, selectedVariants]);
 
   const handleVariantSelect = (variantName: string, option: string) => {
     setSelectedVariants((prev) => ({
