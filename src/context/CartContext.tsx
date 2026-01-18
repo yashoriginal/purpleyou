@@ -217,7 +217,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     selectedVariants?: Record<string, string>,
     quantity: number = 1,
   ) => {
-    if (!userId) {
+    // Get userId from state or directly from localStorage if not yet synced
+    let currentUserId = userId;
+    if (!currentUserId) {
+      try {
+        const userStr = localStorage.getItem("auth_user");
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          currentUserId = user._id || user.id || user.userId;
+        }
+      } catch (err) {
+        console.error("Failed to get userId from localStorage:", err);
+      }
+    }
+
+    if (!currentUserId) {
       setError("Please log in to add items to cart");
       return;
     }
@@ -228,7 +242,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       // Call API to add item
       const cartData = await cartService.addToCart(
-        userId,
+        currentUserId,
         product.id.toString(),
         quantity,
         product.price,
