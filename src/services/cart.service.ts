@@ -96,7 +96,7 @@ async function makeCartRequest<T = unknown>(
     }));
 
     throw new Error(
-      errorData.error || `Cart API error: ${response.statusCode}`,
+      errorData.error || `Cart API error: ${response.status}`,
     );
   }
 
