@@ -36,7 +36,6 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   register: (data: RegisterRequest) => Promise<void>;
-  sendOTP: (mobile: string) => Promise<OTPResponse>;
   verifyOTP: (mobile: string, otp: string) => Promise<void>;
   login: (phoneNumber: string) => Promise<void>;
   updateUserDetails: (data: UpdateUserDetailsRequest) => Promise<string>;
@@ -93,31 +92,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Failed to restore session:", err);
       // Clear corrupted session
       authService.logout();
-    }
-  };
-
-  /**
-   * Send OTP to phone number
-   */
-  const sendOTP = async (mobile: string): Promise<OTPResponse> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await authService.sendOTP(mobile);
-      return response;
-    } catch (err) {
-      const errorMessage =
-        err instanceof AuthServiceError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : "Failed to send OTP. Please try again.";
-
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
