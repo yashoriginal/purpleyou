@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { Product } from "@/types/product";
 import * as wishlistService from "@/services/wishlist.service";
-import { useAuth } from "@/context/AuthContext";
 
 export interface WishlistItem {
   productId: string;
