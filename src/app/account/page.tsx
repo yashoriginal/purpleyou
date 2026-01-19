@@ -12,6 +12,8 @@ import {
 } from "react-icons/hi";
 import EditProfileForm from "@/components/profile/EditProfileForm";
 import * as orderService from "@/services/order.service";
+import * as authService from "@/services/auth.service";
+import { AddressObject } from "@/services/auth.service";
 
 // Dummy data types
 interface Order {
