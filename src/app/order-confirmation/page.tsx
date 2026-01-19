@@ -204,19 +204,27 @@ function OrderConfirmationContent() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Link
-            href="/account"
-            className="flex-1 text-center px-8 py-4 bg-[#5540b7] text-white font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors rounded-lg"
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={() => router.push("/")}
+            className="w-full text-center px-8 py-4 bg-[#5540b7] text-white font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors rounded-lg"
           >
-            View Your Orders
-          </Link>
-          <Link
-            href="/collections/all"
-            className="flex-1 text-center px-8 py-4 border-2 border-[#e6e0da] text-[#111111] font-semibold uppercase tracking-wider hover:border-[#5540b7] hover:bg-[#f8f5f2] transition-colors rounded-lg"
-          >
-            Continue Shopping
-          </Link>
+            Continue to Home
+          </button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              href="/account"
+              className="flex-1 text-center px-8 py-4 border-2 border-[#e6e0da] text-[#111111] font-semibold uppercase tracking-wider hover:border-[#5540b7] hover:bg-[#f8f5f2] transition-colors rounded-lg"
+            >
+              View Your Orders
+            </Link>
+            <Link
+              href="/collections/all"
+              className="flex-1 text-center px-8 py-4 border-2 border-[#e6e0da] text-[#111111] font-semibold uppercase tracking-wider hover:border-[#5540b7] hover:bg-[#f8f5f2] transition-colors rounded-lg"
+            >
+              Continue Shopping
+            </Link>
+          </div>
         </div>
 
         {/* Support Section */}

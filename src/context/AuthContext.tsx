@@ -88,6 +88,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (currentUser) {
         setUser(convertAuthUserToUser(currentUser));
         setIsLoggedIn(true);
+
+        // Dispatch custom event to notify other contexts about session restore
+        window.dispatchEvent(
+          new CustomEvent("userLoggedIn", {
+            detail: { userId: currentUser._id || currentUser.id },
+          }),
+        );
       }
     } catch (err) {
       console.error("Failed to restore session:", err);
@@ -107,6 +114,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const credentials = await authService.verifyOTP(mobile, otp);
       setUser(convertAuthUserToUser(credentials.user));
       setIsLoggedIn(true);
+
+      // Dispatch custom event to notify other contexts (e.g., WishlistContext) about login
+      window.dispatchEvent(
+        new CustomEvent("userLoggedIn", {
+          detail: { userId: credentials.user._id || credentials.user.id },
+        }),
+      );
     } catch (err) {
       const errorMessage =
         err instanceof AuthServiceError
@@ -133,6 +147,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const credentials = await authService.register(data);
       setUser(convertAuthUserToUser(credentials.user));
       setIsLoggedIn(true);
+
+      // Dispatch custom event to notify other contexts about login
+      window.dispatchEvent(
+        new CustomEvent("userLoggedIn", {
+          detail: { userId: credentials.user._id || credentials.user.id },
+        }),
+      );
     } catch (err) {
       const errorMessage =
         err instanceof AuthServiceError
@@ -161,6 +182,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (currentUser) {
         setUser(convertAuthUserToUser(currentUser));
         setIsLoggedIn(true);
+
+        // Dispatch custom event to notify other contexts (e.g., CartContext) about login
+        window.dispatchEvent(
+          new CustomEvent("userLoggedIn", {
+            detail: { userId: currentUser._id || currentUser.id },
+          }),
+        );
       }
     } catch (err) {
       const errorMessage =
@@ -221,6 +249,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoggedIn(false);
       setUser(null);
       setError(null);
+
+      // Dispatch custom event to notify other contexts about logout
+      window.dispatchEvent(new CustomEvent("userLoggedOut"));
     } finally {
       setIsLoading(false);
     }

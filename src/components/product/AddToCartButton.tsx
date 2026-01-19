@@ -14,14 +14,20 @@ interface AddToCartButtonProps {
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const router = useRouter();
   const { addToCart, removeFromCart, items, isLoading, error } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    isLoading: wishlistLoading,
+  } = useWishlist();
   const [selectedVariants, setSelectedVariants] = useState<
     Record<string, string>
   >({});
   const [isInCart, setIsInCart] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const isWishlisted = isInWishlist(product.id);
+  const [wishlistError, setWishlistError] = useState<string | null>(null);
+  const isWishlisted = isInWishlist(product.productId || String(product.id));
 
   // Check if product is in cart
   useEffect(() => {
@@ -194,20 +200,40 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
 
       {/* Wishlist Button */}
       <div className="mt-6 pt-6 border-t border-[#e6e0da]">
+        {wishlistError && (
+          <div className="mb-3 bg-red-50 border border-red-200 rounded p-2 text-xs text-red-700">
+            {wishlistError}
+          </div>
+        )}
         <button
-          onClick={() => {
-            if (isWishlisted) {
-              removeFromWishlist(product.id);
-            } else {
-              addToWishlist(product);
+          onClick={async () => {
+            setWishlistError(null);
+            const productId = product.productId || String(product.id);
+            try {
+              if (isWishlisted) {
+                await removeFromWishlist(productId);
+              } else {
+                await addToWishlist(product);
+              }
+            } catch (err) {
+              const errorMsg =
+                err instanceof Error
+                  ? err.message
+                  : "Failed to update wishlist";
+              setWishlistError(errorMsg);
             }
           }}
-          className="flex items-center justify-center gap-2 w-full text-sm font-medium text-[#6b6b6b] hover:text-[#5540b7] transition-colors"
+          disabled={wishlistLoading}
+          className="flex items-center justify-center gap-2 w-full text-sm font-medium text-[#6b6b6b] hover:text-[#5540b7] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <HiOutlineHeart
             className={`w-5 h-5 ${isWishlisted ? "fill-current text-[#5540b7]" : ""}`}
           />
-          {isWishlisted ? "Added to Wishlist" : "Add to Wishlist"}
+          {wishlistLoading
+            ? "Processing..."
+            : isWishlisted
+              ? "Added to Wishlist"
+              : "Add to Wishlist"}
         </button>
       </div>
     </>

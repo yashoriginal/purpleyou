@@ -163,28 +163,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Monitor for auth changes (login/logout) and reload cart accordingly
   useEffect(() => {
-    const checkAuthChanges = setInterval(() => {
+    // Handle user login event
+    const handleUserLoggedIn = () => {
       try {
         const userStr = localStorage.getItem("auth_user");
-        const currentUserId = userStr
-          ? JSON.parse(userStr)._id || JSON.parse(userStr).id
-          : null;
-
-        if (currentUserId && currentUserId !== userId) {
-          // User logged in
-          setUserId(currentUserId);
-        } else if (!currentUserId && userId) {
-          // User logged out
-          setUserId(null);
-          setItems([]);
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          const newUserId = user._id || user.id || user.userId;
+          if (newUserId) {
+            setUserId(newUserId);
+          }
         }
       } catch (err) {
-        console.error("Error checking auth changes:", err);
+        console.error("Error handling login event:", err);
       }
-    }, 1000); // Check every second
+    };
 
-    return () => clearInterval(checkAuthChanges);
-  }, [userId]);
+    // Handle user logout event
+    const handleUserLoggedOut = () => {
+      setUserId(null);
+      setItems([]);
+      setError(null);
+    };
+
+    // Listen for event-based login/logout
+    window.addEventListener("userLoggedIn", handleUserLoggedIn);
+    window.addEventListener("userLoggedOut", handleUserLoggedOut);
+
+    return () => {
+      window.removeEventListener("userLoggedIn", handleUserLoggedIn);
+      window.removeEventListener("userLoggedOut", handleUserLoggedOut);
+    };
+  }, []);
 
   // Fetch cart from API when userId changes
   useEffect(() => {
@@ -208,12 +218,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
    * Load cart items from API
    */
   async function loadCart() {
-    if (!userId) return;
+    if (!userId) {
+      console.debug("loadCart: no userId, skipping");
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
+      console.debug(`Loading cart for userId: ${userId}`);
       const cartData = await cartService.getCart(userId);
 
       // Create a map of products from the cart data
@@ -243,6 +257,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         };
       });
 
+      console.debug(`Cart loaded successfully: ${cartItems.length} items`);
       setItems(cartItems);
     } catch (err) {
       const errorMessage =

@@ -1,26 +1,20 @@
 import Hero from "@/components/Hero";
 import ProductGrid from "@/components/product/ProductGrid";
-import { products } from "@/lib/data";
 import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
 import { generateHomeMetadata, generateOrganizationSchema } from "@/lib/seo";
 import Script from "next/script";
+import { getAllProducts } from "@/services/product.service";
 
 export const metadata: Metadata = generateHomeMetadata();
 
-// ISR: Revalidate every 24 hours (price updates, new products, etc.)
-export const revalidate = 86400;
+// ISR: Revalidate every 10 minutes (to match API cache duration)
+export const revalidate = 600;
 
-export default function HomePage() {
-  const bestsellers = products.filter((p) => p.isBestseller).slice(0, 6);
-  const rings = products.filter((p) => p.category === "rings").slice(0, 1);
-  const necklaces = products
-    .filter((p) => p.category === "necklaces")
-    .slice(0, 1);
-  const bracelets = products
-    .filter((p) => p.category === "bracelets")
-    .slice(0, 1);
+export default async function HomePage() {
+  const apiProducts = await getAllProducts();
+  const bestsellers = apiProducts.filter((p) => p.isBestseller).slice(0, 6);
 
   const organizationSchema = generateOrganizationSchema();
 
@@ -104,41 +98,11 @@ export default function HomePage() {
             Discover the jewelry pieces loved by our customers.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {bestsellers.map((product) => (
-            <div key={product.id} className="bg-white p-4">
-              <div className="relative overflow-hidden bg-white aspect-[3/4] mb-4">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                />
-                {product.isBestseller && (
-                  <div className="absolute top-3 right-3 bg-[#D3C9FF] text-[#111111] text-xs font-semibold px-3 py-1 rounded-full">
-                    BESTSELLER
-                  </div>
-                )}
-              </div>
-              <h3 className="text-sm font-medium text-[#111111]">
-                {product.name}
-              </h3>
-              <div className="mt-2 flex gap-2">
-                <span className="text-lg font-medium text-[#111111]">
-                  ₹{product.price.toLocaleString("en-IN")}
-                </span>
-                {product.comparePrice && (
-                  <span className="text-sm text-[#6b6b6b] line-through">
-                    ₹{product.comparePrice.toLocaleString("en-IN")}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-[#6b6b6b] mt-2 line-clamp-2">
-                {product.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        {bestsellers.length > 0 ? (
+          <ProductGrid products={bestsellers} />
+        ) : (
+          <p className="text-center text-[#6b6b6b]">No products available</p>
+        )}
       </section>
 
       {/* Brand Story Section */}

@@ -136,6 +136,36 @@ async function makeOrderRequest<T = unknown>(
 // ============================================================================
 
 /**
+ * Get all orders for a specific user
+ * GET /api/v1/orders/user/{userId}
+ */
+export interface UserOrdersResponse {
+  orders: OrderResponse[];
+  totalOrders: number;
+}
+
+export async function getUserOrders(userId: string): Promise<OrderResponse[]> {
+  try {
+    const data = await makeOrderRequest<UserOrdersResponse>(
+      `/user/${userId}`,
+    );
+    return data.orders || [];
+  } catch (error) {
+    // If the endpoint returns a single order instead of an array, handle it
+    try {
+      const singleOrder = await makeOrderRequest<OrderResponse>(
+        `/user/${userId}`,
+      );
+      return [singleOrder];
+    } catch {
+      // If that also fails, return empty array
+      console.error("Failed to fetch user orders:", error);
+      return [];
+    }
+  }
+}
+
+/**
  * Create a new order
  * POST /api/v1/orders/
  */

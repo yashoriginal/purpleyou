@@ -11,6 +11,7 @@ import {
   HiOutlineChevronRight,
 } from "react-icons/hi";
 import EditProfileForm from "@/components/profile/EditProfileForm";
+import * as orderService from "@/services/order.service";
 
 // Dummy data types
 interface Order {
@@ -190,6 +191,51 @@ export default function AccountPage() {
   const [ordersPage, setOrdersPage] = useState(1);
   const [wishlistPage, setWishlistPage] = useState(1);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
+
+  // Fetch user orders from API
+  useEffect(() => {
+    if (isLoggedIn && user?.userId) {
+      loadUserOrders(user.userId);
+    }
+  }, [isLoggedIn, user?.userId]);
+
+  const loadUserOrders = async (userId: string) => {
+    setOrdersLoading(true);
+    setOrdersError(null);
+
+    try {
+      const apiOrders = await orderService.getUserOrders(userId);
+
+      // Map API orders to the Order interface
+      const mappedOrders: Order[] = apiOrders.map((apiOrder) => ({
+        id: apiOrder.orderId,
+        orderNumber: apiOrder.orderId.substring(0, 20), // Use order ID as order number
+        date: apiOrder.createdAt,
+        total: apiOrder.orderDetails.totalPrice,
+        status: (apiOrder.status.toLowerCase() as any) || "confirmed",
+        items: apiOrder.items.map((item) => ({
+          productName: `Product ${item.productId.substring(0, 8)}...`,
+          quantity: item.quantity,
+          price: item.pricePerUnit,
+          image: "/images/hero1.jpg",
+        })),
+      }));
+
+      setOrders(mappedOrders);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to load orders";
+      setOrdersError(errorMsg);
+      console.error("Failed to load orders:", error);
+      // Fall back to empty orders (not dummy data)
+      setOrders([]);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -204,10 +250,10 @@ export default function AccountPage() {
   };
 
   // Pagination calculations
-  const totalOrderPages = Math.ceil(DUMMY_ORDERS.length / ITEMS_PER_PAGE);
+  const totalOrderPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
   const totalWishlistPages = Math.ceil(DUMMY_WISHLIST.length / ITEMS_PER_PAGE);
 
-  const paginatedOrders = DUMMY_ORDERS.slice(
+  const paginatedOrders = orders.slice(
     (ordersPage - 1) * ITEMS_PER_PAGE,
     ordersPage * ITEMS_PER_PAGE,
   );
@@ -340,7 +386,30 @@ export default function AccountPage() {
                     Your Orders
                   </h2>
 
-                  {DUMMY_ORDERS.length === 0 ? (
+                  {ordersLoading ? (
+                    <div className="text-center py-12">
+                      <div className="mb-4 flex justify-center">
+                        <div className="w-10 h-10 border-4 border-[#e6e0da] border-t-[#5540b7] rounded-full animate-spin" />
+                      </div>
+                      <p className="text-[#6b6b6b] font-light">
+                        Loading orders...
+                      </p>
+                    </div>
+                  ) : ordersError ? (
+                    <div className="text-center py-12">
+                      <p className="text-red-600 font-light mb-4">
+                        {ordersError}
+                      </p>
+                      <button
+                        onClick={() =>
+                          user?.userId && loadUserOrders(user.userId)
+                        }
+                        className="text-[#5540b7] font-medium hover:underline"
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  ) : orders.length === 0 ? (
                     <div className="text-center py-12">
                       <p className="text-[#6b6b6b] font-light mb-4">
                         You haven't placed any orders yet
