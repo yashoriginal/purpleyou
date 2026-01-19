@@ -105,6 +105,50 @@ export default function CheckoutPage() {
     };
   }, []);
 
+  // Load saved addresses
+  useEffect(() => {
+    loadAddresses();
+  }, []);
+
+  const loadAddresses = async () => {
+    setAddressesLoading(true);
+    try {
+      const userStr = localStorage.getItem("auth_user");
+      if (!userStr) return;
+
+      const user = JSON.parse(userStr);
+      const userId = user._id || user.id || user.userId;
+      if (!userId) return;
+
+      const addresses = await authService.getAddresses(userId);
+      setSavedAddresses(addresses);
+    } catch (error) {
+      console.error("Failed to load addresses:", error);
+    } finally {
+      setAddressesLoading(false);
+    }
+  };
+
+  const handleSelectAddress = (savedAddress: AddressObject) => {
+    setSelectedAddressId(savedAddress.addressId || null);
+    setShowNewAddressForm(false);
+
+    // Parse building and street from the address string
+    // For now, we'll split by comma
+    const addressParts = savedAddress.address.split(",").map(p => p.trim());
+
+    setAddress({
+      fullName: "",
+      mobileNumber: "",
+      building: addressParts[0] || savedAddress.address,
+      street: addressParts[1] || "",
+      city: savedAddress.area,
+      state: "",
+      pinCode: savedAddress.pincode,
+      email: "",
+    });
+  };
+
   const validateForm = () => {
     const newErrors: Partial<AddressForm> = {};
 
