@@ -137,15 +137,20 @@ export default function CheckoutPage() {
     // For now, we'll split by comma
     const addressParts = savedAddress.address.split(",").map(p => p.trim());
 
+    // Get user data for email and phone
+    const userStr = localStorage.getItem("auth_user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const userPhone = user?.mobile ? user.mobile.replace(/\D/g, "").slice(-10) : "";
+
     setAddress({
-      fullName: "",
-      mobileNumber: "",
+      fullName: user?.userName || user?.name || "",
+      mobileNumber: userPhone,
       building: addressParts[0] || savedAddress.address,
       street: addressParts[1] || "",
       city: savedAddress.area,
       state: "",
       pinCode: savedAddress.pincode,
-      email: "",
+      email: user?.email || "",
     });
   };
 
