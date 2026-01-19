@@ -45,9 +45,7 @@ function downloadImage(url, filePath) {
         if (response.statusCode !== 200) {
           file.destroy();
           reject(
-            new Error(
-              `HTTP ${response.statusCode}: ${response.statusMessage}`
-            )
+            new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`),
           );
           return;
         }
@@ -100,9 +98,7 @@ async function downloadImagesForCategory(category, queries) {
       const imageUrl = getUnsplashUrl(query);
       await downloadImage(imageUrl, filePath);
     } catch (error) {
-      console.error(
-        `  ✗ Failed to download ${fileName}: ${error.message}`
-      );
+      console.error(`  ✗ Failed to download ${fileName}: ${error.message}`);
     }
 
     // Add delay between requests to avoid rate limiting
@@ -114,9 +110,7 @@ async function downloadImagesForCategory(category, queries) {
 
 async function main() {
   console.log("🎨 Downloading jewelry product images...");
-  console.log(
-    "   Using Unsplash (free stock photography)\n"
-  );
+  console.log("   Using Unsplash (free stock photography)\n");
 
   try {
     // Download images for each category

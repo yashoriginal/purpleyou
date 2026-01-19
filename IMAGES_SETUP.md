@@ -9,10 +9,11 @@ This guide explains how to download and manage product images for your Purple Yo
 Run the image download script:
 
 ```bash
-npm run download-images 
+npm run download-images
 ```
 
 This will download **12 random jewelry images** from Unsplash and organize them into categories:
+
 - **3 necklace images** → `necklace-1.jpg`, `necklace-2.jpg`, `necklace-3.jpg`
 - **3 ring images** → `ring-1.jpg`, `ring-2.jpg`, `ring-3.jpg`
 - **3 bracelet images** → `bracelet-1.jpg`, `bracelet-2.jpg`, `bracelet-3.jpg`
@@ -112,7 +113,7 @@ import Image from "next/image";
 export function ProductCard({ product }) {
   return (
     <Image
-      src={product.image}  // e.g., "/images/products/necklace-1.jpg"
+      src={product.image} // e.g., "/images/products/necklace-1.jpg"
       alt={product.name}
       width={600}
       height={600}
