@@ -182,6 +182,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (currentUser) {
         setUser(convertAuthUserToUser(currentUser));
         setIsLoggedIn(true);
+
+        // Dispatch custom event to notify other contexts (e.g., CartContext) about login
+        window.dispatchEvent(
+          new CustomEvent("userLoggedIn", {
+            detail: { userId: currentUser._id || currentUser.id },
+          }),
+        );
       }
     } catch (err) {
       const errorMessage =
