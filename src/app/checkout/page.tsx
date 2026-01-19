@@ -154,20 +154,28 @@ export default function CheckoutPage() {
     });
   };
 
-  const validateForm = () => {
+  const validateForm = (isSelectedAddress: boolean = false) => {
     const newErrors: Partial<AddressForm> = {};
 
-    if (!address.fullName.trim()) newErrors.fullName = "Name required";
-    if (address.mobileNumber.length !== 10)
-      newErrors.mobileNumber = "10-digit mobile required";
-    if (!address.building.trim())
-      newErrors.building = "Building/House required";
-    if (!address.street.trim()) newErrors.street = "Street/Locality required";
-    if (!address.city.trim()) newErrors.city = "City required";
-    if (!address.state) newErrors.state = "State required";
-    if (address.pinCode.length !== 6)
-      newErrors.pinCode = "6-digit PIN code required";
-    if (!address.email.includes("@")) newErrors.email = "Valid email required";
+    // For selected saved addresses, only validate essential fields
+    if (isSelectedAddress) {
+      if (address.mobileNumber.length !== 10)
+        newErrors.mobileNumber = "10-digit mobile required";
+      if (!address.pinCode) newErrors.pinCode = "PIN code required";
+    } else {
+      // For new address entry, validate all fields
+      if (!address.fullName.trim()) newErrors.fullName = "Name required";
+      if (address.mobileNumber.length !== 10)
+        newErrors.mobileNumber = "10-digit mobile required";
+      if (!address.building.trim())
+        newErrors.building = "Building/House required";
+      if (!address.street.trim()) newErrors.street = "Street/Locality required";
+      if (!address.city.trim()) newErrors.city = "City required";
+      if (!address.state) newErrors.state = "State required";
+      if (address.pinCode.length !== 6)
+        newErrors.pinCode = "6-digit PIN code required";
+      if (!address.email.includes("@")) newErrors.email = "Valid email required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
