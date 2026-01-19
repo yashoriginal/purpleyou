@@ -662,25 +662,50 @@ export default function AccountPage() {
                     <h2 className="text-2xl font-light text-[#111111] tracking-wide">
                       Saved Addresses
                     </h2>
-                    <button className="px-4 py-2 bg-[#5540b7] text-white text-sm font-medium rounded hover:bg-[#3d2d7f] transition-colors">
+                    <button
+                      onClick={openAddForm}
+                      className="px-4 py-2 bg-[#5540b7] text-white text-sm font-medium rounded hover:bg-[#3d2d7f] transition-colors">
                       Add New Address
                     </button>
                   </div>
 
-                  {DUMMY_ADDRESSES.length === 0 ? (
+                  {addressesLoading ? (
+                    <div className="text-center py-12">
+                      <div className="mb-4 flex justify-center">
+                        <div className="w-10 h-10 border-4 border-[#e6e0da] border-t-[#5540b7] rounded-full animate-spin" />
+                      </div>
+                      <p className="text-[#6b6b6b] font-light">
+                        Loading addresses...
+                      </p>
+                    </div>
+                  ) : addressesError ? (
+                    <div className="text-center py-12">
+                      <p className="text-red-600 font-light mb-4">
+                        {addressesError}
+                      </p>
+                      <button
+                        onClick={() => user?.userId && loadAddresses(user.userId)}
+                        className="text-[#5540b7] font-medium hover:underline"
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  ) : addresses.length === 0 ? (
                     <div className="text-center py-12">
                       <p className="text-[#6b6b6b] font-light mb-4">
                         No addresses saved yet
                       </p>
-                      <button className="text-[#5540b7] font-medium hover:underline">
+                      <button
+                        onClick={openAddForm}
+                        className="text-[#5540b7] font-medium hover:underline">
                         Add Your First Address
                       </button>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {DUMMY_ADDRESSES.map((address) => (
+                      {addresses.map((address) => (
                         <div
-                          key={address.id}
+                          key={address.addressId}
                           className={`border-2 rounded-lg p-6 ${
                             address.isDefault
                               ? "border-[#5540b7] bg-[#D3C9FF]/5"
@@ -693,22 +718,26 @@ export default function AccountPage() {
                             </span>
                           )}
                           <h3 className="text-lg font-medium text-[#111111] mb-3">
-                            {address.fullName}
+                            {address.label}
                           </h3>
                           <p className="text-sm text-[#6b6b6b] mb-1">
-                            {address.street}
+                            {address.address}
                           </p>
                           <p className="text-sm text-[#6b6b6b] mb-1">
-                            {address.city}, {address.state} {address.pinCode}
+                            {address.area}, {address.pincode}
                           </p>
                           <p className="text-sm text-[#6b6b6b] mb-4">
-                            Phone: {address.phone}
+                            Coords: {address.latitude}, {address.longitude}
                           </p>
                           <div className="flex gap-4 text-sm">
-                            <button className="text-[#5540b7] font-medium hover:underline">
+                            <button
+                              onClick={() => openEditForm(address)}
+                              className="text-[#5540b7] font-medium hover:underline">
                               Edit
                             </button>
-                            <button className="text-red-600 font-medium hover:underline">
+                            <button
+                              onClick={() => address.addressId && handleDeleteAddress(address.addressId)}
+                              className="text-red-600 font-medium hover:underline">
                               Delete
                             </button>
                           </div>
