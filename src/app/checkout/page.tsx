@@ -491,7 +491,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <form onSubmit={handleAddressSubmit} className="space-y-6">
-                {/* Full Name */}
+                    {/* Full Name */}
                 <div>
                   <label className="block text-sm font-medium text-[#111111] mb-2">
                     Full Name *
