@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import { generateHomeMetadata, generateOrganizationSchema } from "@/lib/seo";
 import Script from "next/script";
 import { getAllProducts } from "@/services/product.service";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 export const metadata: Metadata = generateHomeMetadata();
 
