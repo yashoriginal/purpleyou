@@ -77,6 +77,12 @@ export default function CheckoutPage() {
   const [paymentError, setPaymentError] = useState("");
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
+  // Address states
+  const [savedAddresses, setSavedAddresses] = useState<AddressObject[]>([]);
+  const [addressesLoading, setAddressesLoading] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+
   const shippingCost = totalPrice >= 3000 ? 0 : 99;
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
