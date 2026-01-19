@@ -66,7 +66,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         const data = await wishlistService.getWishlist(userId);
         if (data && data.items) {
-          setItems(data.items);
+          setItems(data.items as WishlistItem[]);
         }
       } catch (err) {
         console.error("Failed to load wishlist:", err);
