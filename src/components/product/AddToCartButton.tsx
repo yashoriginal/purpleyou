@@ -69,7 +69,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       try {
         await removeFromCart(itemId);
         // Also remove from wishlist when removing from bag
-        removeFromWishlist(product.id);
+        removeFromWishlist(product.productId || String(product.id));
       } catch (err) {
         const errorMsg =
           err instanceof Error ? err.message : "Failed to remove from cart";
