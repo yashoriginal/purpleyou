@@ -78,6 +78,11 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
     loadWishlist();
 
+    // Listen for login event from AuthContext
+    const handleUserLoggedIn = () => {
+      loadWishlist();
+    };
+
     // Listen for storage changes (login/logout from other tabs)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "auth_user") {
@@ -85,8 +90,13 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    window.addEventListener("userLoggedIn", handleUserLoggedIn);
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("userLoggedIn", handleUserLoggedIn);
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   const itemCount = items.length;
