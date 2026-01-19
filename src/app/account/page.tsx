@@ -182,10 +182,11 @@ export default function AccountPage() {
     isDefault: false,
   });
 
-  // Fetch user orders from API
+  // Fetch user orders and addresses from API
   useEffect(() => {
     if (isLoggedIn && user?.userId) {
       loadUserOrders(user.userId);
+      loadAddresses(user.userId);
     }
   }, [isLoggedIn, user?.userId]);
 
