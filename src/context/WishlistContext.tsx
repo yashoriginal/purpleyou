@@ -52,6 +52,29 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     return null;
   };
 
+  // Load wishlist from backend on mount
+  useEffect(() => {
+    const loadWishlist = async () => {
+      const userId = getUserId();
+      if (!userId) return;
+
+      try {
+        setIsLoading(true);
+        const data = await wishlistService.getWishlist(userId);
+        if (data && data.items) {
+          setItems(data.items);
+        }
+      } catch (err) {
+        console.error("Failed to load wishlist:", err);
+        // Don't set error state here, as it's on mount
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadWishlist();
+  }, []);
+
   const itemCount = items.length;
 
   const addToWishlist = async (product: Product) => {
