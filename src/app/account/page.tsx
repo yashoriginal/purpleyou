@@ -107,28 +107,6 @@ const DUMMY_ORDERS: Order[] = [
   },
 ];
 
-const DUMMY_ADDRESSES: Address[] = [
-  {
-    id: "1",
-    fullName: "Uvan Shankar",
-    street: "123 Luxury Lane, Apartment 5B",
-    city: "New York",
-    state: "NY",
-    pinCode: "10001",
-    phone: "9999999999",
-    isDefault: true,
-  },
-  {
-    id: "2",
-    fullName: "Uvan Shankar",
-    street: "456 Park Avenue, Suite 200",
-    city: "Manhattan",
-    state: "NY",
-    pinCode: "10022",
-    phone: "9999999999",
-    isDefault: false,
-  },
-];
 
 const DUMMY_WISHLIST: WishlistItem[] = [
   {
