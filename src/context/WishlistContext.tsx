@@ -132,7 +132,6 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
     try {
       setIsLoading(true);
-      const productId = product.productId || String(product.id);
       await wishlistService.addToWishlist(
         userId,
         productId,
