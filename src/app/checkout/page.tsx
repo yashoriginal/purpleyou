@@ -229,6 +229,7 @@ export default function CheckoutPage() {
         deliveryDetails: {
           deliveryDate: new Date().toISOString(),
           deliveryAddress: `${address.building}, ${address.street}, ${address.city}, ${address.state} ${address.pinCode}`,
+          phoneNumber: address.mobileNumber,
         },
       };
 
