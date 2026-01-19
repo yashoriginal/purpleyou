@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { HiOutlineChevronLeft } from "react-icons/hi";
 import Link from "next/link";
 import * as orderService from "@/services/order.service";
+import * as authService from "@/services/auth.service";
+import { AddressObject } from "@/services/auth.service";
 
 const INDIAN_STATES = [
   "Andhra Pradesh",
