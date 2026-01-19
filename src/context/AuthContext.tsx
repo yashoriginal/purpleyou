@@ -88,6 +88,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (currentUser) {
         setUser(convertAuthUserToUser(currentUser));
         setIsLoggedIn(true);
+
+        // Dispatch custom event to notify other contexts about session restore
+        window.dispatchEvent(
+          new CustomEvent("userLoggedIn", {
+            detail: { userId: currentUser._id || currentUser.id },
+          }),
+        );
       }
     } catch (err) {
       console.error("Failed to restore session:", err);
