@@ -27,9 +27,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const [isBuying, setIsBuying] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
-  const isWishlisted = isInWishlist(
-    product.productId || String(product.id),
-  );
+  const isWishlisted = isInWishlist(product.productId || String(product.id));
 
   // Check if product is in cart
   useEffect(() => {

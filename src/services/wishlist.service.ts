@@ -4,7 +4,8 @@
  * API Base: https://purpleoneservice.onrender.com/api/v1/wishlist
  */
 
-const WISHLIST_API_BASE = "https://purpleoneservice.onrender.com/api/v1/wishlist";
+const WISHLIST_API_BASE =
+  "https://purpleoneservice.onrender.com/api/v1/wishlist";
 
 // ============================================================================
 // TYPE DEFINITIONS
