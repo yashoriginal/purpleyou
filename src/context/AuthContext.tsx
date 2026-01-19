@@ -242,6 +242,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoggedIn(false);
       setUser(null);
       setError(null);
+
+      // Dispatch custom event to notify other contexts about logout
+      window.dispatchEvent(new CustomEvent("userLoggedOut"));
     } finally {
       setIsLoading(false);
     }
