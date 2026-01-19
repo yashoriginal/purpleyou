@@ -32,16 +32,7 @@ interface OrderItem {
   image: string;
 }
 
-interface Address {
-  id: string;
-  fullName: string;
-  street: string;
-  city: string;
-  state: string;
-  pinCode: string;
-  phone: string;
-  isDefault: boolean;
-}
+// Using AddressObject from auth.service
 
 interface WishlistItem {
   id: string;
