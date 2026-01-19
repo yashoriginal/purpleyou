@@ -11,6 +11,7 @@ import {
   HiOutlineChevronRight,
 } from "react-icons/hi";
 import EditProfileForm from "@/components/profile/EditProfileForm";
+import * as orderService from "@/services/order.service";
 
 // Dummy data types
 interface Order {
