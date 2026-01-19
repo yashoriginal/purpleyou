@@ -33,7 +33,13 @@ export default function WishlistPage() {
 
   // Get full product objects for wishlist items
   const wishlistProducts = items
-    .map((item) => allProducts.find((p) => p.id === item.productId))
+    .map((item) =>
+      allProducts.find(
+        (p) =>
+          p.productId === item.productId ||
+          String(p.id) === String(item.productId),
+      ),
+    )
     .filter(Boolean) as Product[];
 
   const handleAddToCart = (product: Product) => {
