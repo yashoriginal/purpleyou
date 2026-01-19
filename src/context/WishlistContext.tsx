@@ -8,126 +8,128 @@ import React, {
   ReactNode,
 } from "react";
 import { Product } from "@/types/product";
+import * as wishlistService from "@/services/wishlist.service";
 
 export interface WishlistItem {
-  productId: number;
-  addedAt: string; // ISO timestamp
+  productId: string;
+  quantity: number;
+  variant?: Record<string, string>;
+  priceEach: number;
+  currency: string;
 }
 
 interface WishlistContextType {
   items: WishlistItem[];
   itemCount: number;
-  addToWishlist: (product: Product) => void;
-  removeFromWishlist: (productId: number) => void;
-  isInWishlist: (productId: number) => boolean;
-  clearWishlist: () => void;
+  addToWishlist: (product: Product) => Promise<void>;
+  removeFromWishlist: (productId: string) => Promise<void>;
+  isInWishlist: (productId: string | number) => boolean;
+  isLoading: boolean;
+  error: string | null;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(
   undefined,
 );
 
-const WISHLIST_STORAGE_KEY = "wishlist_items";
-
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load wishlist from localStorage on mount
-  useEffect(() => {
+  // Get userId from localStorage
+  const getUserId = (): string | null => {
+    if (typeof window === "undefined") return null;
     try {
-      const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
-      if (saved) {
-        const parsedItems = JSON.parse(saved);
-        if (Array.isArray(parsedItems)) {
-          setItems(parsedItems);
-        }
+      const userStr = localStorage.getItem("auth_user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        return user._id || user.id || user.userId || null;
       }
-    } catch (error) {
-      console.error("Failed to load wishlist from localStorage:", error);
-    } finally {
-      setIsHydrated(true);
+    } catch {
+      return null;
     }
-  }, []);
-
-  // Listen for logout events and clear wishlist
-  useEffect(() => {
-    const checkAuthState = setInterval(() => {
-      const authToken = localStorage.getItem("auth_token");
-      if (!authToken) {
-        // User logged out, clear wishlist
-        setItems([]);
-        localStorage.removeItem(WISHLIST_STORAGE_KEY);
-      }
-    }, 1000);
-
-    return () => clearInterval(checkAuthState);
-  }, []);
-
-  // Save wishlist to localStorage whenever it changes
-  useEffect(() => {
-    if (isHydrated) {
-      try {
-        localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(items));
-      } catch (error) {
-        console.error("Failed to save wishlist to localStorage:", error);
-      }
-    }
-  }, [items, isHydrated]);
+    return null;
+  };
 
   const itemCount = items.length;
 
-  const addToWishlist = (product: Product) => {
-    setItems((prevItems) => {
-      // Check if product already exists in wishlist
-      if (prevItems.some((item) => item.productId === product.id)) {
-        return prevItems;
-      }
+  const addToWishlist = async (product: Product) => {
+    setError(null);
+    const userId = getUserId();
 
-      // Add new item to wishlist
-      const newItem: WishlistItem = {
-        productId: product.id,
-        addedAt: new Date().toISOString(),
-      };
-      return [...prevItems, newItem];
-    });
+    if (!userId) {
+      setError("Please log in to add items to wishlist");
+      throw new Error("User not authenticated");
+    }
 
-    // TODO: API Integration
-    // Once you have a backend, replace the above with:
-    // await fetch('/api/wishlist/add', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     productId: product.id,
-    //   }),
-    // });
+    // Check if already in wishlist
+    if (isInWishlist(product.productId)) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const productId = product.productId || String(product.id);
+      await wishlistService.addToWishlist(
+        userId,
+        productId,
+        1,
+        product.price,
+        undefined,
+      );
+
+      // Update local state
+      setItems((prevItems) => [
+        ...prevItems,
+        {
+          productId,
+          quantity: 1,
+          priceEach: product.price,
+          currency: "INR",
+        },
+      ]);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to add to wishlist";
+      setError(errorMsg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const removeFromWishlist = (productId: number) => {
-    setItems((prevItems) =>
-      prevItems.filter((item) => item.productId !== productId),
-    );
+  const removeFromWishlist = async (productId: string | number) => {
+    setError(null);
+    const userId = getUserId();
 
-    // TODO: API Integration
-    // await fetch('/api/wishlist/remove', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ productId }),
-    // });
+    if (!userId) {
+      setError("Please log in to remove items from wishlist");
+      throw new Error("User not authenticated");
+    }
+
+    try {
+      setIsLoading(true);
+      const prodId = String(productId);
+      await wishlistService.removeFromWishlist(userId, prodId);
+
+      // Update local state
+      setItems((prevItems) =>
+        prevItems.filter((item) => item.productId !== prodId),
+      );
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to remove from wishlist";
+      setError(errorMsg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const isInWishlist = (productId: number): boolean => {
-    return items.some((item) => item.productId === productId);
-  };
-
-  const clearWishlist = () => {
-    setItems([]);
-
-    // TODO: API Integration
-    // await fetch('/api/wishlist/clear', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    // });
+  const isInWishlist = (productId: string | number): boolean => {
+    const prodId = String(productId);
+    return items.some((item) => item.productId === prodId);
   };
 
   const value: WishlistContextType = {
@@ -136,7 +138,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
-    clearWishlist,
+    isLoading,
+    error,
   };
 
   return (
