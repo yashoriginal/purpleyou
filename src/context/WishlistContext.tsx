@@ -125,7 +125,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
 
     // Check if already in wishlist
-    if (isInWishlist(product.productId)) {
+    const productId = product.productId || String(product.id);
+    if (isInWishlist(productId)) {
       return;
     }
 
