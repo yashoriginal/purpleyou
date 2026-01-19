@@ -250,10 +250,10 @@ export default function AccountPage() {
   };
 
   // Pagination calculations
-  const totalOrderPages = Math.ceil(DUMMY_ORDERS.length / ITEMS_PER_PAGE);
+  const totalOrderPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
   const totalWishlistPages = Math.ceil(DUMMY_WISHLIST.length / ITEMS_PER_PAGE);
 
-  const paginatedOrders = DUMMY_ORDERS.slice(
+  const paginatedOrders = orders.slice(
     (ordersPage - 1) * ITEMS_PER_PAGE,
     ordersPage * ITEMS_PER_PAGE,
   );
