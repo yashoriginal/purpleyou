@@ -9,12 +9,14 @@
 
 :root {
   /* BRAND COLORS */
-  /* Primary Accent: Light Lavender */
+  /* Primary Accent: Light Lavender (Secondary) */
   --primary-accent: #d3c9ff;
-  /* Deep Purple: Hover & Interactive States */
+  /* Deep Purple: Primary Brand Color */
   --primary-purple: #5540b7;
-  /* Luxury Cream Background */
+  /* Luxury Cream Background (Base) */
   --luxury-bg: #f8f5f2;
+  /* Soft Champagne Gold: Highlights & Accents */
+  --champagne-gold: #e5d4b8;
 
   /* TYPOGRAPHY COLORS */
   --text-primary: #111111;
