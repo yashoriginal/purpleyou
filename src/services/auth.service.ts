@@ -1317,6 +1317,10 @@ export const authService = {
   clearCredentials,
   refreshAccessToken,
   updateUserDetails,
+  getAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
 };
 
 export default authService;
