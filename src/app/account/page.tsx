@@ -107,7 +107,6 @@ const DUMMY_ORDERS: Order[] = [
   },
 ];
 
-
 const DUMMY_WISHLIST: WishlistItem[] = [
   {
     id: "1",
@@ -170,7 +169,9 @@ export default function AccountPage() {
   const [addressesLoading, setAddressesLoading] = useState(false);
   const [addressesError, setAddressesError] = useState<string | null>(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<AddressObject | null>(null);
+  const [editingAddress, setEditingAddress] = useState<AddressObject | null>(
+    null,
+  );
   const [addressFormLoading, setAddressFormLoading] = useState(false);
   const [formData, setFormData] = useState({
     label: "",
@@ -273,7 +274,8 @@ export default function AccountPage() {
       });
       setShowAddressForm(false);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Failed to add address";
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to add address";
       alert(`Error: ${errorMsg}`);
     } finally {
       setAddressFormLoading(false);
@@ -311,7 +313,8 @@ export default function AccountPage() {
       setEditingAddress(null);
       setShowAddressForm(false);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Failed to update address";
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to update address";
       alert(`Error: ${errorMsg}`);
     } finally {
       setAddressFormLoading(false);
@@ -319,14 +322,19 @@ export default function AccountPage() {
   };
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (!user?.userId || !confirm("Are you sure you want to delete this address?")) return;
+    if (
+      !user?.userId ||
+      !confirm("Are you sure you want to delete this address?")
+    )
+      return;
 
     try {
       await authService.deleteAddress(user.userId, addressId);
       // Reload addresses
       await loadAddresses(user.userId);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Failed to delete address";
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to delete address";
       alert(`Error: ${errorMsg}`);
     }
   };
@@ -664,7 +672,8 @@ export default function AccountPage() {
                     </h2>
                     <button
                       onClick={openAddForm}
-                      className="px-4 py-2 bg-[#5540b7] text-white text-sm font-medium rounded hover:bg-[#3d2d7f] transition-colors">
+                      className="px-4 py-2 bg-[#5540b7] text-white text-sm font-medium rounded hover:bg-[#3d2d7f] transition-colors"
+                    >
                       Add New Address
                     </button>
                   </div>
@@ -684,7 +693,9 @@ export default function AccountPage() {
                         {addressesError}
                       </p>
                       <button
-                        onClick={() => user?.userId && loadAddresses(user.userId)}
+                        onClick={() =>
+                          user?.userId && loadAddresses(user.userId)
+                        }
                         className="text-[#5540b7] font-medium hover:underline"
                       >
                         Try Again
@@ -697,7 +708,8 @@ export default function AccountPage() {
                       </p>
                       <button
                         onClick={openAddForm}
-                        className="text-[#5540b7] font-medium hover:underline">
+                        className="text-[#5540b7] font-medium hover:underline"
+                      >
                         Add Your First Address
                       </button>
                     </div>
@@ -732,12 +744,17 @@ export default function AccountPage() {
                           <div className="flex gap-4 text-sm">
                             <button
                               onClick={() => openEditForm(address)}
-                              className="text-[#5540b7] font-medium hover:underline">
+                              className="text-[#5540b7] font-medium hover:underline"
+                            >
                               Edit
                             </button>
                             <button
-                              onClick={() => address.addressId && handleDeleteAddress(address.addressId)}
-                              className="text-red-600 font-medium hover:underline">
+                              onClick={() =>
+                                address.addressId &&
+                                handleDeleteAddress(address.addressId)
+                              }
+                              className="text-red-600 font-medium hover:underline"
+                            >
                               Delete
                             </button>
                           </div>
@@ -1013,7 +1030,9 @@ export default function AccountPage() {
                 Cancel
               </button>
               <button
-                onClick={editingAddress ? handleUpdateAddress : handleAddAddress}
+                onClick={
+                  editingAddress ? handleUpdateAddress : handleAddAddress
+                }
                 disabled={addressFormLoading}
                 className="px-6 py-2 bg-[#5540b7] text-white rounded-lg hover:bg-[#3d2d7f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
