@@ -400,7 +400,7 @@ export default function CheckoutPage() {
               </h2>
 
               {/* Saved Addresses Section */}
-              {!showNewAddressForm && savedAddresses.length > 0 && (
+              {savedAddresses.length > 0 && (
                 <div className="mb-8">
                   <h3 className="text-lg font-medium text-[#111111] mb-4">
                     Your Saved Addresses
