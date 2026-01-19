@@ -166,7 +166,9 @@ export default function WishlistPage() {
               </button>
 
               <button
-                onClick={() => removeFromWishlist(product.id)}
+                onClick={() =>
+                  removeFromWishlist(product.productId || String(product.id))
+                }
                 className="w-full px-4 py-3 border border-[#e6e0da] text-[#6b6b6b] text-sm font-semibold uppercase tracking-wider hover:border-red-400 hover:text-red-600 transition-colors flex items-center justify-center gap-2"
               >
                 <HiOutlineTrash className="w-4 h-4" />
