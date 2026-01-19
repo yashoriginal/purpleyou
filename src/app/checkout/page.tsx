@@ -425,26 +425,42 @@ export default function CheckoutPage() {
                       </div>
                     ))}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowNewAddressForm(true);
-                      setSelectedAddressId(null);
-                      setAddress({
-                        fullName: "",
-                        mobileNumber: "",
-                        building: "",
-                        street: "",
-                        city: "",
-                        state: "",
-                        pinCode: "",
-                        email: "",
-                      });
-                    }}
-                    className="text-[#5540b7] font-medium hover:underline text-sm"
-                  >
-                    + Use a different address
-                  </button>
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewAddressForm(true);
+                        setSelectedAddressId(null);
+                        setAddress({
+                          fullName: "",
+                          mobileNumber: "",
+                          building: "",
+                          street: "",
+                          city: "",
+                          state: "",
+                          pinCode: "",
+                          email: "",
+                        });
+                      }}
+                      className="text-[#5540b7] font-medium hover:underline text-sm"
+                    >
+                      + Use a different address
+                    </button>
+
+                    {selectedAddressId && (
+                      <button
+                        onClick={handleAddressSubmit}
+                        disabled={isProcessing || !razorpayLoaded}
+                        className={`py-2 px-6 text-sm font-semibold rounded-lg transition-all ${
+                          isProcessing || !razorpayLoaded
+                            ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
+                            : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
+                        }`}
+                      >
+                        {isProcessing ? "Processing..." : "Continue to Payment"}
+                      </button>
+                    )}
+                  </div>
                   <div className="mt-6 border-t border-[#e6e0da] pt-6"></div>
                 </div>
               )}
