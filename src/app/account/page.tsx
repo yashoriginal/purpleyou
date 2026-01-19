@@ -225,6 +225,140 @@ export default function AccountPage() {
     }
   };
 
+  const loadAddresses = async (userId: string) => {
+    setAddressesLoading(true);
+    setAddressesError(null);
+
+    try {
+      const apiAddresses = await authService.getAddresses(userId);
+      setAddresses(apiAddresses);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to load addresses";
+      setAddressesError(errorMsg);
+      console.error("Failed to load addresses:", error);
+      setAddresses([]);
+    } finally {
+      setAddressesLoading(false);
+    }
+  };
+
+  const handleAddAddress = async () => {
+    if (!user?.userId) return;
+
+    setAddressFormLoading(true);
+    try {
+      await authService.addAddress(user.userId, {
+        label: formData.label,
+        address: formData.address,
+        area: formData.area,
+        pincode: formData.pincode,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        isDefault: formData.isDefault,
+      });
+
+      // Reload addresses
+      await loadAddresses(user.userId);
+
+      // Reset form and close modal
+      setFormData({
+        label: "",
+        address: "",
+        area: "",
+        pincode: "",
+        latitude: "",
+        longitude: "",
+        isDefault: false,
+      });
+      setShowAddressForm(false);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to add address";
+      alert(`Error: ${errorMsg}`);
+    } finally {
+      setAddressFormLoading(false);
+    }
+  };
+
+  const handleUpdateAddress = async () => {
+    if (!user?.userId || !editingAddress?.addressId) return;
+
+    setAddressFormLoading(true);
+    try {
+      await authService.updateAddress(user.userId, editingAddress.addressId, {
+        label: formData.label,
+        address: formData.address,
+        area: formData.area,
+        pincode: formData.pincode,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        isDefault: formData.isDefault,
+      });
+
+      // Reload addresses
+      await loadAddresses(user.userId);
+
+      // Reset form and close modal
+      setFormData({
+        label: "",
+        address: "",
+        area: "",
+        pincode: "",
+        latitude: "",
+        longitude: "",
+        isDefault: false,
+      });
+      setEditingAddress(null);
+      setShowAddressForm(false);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to update address";
+      alert(`Error: ${errorMsg}`);
+    } finally {
+      setAddressFormLoading(false);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string) => {
+    if (!user?.userId || !confirm("Are you sure you want to delete this address?")) return;
+
+    try {
+      await authService.deleteAddress(user.userId, addressId);
+      // Reload addresses
+      await loadAddresses(user.userId);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to delete address";
+      alert(`Error: ${errorMsg}`);
+    }
+  };
+
+  const openAddForm = () => {
+    setEditingAddress(null);
+    setFormData({
+      label: "",
+      address: "",
+      area: "",
+      pincode: "",
+      latitude: "",
+      longitude: "",
+      isDefault: false,
+    });
+    setShowAddressForm(true);
+  };
+
+  const openEditForm = (address: AddressObject) => {
+    setEditingAddress(address);
+    setFormData({
+      label: address.label,
+      address: address.address,
+      area: address.area,
+      pincode: address.pincode,
+      latitude: address.latitude,
+      longitude: address.longitude,
+      isDefault: address.isDefault,
+    });
+    setShowAddressForm(true);
+  };
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoggedIn) {
