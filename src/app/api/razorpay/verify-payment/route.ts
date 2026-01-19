@@ -3,12 +3,16 @@ import { verifyPaymentSignature } from "@/lib/razorpay";
 
 export async function POST(request: NextRequest) {
   try {
-    const { orderId, paymentId, signature } = await request.json();
+    const { orderId, razorpay_payment_id, razorpay_signature } =
+      await request.json();
 
     // Validate input
-    if (!orderId || !paymentId || !signature) {
+    if (!orderId || !razorpay_payment_id || !razorpay_signature) {
       return NextResponse.json(
-        { error: "Missing required fields: orderId, paymentId, signature" },
+        {
+          error:
+            "Missing required fields: orderId, razorpay_payment_id, razorpay_signature",
+        },
         { status: 400 }
       );
     }
@@ -16,8 +20,8 @@ export async function POST(request: NextRequest) {
     // Verify the payment signature
     const isValid = verifyPaymentSignature({
       orderId,
-      paymentId,
-      signature,
+      paymentId: razorpay_payment_id,
+      signature: razorpay_signature,
     });
 
     if (!isValid) {
