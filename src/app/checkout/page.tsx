@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { HiOutlineChevronLeft } from "react-icons/hi";
 import Link from "next/link";
 import * as orderService from "@/services/order.service";
+import * as authService from "@/services/auth.service";
+import { AddressObject } from "@/services/auth.service";
 
 const INDIAN_STATES = [
   "Andhra Pradesh",
@@ -75,6 +77,14 @@ export default function CheckoutPage() {
   const [paymentError, setPaymentError] = useState("");
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
+  // Address states
+  const [savedAddresses, setSavedAddresses] = useState<AddressObject[]>([]);
+  const [addressesLoading, setAddressesLoading] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null,
+  );
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+
   const shippingCost = totalPrice >= 3000 ? 0 : 99;
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
@@ -97,20 +107,80 @@ export default function CheckoutPage() {
     };
   }, []);
 
-  const validateForm = () => {
+  // Load saved addresses
+  useEffect(() => {
+    loadAddresses();
+  }, []);
+
+  const loadAddresses = async () => {
+    setAddressesLoading(true);
+    try {
+      const userStr = localStorage.getItem("auth_user");
+      if (!userStr) return;
+
+      const user = JSON.parse(userStr);
+      const userId = user._id || user.id || user.userId;
+      if (!userId) return;
+
+      const addresses = await authService.getAddresses(userId);
+      setSavedAddresses(addresses);
+    } catch (error) {
+      console.error("Failed to load addresses:", error);
+    } finally {
+      setAddressesLoading(false);
+    }
+  };
+
+  const handleSelectAddress = (savedAddress: AddressObject) => {
+    setSelectedAddressId(savedAddress.addressId || null);
+    setShowNewAddressForm(false);
+
+    // Parse building and street from the address string
+    // For now, we'll split by comma
+    const addressParts = savedAddress.address.split(",").map((p) => p.trim());
+
+    // Get user data for email and phone
+    const userStr = localStorage.getItem("auth_user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const userPhone = user?.mobile
+      ? user.mobile.replace(/\D/g, "").slice(-10)
+      : "";
+
+    setAddress({
+      fullName: user?.userName || user?.name || "",
+      mobileNumber: userPhone,
+      building: addressParts[0] || savedAddress.address,
+      street: addressParts[1] || "",
+      city: savedAddress.area,
+      state: "",
+      pinCode: savedAddress.pincode,
+      email: user?.email || "",
+    });
+  };
+
+  const validateForm = (isSelectedAddress: boolean = false) => {
     const newErrors: Partial<AddressForm> = {};
 
-    if (!address.fullName.trim()) newErrors.fullName = "Name required";
-    if (address.mobileNumber.length !== 10)
-      newErrors.mobileNumber = "10-digit mobile required";
-    if (!address.building.trim())
-      newErrors.building = "Building/House required";
-    if (!address.street.trim()) newErrors.street = "Street/Locality required";
-    if (!address.city.trim()) newErrors.city = "City required";
-    if (!address.state) newErrors.state = "State required";
-    if (address.pinCode.length !== 6)
-      newErrors.pinCode = "6-digit PIN code required";
-    if (!address.email.includes("@")) newErrors.email = "Valid email required";
+    // For selected saved addresses, only validate essential fields
+    if (isSelectedAddress) {
+      if (address.mobileNumber.length !== 10)
+        newErrors.mobileNumber = "10-digit mobile required";
+      if (!address.pinCode) newErrors.pinCode = "PIN code required";
+    } else {
+      // For new address entry, validate all fields
+      if (!address.fullName.trim()) newErrors.fullName = "Name required";
+      if (address.mobileNumber.length !== 10)
+        newErrors.mobileNumber = "10-digit mobile required";
+      if (!address.building.trim())
+        newErrors.building = "Building/House required";
+      if (!address.street.trim()) newErrors.street = "Street/Locality required";
+      if (!address.city.trim()) newErrors.city = "City required";
+      if (!address.state) newErrors.state = "State required";
+      if (address.pinCode.length !== 6)
+        newErrors.pinCode = "6-digit PIN code required";
+      if (!address.email.includes("@"))
+        newErrors.email = "Valid email required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -123,9 +193,12 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleAddressSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const handleAddressSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+    const isSelectedAddress = selectedAddressId !== null;
+    if (!validateForm(isSelectedAddress)) return;
 
     setPaymentError("");
     setIsProcessing(true);
@@ -161,6 +234,7 @@ export default function CheckoutPage() {
         deliveryDetails: {
           deliveryDate: new Date().toISOString(),
           deliveryAddress: `${address.building}, ${address.street}, ${address.city}, ${address.state} ${address.pinCode}`,
+          phoneNumber: address.mobileNumber,
         },
       };
 
@@ -329,227 +403,430 @@ export default function CheckoutPage() {
               <h2 className="text-2xl font-light text-[#111111] tracking-wide mb-8">
                 Delivery Address
               </h2>
-              <form onSubmit={handleAddressSubmit} className="space-y-6">
-                {/* Full Name */}
-                <div>
-                  <label className="block text-sm font-medium text-[#111111] mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={address.fullName}
-                    onChange={(e) =>
-                      handleInputChange("fullName", e.target.value)
-                    }
-                    className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                      errors.fullName ? "border-red-500" : "border-[#e6e0da]"
-                    }`}
-                    placeholder="Your full name"
-                  />
-                  {errors.fullName && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.fullName}
-                    </p>
-                  )}
-                </div>
 
-                {/* Email & Mobile - 2 Columns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {/* Email */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#111111] mb-2">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      value={address.email}
-                      onChange={(e) =>
-                        handleInputChange("email", e.target.value)
-                      }
-                      className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.email ? "border-red-500" : "border-[#e6e0da]"
-                      }`}
-                      placeholder="your@email.com"
-                    />
-                    {errors.email && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.email}
-                      </p>
-                    )}
+              {/* Saved Addresses Section */}
+              {savedAddresses.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-medium text-[#111111] mb-4">
+                    Your Saved Addresses
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    {savedAddresses.map((savedAddress) => (
+                      <div
+                        key={savedAddress.addressId}
+                        onClick={() => handleSelectAddress(savedAddress)}
+                        className={`p-5 rounded-lg border-2 cursor-pointer transition-all ${
+                          selectedAddressId === savedAddress.addressId
+                            ? "border-[#5540b7] bg-[#D3C9FF]/5"
+                            : "border-[#e6e0da] hover:border-[#5540b7]"
+                        }`}
+                      >
+                        <div className="space-y-3">
+                          {/* Header with Label and Default Badge */}
+                          <div className="flex items-center justify-between">
+                            <p className="font-semibold text-[#111111] text-base">
+                              {savedAddress.label}
+                            </p>
+                            {savedAddress.isDefault && (
+                              <span className="text-xs bg-[#5540b7] text-white px-3 py-1 rounded-full whitespace-nowrap">
+                                Default
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Address Details */}
+                          <div className="space-y-2 text-sm">
+                            {/* Full Address */}
+                            <div>
+                              <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                Address
+                              </p>
+                              <p className="text-[#111111]">
+                                {savedAddress.address}
+                              </p>
+                            </div>
+
+                            {/* Area and City */}
+                            <div>
+                              <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                Area/City
+                              </p>
+                              <p className="text-[#111111]">
+                                {savedAddress.area}
+                              </p>
+                            </div>
+
+                            {/* Postal Code */}
+                            <div>
+                              <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                Postal Code
+                              </p>
+                              <p className="text-[#111111]">
+                                {savedAddress.pincode}
+                              </p>
+                            </div>
+
+                            {/* Coordinates */}
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                  Latitude
+                                </p>
+                                <p className="text-[#111111] text-xs">
+                                  {savedAddress.latitude}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                  Longitude
+                                </p>
+                                <p className="text-[#111111] text-xs">
+                                  {savedAddress.longitude}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Timestamps */}
+                            {savedAddress.createdAt && (
+                              <div className="pt-2 border-t border-[#e6e0da]">
+                                <p className="text-[#6b6b6b] text-xs">
+                                  Added on{" "}
+                                  {new Date(
+                                    savedAddress.createdAt,
+                                  ).toLocaleDateString("en-IN")}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-
-                  {/* Mobile Number */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#111111] mb-2">
-                      Mobile Number (10 digits) *
-                    </label>
-                    <input
-                      type="tel"
-                      value={address.mobileNumber}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "mobileNumber",
-                          e.target.value.replace(/\D/g, "").slice(0, 10),
-                        )
-                      }
-                      className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.mobileNumber
-                          ? "border-red-500"
-                          : "border-[#e6e0da]"
-                      }`}
-                      placeholder="10-digit number"
-                      maxLength={10}
-                    />
-                    {errors.mobileNumber && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.mobileNumber}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Building/House */}
-                <div>
-                  <label className="block text-sm font-medium text-[#111111] mb-2">
-                    House/Flat/Building *
-                  </label>
-                  <input
-                    type="text"
-                    value={address.building}
-                    onChange={(e) =>
-                      handleInputChange("building", e.target.value)
-                    }
-                    className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                      errors.building ? "border-red-500" : "border-[#e6e0da]"
-                    }`}
-                    placeholder="House/Flat no., Building name"
-                  />
-                  {errors.building && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.building}
-                    </p>
-                  )}
-                </div>
-
-                {/* Street/Locality */}
-                <div>
-                  <label className="block text-sm font-medium text-[#111111] mb-2">
-                    Street/Locality *
-                  </label>
-                  <input
-                    type="text"
-                    value={address.street}
-                    onChange={(e) =>
-                      handleInputChange("street", e.target.value)
-                    }
-                    className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                      errors.street ? "border-red-500" : "border-[#e6e0da]"
-                    }`}
-                    placeholder="Road/Locality name"
-                  />
-                  {errors.street && (
-                    <p className="text-xs text-red-500 mt-1">{errors.street}</p>
-                  )}
-                </div>
-
-                {/* City */}
-                <div>
-                  <label className="block text-sm font-medium text-[#111111] mb-2">
-                    City *
-                  </label>
-                  <input
-                    type="text"
-                    value={address.city}
-                    onChange={(e) => handleInputChange("city", e.target.value)}
-                    className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                      errors.city ? "border-red-500" : "border-[#e6e0da]"
-                    }`}
-                    placeholder="City"
-                  />
-                  {errors.city && (
-                    <p className="text-xs text-red-500 mt-1">{errors.city}</p>
-                  )}
-                </div>
-
-                {/* State & PIN Code */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {/* State */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#111111] mb-2">
-                      State *
-                    </label>
-                    <select
-                      value={address.state}
-                      onChange={(e) =>
-                        handleInputChange("state", e.target.value)
-                      }
-                      className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.state ? "border-red-500" : "border-[#e6e0da]"
-                      }`}
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewAddressForm(true);
+                        setSelectedAddressId(null);
+                        setAddress({
+                          fullName: "",
+                          mobileNumber: "",
+                          building: "",
+                          street: "",
+                          city: "",
+                          state: "",
+                          pinCode: "",
+                          email: "",
+                        });
+                      }}
+                      className="text-[#5540b7] font-medium hover:underline text-sm"
                     >
-                      <option value="">Select State</option>
-                      {INDIAN_STATES.map((state) => (
-                        <option key={state} value={state}>
-                          {state}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.state && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.state}
-                      </p>
-                    )}
-                  </div>
+                      + Use a different address
+                    </button>
 
-                  {/* PIN Code */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#111111] mb-2">
-                      PIN Code (6 digits) *
-                    </label>
-                    <input
-                      type="tel"
-                      value={address.pinCode}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "pinCode",
-                          e.target.value.replace(/\D/g, "").slice(0, 6),
-                        )
-                      }
-                      className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
-                        errors.pinCode ? "border-red-500" : "border-[#e6e0da]"
-                      }`}
-                      placeholder="6-digit PIN"
-                      maxLength={6}
-                    />
-                    {errors.pinCode && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.pinCode}
-                      </p>
+                    {selectedAddressId && (
+                      <button
+                        onClick={handleAddressSubmit}
+                        disabled={isProcessing || !razorpayLoaded}
+                        className={`py-2 px-6 text-sm font-semibold rounded-lg transition-all ${
+                          isProcessing || !razorpayLoaded
+                            ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
+                            : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
+                        }`}
+                      >
+                        {isProcessing ? "Processing..." : "Continue to Payment"}
+                      </button>
                     )}
                   </div>
+                  <div className="mt-6 border-t border-[#e6e0da] pt-6"></div>
                 </div>
+              )}
 
-                {paymentError && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                    {paymentError}
+              {/* Show message if loading addresses */}
+              {addressesLoading && (
+                <div className="mb-6 p-4 bg-[#f8f5f2] rounded-lg text-sm text-[#6b6b6b]">
+                  Loading saved addresses...
+                </div>
+              )}
+
+              {/* When no saved addresses and form not shown */}
+              {!showNewAddressForm &&
+                savedAddresses.length === 0 &&
+                !addressesLoading && (
+                  <div className="mb-8 p-6 bg-[#f8f5f2] rounded-lg text-center">
+                    <p className="text-[#6b6b6b] font-light mb-4">
+                      No saved addresses yet
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewAddressForm(true)}
+                      className="px-4 py-2 bg-[#5540b7] text-white text-sm font-medium rounded hover:bg-[#3d2d7f] transition-colors"
+                    >
+                      Add Address
+                    </button>
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={isProcessing || !razorpayLoaded}
-                  className={`w-full py-4 text-sm font-semibold uppercase tracking-wider mt-8 rounded-lg transition-all flex items-center justify-center gap-2 ${
-                    isProcessing || !razorpayLoaded
-                      ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
-                      : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
-                  }`}
-                >
-                  <span className="text-base">🔒</span>
-                  {isProcessing
-                    ? "Processing Payment..."
-                    : "Continue to Payment"}
-                </button>
-              </form>
+              {/* New address form title and form - only show on demand */}
+              {showNewAddressForm && (
+                <>
+                  <div className="mb-6 flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-[#111111]">
+                      {savedAddresses.length > 0
+                        ? "Enter New Address"
+                        : "Add Delivery Address"}
+                    </h3>
+                    {savedAddresses.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowNewAddressForm(false);
+                          if (savedAddresses.length > 0 && !selectedAddressId) {
+                            handleSelectAddress(savedAddresses[0]);
+                          }
+                        }}
+                        className="text-[#5540b7] font-medium hover:underline text-sm"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+
+                  <form onSubmit={handleAddressSubmit} className="space-y-6">
+                    {/* Full Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-[#111111] mb-2">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={address.fullName}
+                        onChange={(e) =>
+                          handleInputChange("fullName", e.target.value)
+                        }
+                        className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                          errors.fullName
+                            ? "border-red-500"
+                            : "border-[#e6e0da]"
+                        }`}
+                        placeholder="Your full name"
+                      />
+                      {errors.fullName && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.fullName}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Email & Mobile - 2 Columns */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {/* Email */}
+                      <div>
+                        <label className="block text-sm font-medium text-[#111111] mb-2">
+                          Email *
+                        </label>
+                        <input
+                          type="email"
+                          value={address.email}
+                          onChange={(e) =>
+                            handleInputChange("email", e.target.value)
+                          }
+                          className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                            errors.email ? "border-red-500" : "border-[#e6e0da]"
+                          }`}
+                          placeholder="your@email.com"
+                        />
+                        {errors.email && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {errors.email}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Mobile Number */}
+                      <div>
+                        <label className="block text-sm font-medium text-[#111111] mb-2">
+                          Mobile Number (10 digits) *
+                        </label>
+                        <input
+                          type="tel"
+                          value={address.mobileNumber}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "mobileNumber",
+                              e.target.value.replace(/\D/g, "").slice(0, 10),
+                            )
+                          }
+                          className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                            errors.mobileNumber
+                              ? "border-red-500"
+                              : "border-[#e6e0da]"
+                          }`}
+                          placeholder="10-digit number"
+                          maxLength={10}
+                        />
+                        {errors.mobileNumber && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {errors.mobileNumber}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Building/House */}
+                    <div>
+                      <label className="block text-sm font-medium text-[#111111] mb-2">
+                        House/Flat/Building *
+                      </label>
+                      <input
+                        type="text"
+                        value={address.building}
+                        onChange={(e) =>
+                          handleInputChange("building", e.target.value)
+                        }
+                        className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                          errors.building
+                            ? "border-red-500"
+                            : "border-[#e6e0da]"
+                        }`}
+                        placeholder="House/Flat no., Building name"
+                      />
+                      {errors.building && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.building}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Street/Locality */}
+                    <div>
+                      <label className="block text-sm font-medium text-[#111111] mb-2">
+                        Street/Locality *
+                      </label>
+                      <input
+                        type="text"
+                        value={address.street}
+                        onChange={(e) =>
+                          handleInputChange("street", e.target.value)
+                        }
+                        className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                          errors.street ? "border-red-500" : "border-[#e6e0da]"
+                        }`}
+                        placeholder="Road/Locality name"
+                      />
+                      {errors.street && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.street}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* City */}
+                    <div>
+                      <label className="block text-sm font-medium text-[#111111] mb-2">
+                        City *
+                      </label>
+                      <input
+                        type="text"
+                        value={address.city}
+                        onChange={(e) =>
+                          handleInputChange("city", e.target.value)
+                        }
+                        className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                          errors.city ? "border-red-500" : "border-[#e6e0da]"
+                        }`}
+                        placeholder="City"
+                      />
+                      {errors.city && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.city}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* State & PIN Code */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {/* State */}
+                      <div>
+                        <label className="block text-sm font-medium text-[#111111] mb-2">
+                          State *
+                        </label>
+                        <select
+                          value={address.state}
+                          onChange={(e) =>
+                            handleInputChange("state", e.target.value)
+                          }
+                          className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                            errors.state ? "border-red-500" : "border-[#e6e0da]"
+                          }`}
+                        >
+                          <option value="">Select State</option>
+                          {INDIAN_STATES.map((state) => (
+                            <option key={state} value={state}>
+                              {state}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.state && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {errors.state}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* PIN Code */}
+                      <div>
+                        <label className="block text-sm font-medium text-[#111111] mb-2">
+                          PIN Code (6 digits) *
+                        </label>
+                        <input
+                          type="tel"
+                          value={address.pinCode}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "pinCode",
+                              e.target.value.replace(/\D/g, "").slice(0, 6),
+                            )
+                          }
+                          className={`w-full px-4 py-3 border rounded text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#5540b7] focus:border-transparent transition-all ${
+                            errors.pinCode
+                              ? "border-red-500"
+                              : "border-[#e6e0da]"
+                          }`}
+                          placeholder="6-digit PIN"
+                          maxLength={6}
+                        />
+                        {errors.pinCode && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {errors.pinCode}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {paymentError && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                        {paymentError}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isProcessing || !razorpayLoaded}
+                      className={`w-full py-4 text-sm font-semibold uppercase tracking-wider mt-8 rounded-lg transition-all flex items-center justify-center gap-2 ${
+                        isProcessing || !razorpayLoaded
+                          ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
+                          : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
+                      }`}
+                    >
+                      <span className="text-base">🔒</span>
+                      {isProcessing
+                        ? "Processing Payment..."
+                        : "Continue to Payment"}
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
           </div>
 

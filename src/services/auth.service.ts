@@ -118,6 +118,74 @@ export interface AddressObject {
   latitude: string;
   longitude: string;
   isDefault: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Get addresses response
+ */
+export interface GetAddressesResponse {
+  statusCode: number;
+  success: boolean;
+  data: AddressObject[];
+  error: null | string;
+}
+
+/**
+ * Add address request
+ */
+export interface AddAddressRequest {
+  address: string;
+  label: string;
+  area: string;
+  pincode: string;
+  latitude: string;
+  longitude: string;
+  isDefault: boolean;
+}
+
+/**
+ * Add address response
+ */
+export interface AddAddressResponse {
+  statusCode: number;
+  success: boolean;
+  data: boolean;
+  error: null | string;
+}
+
+/**
+ * Update address request
+ */
+export interface UpdateAddressRequest {
+  label?: string;
+  address?: string;
+  area?: string;
+  pincode?: string;
+  latitude?: string;
+  longitude?: string;
+  isDefault?: boolean;
+}
+
+/**
+ * Update address response
+ */
+export interface UpdateAddressResponse {
+  statusCode: number;
+  success: boolean;
+  data: boolean;
+  error: null | string;
+}
+
+/**
+ * Delete address response
+ */
+export interface DeleteAddressResponse {
+  statusCode: number;
+  success: boolean;
+  data: boolean;
+  error: null | string;
 }
 
 /**
@@ -1001,6 +1069,206 @@ function formatMobileNumber(mobile: string): string {
 }
 
 // ============================================================================
+// ADDRESS API FUNCTIONS
+// ============================================================================
+
+/**
+ * Get all addresses for a user
+ * @param userId - User ID
+ * @returns List of addresses
+ */
+export async function getAddresses(userId: string): Promise<AddressObject[]> {
+  try {
+    if (!userId?.trim()) {
+      throw new Error("User ID is required");
+    }
+
+    const response = await makeRequest<GetAddressesResponse>(
+      `/users/${userId}/addresses`,
+      {
+        method: "GET",
+        requiresAuth: true,
+      },
+    );
+
+    if (!response.success) {
+      throw new AuthServiceError(
+        response.statusCode || 400,
+        response.error || "Failed to fetch addresses",
+      );
+    }
+
+    return response.data || [];
+  } catch (error) {
+    if (error instanceof AuthServiceError) {
+      throw error;
+    }
+    throw new AuthServiceError(
+      500,
+      error instanceof Error ? error.message : "Failed to fetch addresses",
+    );
+  }
+}
+
+/**
+ * Add a new address for a user
+ * @param userId - User ID
+ * @param data - Address data
+ * @returns Success boolean
+ */
+export async function addAddress(
+  userId: string,
+  data: AddAddressRequest,
+): Promise<boolean> {
+  try {
+    if (!userId?.trim()) {
+      throw new Error("User ID is required");
+    }
+
+    if (!data.address?.trim()) {
+      throw new Error("Address is required");
+    }
+
+    if (!data.label?.trim()) {
+      throw new Error("Label is required");
+    }
+
+    if (!data.pincode?.trim()) {
+      throw new Error("Pincode is required");
+    }
+
+    if (!data.area?.trim()) {
+      throw new Error("Area is required");
+    }
+
+    const response = await makeRequest<AddAddressResponse>(
+      `/users/${userId}/addresses`,
+      {
+        method: "POST",
+        body: data,
+        requiresAuth: true,
+      },
+    );
+
+    if (!response.success) {
+      throw new AuthServiceError(
+        response.statusCode || 400,
+        response.error || "Failed to add address",
+      );
+    }
+
+    return response.data || false;
+  } catch (error) {
+    if (error instanceof AuthServiceError) {
+      throw error;
+    }
+    throw new AuthServiceError(
+      500,
+      error instanceof Error ? error.message : "Failed to add address",
+    );
+  }
+}
+
+/**
+ * Update an existing address
+ * @param userId - User ID
+ * @param addressId - Address ID
+ * @param data - Address data to update
+ * @returns Success boolean
+ */
+export async function updateAddress(
+  userId: string,
+  addressId: string,
+  data: UpdateAddressRequest,
+): Promise<boolean> {
+  try {
+    if (!userId?.trim()) {
+      throw new Error("User ID is required");
+    }
+
+    if (!addressId?.trim()) {
+      throw new Error("Address ID is required");
+    }
+
+    if (!data || Object.keys(data).length === 0) {
+      throw new Error("At least one field to update is required");
+    }
+
+    const response = await makeRequest<UpdateAddressResponse>(
+      `/users/${userId}/addresses/${addressId}`,
+      {
+        method: "PATCH",
+        body: data,
+        requiresAuth: true,
+      },
+    );
+
+    if (!response.success) {
+      throw new AuthServiceError(
+        response.statusCode || 400,
+        response.error || "Failed to update address",
+      );
+    }
+
+    return response.data || false;
+  } catch (error) {
+    if (error instanceof AuthServiceError) {
+      throw error;
+    }
+    throw new AuthServiceError(
+      500,
+      error instanceof Error ? error.message : "Failed to update address",
+    );
+  }
+}
+
+/**
+ * Delete an address
+ * @param userId - User ID
+ * @param addressId - Address ID
+ * @returns Success boolean
+ */
+export async function deleteAddress(
+  userId: string,
+  addressId: string,
+): Promise<boolean> {
+  try {
+    if (!userId?.trim()) {
+      throw new Error("User ID is required");
+    }
+
+    if (!addressId?.trim()) {
+      throw new Error("Address ID is required");
+    }
+
+    const response = await makeRequest<DeleteAddressResponse>(
+      `/users/${userId}/addresses/${addressId}`,
+      {
+        method: "DELETE",
+        requiresAuth: true,
+      },
+    );
+
+    if (!response.success) {
+      throw new AuthServiceError(
+        response.statusCode || 400,
+        response.error || "Failed to delete address",
+      );
+    }
+
+    return response.data || false;
+  } catch (error) {
+    if (error instanceof AuthServiceError) {
+      throw error;
+    }
+    throw new AuthServiceError(
+      500,
+      error instanceof Error ? error.message : "Failed to delete address",
+    );
+  }
+}
+
+// ============================================================================
 // AUTHENTICATED FETCH HELPERS (for use in other services)
 // ============================================================================
 
@@ -1049,6 +1317,10 @@ export const authService = {
   clearCredentials,
   refreshAccessToken,
   updateUserDetails,
+  getAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
 };
 
 export default authService;
