@@ -386,7 +386,30 @@ export default function AccountPage() {
                     Your Orders
                   </h2>
 
-                  {DUMMY_ORDERS.length === 0 ? (
+                  {ordersLoading ? (
+                    <div className="text-center py-12">
+                      <div className="mb-4 flex justify-center">
+                        <div className="w-10 h-10 border-4 border-[#e6e0da] border-t-[#5540b7] rounded-full animate-spin" />
+                      </div>
+                      <p className="text-[#6b6b6b] font-light">
+                        Loading orders...
+                      </p>
+                    </div>
+                  ) : ordersError ? (
+                    <div className="text-center py-12">
+                      <p className="text-red-600 font-light mb-4">
+                        {ordersError}
+                      </p>
+                      <button
+                        onClick={() =>
+                          user?.userId && loadUserOrders(user.userId)
+                        }
+                        className="text-[#5540b7] font-medium hover:underline"
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  ) : orders.length === 0 ? (
                     <div className="text-center py-12">
                       <p className="text-[#6b6b6b] font-light mb-4">
                         You haven't placed any orders yet
