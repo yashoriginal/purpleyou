@@ -140,6 +140,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const credentials = await authService.register(data);
       setUser(convertAuthUserToUser(credentials.user));
       setIsLoggedIn(true);
+
+      // Dispatch custom event to notify other contexts about login
+      window.dispatchEvent(
+        new CustomEvent("userLoggedIn", {
+          detail: { userId: credentials.user._id || credentials.user.id },
+        }),
+      );
     } catch (err) {
       const errorMessage =
         err instanceof AuthServiceError
