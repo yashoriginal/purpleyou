@@ -451,28 +451,46 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* New address form title */}
-              {showNewAddressForm && savedAddresses.length > 0 && (
-                <div className="mb-6 flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-[#111111]">
-                    Enter New Address
-                  </h3>
+              {/* When no saved addresses and form not shown */}
+              {!showNewAddressForm && savedAddresses.length === 0 && !addressesLoading && (
+                <div className="mb-8 p-6 bg-[#f8f5f2] rounded-lg text-center">
+                  <p className="text-[#6b6b6b] font-light mb-4">
+                    No saved addresses yet
+                  </p>
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowNewAddressForm(false);
-                      if (savedAddresses.length > 0 && !selectedAddressId) {
-                        handleSelectAddress(savedAddresses[0]);
-                      }
-                    }}
-                    className="text-[#5540b7] font-medium hover:underline text-sm"
+                    onClick={() => setShowNewAddressForm(true)}
+                    className="px-4 py-2 bg-[#5540b7] text-white text-sm font-medium rounded hover:bg-[#3d2d7f] transition-colors"
                   >
-                    Cancel
+                    Add Address
                   </button>
                 </div>
               )}
 
-              <form onSubmit={handleAddressSubmit} className="space-y-6">
+              {/* New address form title and form - only show on demand */}
+              {showNewAddressForm && (
+                <>
+                  <div className="mb-6 flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-[#111111]">
+                      {savedAddresses.length > 0 ? "Enter New Address" : "Add Delivery Address"}
+                    </h3>
+                    {savedAddresses.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowNewAddressForm(false);
+                          if (savedAddresses.length > 0 && !selectedAddressId) {
+                            handleSelectAddress(savedAddresses[0]);
+                          }
+                        }}
+                        className="text-[#5540b7] font-medium hover:underline text-sm"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+
+                  <form onSubmit={handleAddressSubmit} className="space-y-6">
                 {/* Full Name */}
                 <div>
                   <label className="block text-sm font-medium text-[#111111] mb-2">
@@ -692,7 +710,9 @@ export default function CheckoutPage() {
                     ? "Processing Payment..."
                     : "Continue to Payment"}
                 </button>
-              </form>
+                  </form>
+                </>
+              )}
             </div>
           </div>
 
