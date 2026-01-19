@@ -118,6 +118,74 @@ export interface AddressObject {
   latitude: string;
   longitude: string;
   isDefault: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Get addresses response
+ */
+export interface GetAddressesResponse {
+  statusCode: number;
+  success: boolean;
+  data: AddressObject[];
+  error: null | string;
+}
+
+/**
+ * Add address request
+ */
+export interface AddAddressRequest {
+  address: string;
+  label: string;
+  area: string;
+  pincode: string;
+  latitude: string;
+  longitude: string;
+  isDefault: boolean;
+}
+
+/**
+ * Add address response
+ */
+export interface AddAddressResponse {
+  statusCode: number;
+  success: boolean;
+  data: boolean;
+  error: null | string;
+}
+
+/**
+ * Update address request
+ */
+export interface UpdateAddressRequest {
+  label?: string;
+  address?: string;
+  area?: string;
+  pincode?: string;
+  latitude?: string;
+  longitude?: string;
+  isDefault?: boolean;
+}
+
+/**
+ * Update address response
+ */
+export interface UpdateAddressResponse {
+  statusCode: number;
+  success: boolean;
+  data: boolean;
+  error: null | string;
+}
+
+/**
+ * Delete address response
+ */
+export interface DeleteAddressResponse {
+  statusCode: number;
+  success: boolean;
+  data: boolean;
+  error: null | string;
 }
 
 /**
