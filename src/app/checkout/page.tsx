@@ -193,7 +193,7 @@ export default function CheckoutPage() {
 
             // Verify payment on backend server
             const verifyResponse = await fetch(
-              "https://purpleoneservice.onrender.com/api/v1/orders/razorpay/verify-payment",
+              "/api/v1/orders/payment/verify-payment",
               {
                 method: "POST",
                 headers: {
