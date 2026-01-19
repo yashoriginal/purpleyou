@@ -179,22 +179,44 @@ export default function CheckoutPage() {
         currency: "INR",
         handler: async (response: any) => {
           try {
-            // Verify payment on backend
-            const verifyResponse = await fetch("/api/razorpay/verify-payment", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                orderId: razorpayOrder.id,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-              }),
-            });
+            // Get userId from localStorage
+            const userStr = localStorage.getItem("auth_user");
+            if (!userStr) {
+              throw new Error("User not authenticated. Please log in again.");
+            }
 
-            if (!verifyResponse.ok) {
-              const errorData = await verifyResponse.json();
-              throw new Error(errorData.error || "Payment verification failed");
+            const user = JSON.parse(userStr);
+            const userId = user._id || user.id || user.userId;
+            if (!userId) {
+              throw new Error("User ID not found. Please log in again.");
+            }
+
+            // Verify payment on backend server
+            const verifyResponse = await fetch(
+              "https://purpleoneservice.onrender.com/api/v1/orders/razorpay/verify-payment",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  orderId: razorpayOrder.id,
+                  userId: userId,
+                  shopId: "purple_you",
+                  razorpay_order_id: razorpayOrder.id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  amount: totalAmount,
+                  currency: "INR",
+                  payment_method: "razorpay",
+                }),
+              }
+            );
+
+            const verifyData = await verifyResponse.json();
+
+            if (!verifyData.success) {
+              throw new Error(verifyData.error || "Payment verification failed");
             }
 
             // Payment successful
