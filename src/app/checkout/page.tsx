@@ -410,29 +410,86 @@ export default function CheckoutPage() {
                       <div
                         key={savedAddress.addressId}
                         onClick={() => handleSelectAddress(savedAddress)}
-                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                        className={`p-5 rounded-lg border-2 cursor-pointer transition-all ${
                           selectedAddressId === savedAddress.addressId
                             ? "border-[#5540b7] bg-[#D3C9FF]/5"
                             : "border-[#e6e0da] hover:border-[#5540b7]"
                         }`}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <p className="font-medium text-[#111111]">
+                        <div className="space-y-3">
+                          {/* Header with Label and Default Badge */}
+                          <div className="flex items-center justify-between">
+                            <p className="font-semibold text-[#111111] text-base">
                               {savedAddress.label}
                             </p>
-                            <p className="text-sm text-[#6b6b6b] mt-1">
-                              {savedAddress.address}
-                            </p>
-                            <p className="text-sm text-[#6b6b6b]">
-                              {savedAddress.area}, {savedAddress.pincode}
-                            </p>
+                            {savedAddress.isDefault && (
+                              <span className="text-xs bg-[#5540b7] text-white px-3 py-1 rounded-full whitespace-nowrap">
+                                Default
+                              </span>
+                            )}
                           </div>
-                          {savedAddress.isDefault && (
-                            <span className="text-xs bg-[#5540b7] text-white px-2 py-1 rounded whitespace-nowrap ml-2">
-                              Default
-                            </span>
-                          )}
+
+                          {/* Address Details */}
+                          <div className="space-y-2 text-sm">
+                            {/* Full Address */}
+                            <div>
+                              <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                Address
+                              </p>
+                              <p className="text-[#111111]">
+                                {savedAddress.address}
+                              </p>
+                            </div>
+
+                            {/* Area and City */}
+                            <div>
+                              <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                Area/City
+                              </p>
+                              <p className="text-[#111111]">
+                                {savedAddress.area}
+                              </p>
+                            </div>
+
+                            {/* Postal Code */}
+                            <div>
+                              <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                Postal Code
+                              </p>
+                              <p className="text-[#111111]">
+                                {savedAddress.pincode}
+                              </p>
+                            </div>
+
+                            {/* Coordinates */}
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                  Latitude
+                                </p>
+                                <p className="text-[#111111] text-xs">
+                                  {savedAddress.latitude}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-[#6b6b6b] font-medium text-xs uppercase tracking-wide">
+                                  Longitude
+                                </p>
+                                <p className="text-[#111111] text-xs">
+                                  {savedAddress.longitude}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Timestamps */}
+                            {savedAddress.createdAt && (
+                              <div className="pt-2 border-t border-[#e6e0da]">
+                                <p className="text-[#6b6b6b] text-xs">
+                                  Added on {new Date(savedAddress.createdAt).toLocaleDateString('en-IN')}
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
