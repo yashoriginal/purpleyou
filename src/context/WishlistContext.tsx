@@ -66,7 +66,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         const data = await wishlistService.getWishlist(userId);
         if (data && data.items) {
-          setItems(data.items);
+          setItems(data.items as WishlistItem[]);
         }
       } catch (err) {
         console.error("Failed to load wishlist:", err);
@@ -125,13 +125,13 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
 
     // Check if already in wishlist
-    if (isInWishlist(product.productId)) {
+    const productId = product.productId || String(product.id);
+    if (isInWishlist(productId)) {
       return;
     }
 
     try {
       setIsLoading(true);
-      const productId = product.productId || String(product.id);
       await wishlistService.addToWishlist(
         userId,
         productId,

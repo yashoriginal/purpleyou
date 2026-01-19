@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import { generateHomeMetadata, generateOrganizationSchema } from "@/lib/seo";
 import Script from "next/script";
 import { getAllProducts } from "@/services/product.service";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 export const metadata: Metadata = generateHomeMetadata();
 
@@ -177,34 +178,7 @@ export default async function HomePage() {
       </section>
 
       {/* Email Signup Section */}
-      <section className="bg-[#D3C9FF] py-16 sm:py-24">
-        <div className="mx-auto max-w-2xl px-4 text-center">
-          <h2 className="text-4xl sm:text-5xl font-light text-[#111111] tracking-wider mb-4">
-            Join the PURPLE YOU Club
-          </h2>
-          <p className="text-base text-[#111111] font-light mb-8">
-            Get exclusive offers, early access to new collections, and styling
-            tips delivered to your inbox.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 bg-white border border-[#e6e0da] text-[#111111] placeholder-[#6b6b6b] focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-[#111111] text-[#D3C9FF] px-8 py-3 text-sm font-medium uppercase tracking-wider hover:bg-[#5540b7] transition-colors whitespace-nowrap"
-            >
-              Subscribe
-            </button>
-          </form>
-          <p className="text-xs text-[#111111] mt-4 font-light">
-            We respect your inbox. Unsubscribe anytime.
-          </p>
-        </div>
-      </section>
+      <NewsletterSignup />
     </>
   );
 }

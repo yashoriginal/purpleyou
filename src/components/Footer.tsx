@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FaInstagram } from "react-icons/fa";
+import { FooterNewsletterSignup } from "@/components/FooterNewsletterSignup";
 
 export default function Footer() {
   return (
@@ -138,20 +139,7 @@ export default function Footer() {
           <h4 className="text-sm font-semibold text-[#111111] uppercase tracking-wider mb-4">
             Subscribe to PURPLE YOU
           </h4>
-          <form className="flex flex-col sm:flex-row gap-3 max-w-md">
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="flex-1 px-4 py-2 bg-white border border-[#e6e0da] text-[#111111] placeholder-[#6b6b6b] text-sm focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-[#5540b7] text-white px-6 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors whitespace-nowrap"
-            >
-              Subscribe
-            </button>
-          </form>
+          <FooterNewsletterSignup />
         </div>
 
         {/* Bottom bar */}
