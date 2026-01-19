@@ -210,13 +210,15 @@ export default function CheckoutPage() {
                   currency: "INR",
                   payment_method: "razorpay",
                 }),
-              }
+              },
             );
 
             const verifyData = await verifyResponse.json();
 
             if (!verifyData.success) {
-              throw new Error(verifyData.error || "Payment verification failed");
+              throw new Error(
+                verifyData.error || "Payment verification failed",
+              );
             }
 
             // Payment successful
