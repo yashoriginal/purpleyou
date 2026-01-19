@@ -186,37 +186,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null);
     };
 
-    // Polling as fallback for storage changes from other tabs
-    const checkAuthChanges = setInterval(() => {
-      try {
-        const userStr = localStorage.getItem("auth_user");
-        const currentUserId = userStr
-          ? JSON.parse(userStr)._id || JSON.parse(userStr).id
-          : null;
-
-        if (currentUserId && currentUserId !== userId) {
-          // User logged in
-          setUserId(currentUserId);
-        } else if (!currentUserId && userId) {
-          // User logged out
-          setUserId(null);
-          setItems([]);
-        }
-      } catch (err) {
-        console.error("Error checking auth changes:", err);
-      }
-    }, 1000); // Check every second
-
-    // Listen for event-based login/logout (faster than polling)
+    // Listen for event-based login/logout
     window.addEventListener("userLoggedIn", handleUserLoggedIn);
     window.addEventListener("userLoggedOut", handleUserLoggedOut);
 
     return () => {
-      clearInterval(checkAuthChanges);
       window.removeEventListener("userLoggedIn", handleUserLoggedIn);
       window.removeEventListener("userLoggedOut", handleUserLoggedOut);
     };
-  }, [userId]);
+  }, []);
 
   // Fetch cart from API when userId changes
   useEffect(() => {
