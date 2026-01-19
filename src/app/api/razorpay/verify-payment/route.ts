@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "Payment verified successfully",
       orderId,
-      paymentId,
+      paymentId: razorpay_payment_id,
     });
   } catch (error) {
     console.error("Error verifying payment:", error);
