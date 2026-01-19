@@ -193,14 +193,14 @@ export default function CheckoutPage() {
 
             // Verify payment on backend server
             const verifyResponse = await fetch(
-              "/api/v1/orders/payment/verify-payment",
+              "https://purpleoneservice.onrender.com/api/v1/orders/payment/verify-payment",
               {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  orderId: razorpayOrder.id,
+                  orderId: orderResponse.orderId,
                   userId: userId,
                   shopId: "purple_you",
                   razorpay_order_id: razorpayOrder.id,
@@ -226,7 +226,7 @@ export default function CheckoutPage() {
 
             // Redirect to order confirmation
             const params = new URLSearchParams({
-              orderId: razorpayOrder.id,
+              orderId: orderResponse.orderId,
               paymentId: response.razorpay_payment_id,
               email: address.email,
               amount: totalAmount.toLocaleString("en-IN"),
