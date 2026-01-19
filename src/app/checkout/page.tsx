@@ -381,6 +381,97 @@ export default function CheckoutPage() {
               <h2 className="text-2xl font-light text-[#111111] tracking-wide mb-8">
                 Delivery Address
               </h2>
+
+              {/* Saved Addresses Section */}
+              {!showNewAddressForm && savedAddresses.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-medium text-[#111111] mb-4">
+                    Your Saved Addresses
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    {savedAddresses.map((savedAddress) => (
+                      <div
+                        key={savedAddress.addressId}
+                        onClick={() => handleSelectAddress(savedAddress)}
+                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                          selectedAddressId === savedAddress.addressId
+                            ? "border-[#5540b7] bg-[#D3C9FF]/5"
+                            : "border-[#e6e0da] hover:border-[#5540b7]"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="font-medium text-[#111111]">
+                              {savedAddress.label}
+                            </p>
+                            <p className="text-sm text-[#6b6b6b] mt-1">
+                              {savedAddress.address}
+                            </p>
+                            <p className="text-sm text-[#6b6b6b]">
+                              {savedAddress.area}, {savedAddress.pincode}
+                            </p>
+                          </div>
+                          {savedAddress.isDefault && (
+                            <span className="text-xs bg-[#5540b7] text-white px-2 py-1 rounded whitespace-nowrap ml-2">
+                              Default
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewAddressForm(true);
+                      setSelectedAddressId(null);
+                      setAddress({
+                        fullName: "",
+                        mobileNumber: "",
+                        building: "",
+                        street: "",
+                        city: "",
+                        state: "",
+                        pinCode: "",
+                        email: "",
+                      });
+                    }}
+                    className="text-[#5540b7] font-medium hover:underline text-sm"
+                  >
+                    + Use a different address
+                  </button>
+                  <div className="mt-6 border-t border-[#e6e0da] pt-6"></div>
+                </div>
+              )}
+
+              {/* Show message if loading addresses */}
+              {addressesLoading && (
+                <div className="mb-6 p-4 bg-[#f8f5f2] rounded-lg text-sm text-[#6b6b6b]">
+                  Loading saved addresses...
+                </div>
+              )}
+
+              {/* New address form title */}
+              {showNewAddressForm && savedAddresses.length > 0 && (
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-[#111111]">
+                    Enter New Address
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewAddressForm(false);
+                      if (savedAddresses.length > 0 && !selectedAddressId) {
+                        handleSelectAddress(savedAddresses[0]);
+                      }
+                    }}
+                    className="text-[#5540b7] font-medium hover:underline text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
               <form onSubmit={handleAddressSubmit} className="space-y-6">
                 {/* Full Name */}
                 <div>
