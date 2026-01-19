@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FaInstagram } from "react-icons/fa";
+import { FooterNewsletterSignup } from "@/components/FooterNewsletterSignup";
 
 export default function Footer() {
   return (
