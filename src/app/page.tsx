@@ -1,26 +1,20 @@
 import Hero from "@/components/Hero";
 import ProductGrid from "@/components/product/ProductGrid";
-import { products } from "@/lib/data";
 import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
 import { generateHomeMetadata, generateOrganizationSchema } from "@/lib/seo";
 import Script from "next/script";
+import { getAllProducts } from "@/services/product.service";
 
 export const metadata: Metadata = generateHomeMetadata();
 
-// ISR: Revalidate every 24 hours (price updates, new products, etc.)
-export const revalidate = 86400;
+// ISR: Revalidate every 10 minutes (to match API cache duration)
+export const revalidate = 600;
 
-export default function HomePage() {
-  const bestsellers = products.filter((p) => p.isBestseller).slice(0, 6);
-  const rings = products.filter((p) => p.category === "rings").slice(0, 1);
-  const necklaces = products
-    .filter((p) => p.category === "necklaces")
-    .slice(0, 1);
-  const bracelets = products
-    .filter((p) => p.category === "bracelets")
-    .slice(0, 1);
+export default async function HomePage() {
+  const apiProducts = await getAllProducts();
+  const bestsellers = apiProducts.filter((p) => p.isBestseller).slice(0, 6);
 
   const organizationSchema = generateOrganizationSchema();
 
