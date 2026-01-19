@@ -71,7 +71,7 @@ The checkout accepts:
   - Request: `{ amount, currency, receipt, notes, customerEmail, customerPhone }`
   - Response: `{ success, order: { id, amount, currency } }`
 
-- **`/api/razorpay/verify-payment`** - Verifies payment signature
+- **`/api/v1/orders/payment/verify-payment`** - Verifies payment signature
   - Request: `{ orderId, paymentId, signature }`
   - Response: `{ success, message }`
 
