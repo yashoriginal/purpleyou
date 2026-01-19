@@ -114,6 +114,14 @@ async function makeWishlistRequest<T = unknown>(
 // ============================================================================
 
 /**
+ * Get wishlist for a user
+ * GET /api/v1/wishlist?userId={userId}
+ */
+export async function getWishlist(userId: string): Promise<WishlistData> {
+  return makeWishlistRequest<WishlistData>(`?userId=${userId}`);
+}
+
+/**
  * Add item to wishlist
  * POST /api/v1/wishlist/items
  */
