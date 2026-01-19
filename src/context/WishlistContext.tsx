@@ -52,11 +52,15 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     return null;
   };
 
-  // Load wishlist from backend on mount
+  // Load wishlist from backend on mount and when user logs in
   useEffect(() => {
     const loadWishlist = async () => {
       const userId = getUserId();
-      if (!userId) return;
+      if (!userId) {
+        // No user logged in, clear wishlist
+        setItems([]);
+        return;
+      }
 
       try {
         setIsLoading(true);
@@ -73,6 +77,16 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     };
 
     loadWishlist();
+
+    // Listen for storage changes (login/logout from other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "auth_user") {
+        loadWishlist();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const itemCount = items.length;
