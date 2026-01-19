@@ -163,6 +163,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Monitor for auth changes (login/logout) and reload cart accordingly
   useEffect(() => {
+    // Handle user login event
+    const handleUserLoggedIn = () => {
+      try {
+        const userStr = localStorage.getItem("auth_user");
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          const newUserId = user._id || user.id || user.userId;
+          if (newUserId) {
+            setUserId(newUserId);
+          }
+        }
+      } catch (err) {
+        console.error("Error handling login event:", err);
+      }
+    };
+
+    // Handle user logout event
+    const handleUserLoggedOut = () => {
+      setUserId(null);
+      setItems([]);
+      setError(null);
+    };
+
+    // Polling as fallback for storage changes from other tabs
     const checkAuthChanges = setInterval(() => {
       try {
         const userStr = localStorage.getItem("auth_user");
@@ -183,7 +207,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     }, 1000); // Check every second
 
-    return () => clearInterval(checkAuthChanges);
+    // Listen for event-based login/logout (faster than polling)
+    window.addEventListener("userLoggedIn", handleUserLoggedIn);
+    window.addEventListener("userLoggedOut", handleUserLoggedOut);
+
+    return () => {
+      clearInterval(checkAuthChanges);
+      window.removeEventListener("userLoggedIn", handleUserLoggedIn);
+      window.removeEventListener("userLoggedOut", handleUserLoggedOut);
+    };
   }, [userId]);
 
   // Fetch cart from API when userId changes
