@@ -191,6 +191,51 @@ export default function AccountPage() {
   const [ordersPage, setOrdersPage] = useState(1);
   const [wishlistPage, setWishlistPage] = useState(1);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
+
+  // Fetch user orders from API
+  useEffect(() => {
+    if (isLoggedIn && user?.userId) {
+      loadUserOrders(user.userId);
+    }
+  }, [isLoggedIn, user?.userId]);
+
+  const loadUserOrders = async (userId: string) => {
+    setOrdersLoading(true);
+    setOrdersError(null);
+
+    try {
+      const apiOrders = await orderService.getUserOrders(userId);
+
+      // Map API orders to the Order interface
+      const mappedOrders: Order[] = apiOrders.map((apiOrder) => ({
+        id: apiOrder.orderId,
+        orderNumber: apiOrder.orderId.substring(0, 20), // Use order ID as order number
+        date: apiOrder.createdAt,
+        total: apiOrder.orderDetails.totalPrice,
+        status: (apiOrder.status.toLowerCase() as any) || "confirmed",
+        items: apiOrder.items.map((item) => ({
+          productName: `Product ${item.productId.substring(0, 8)}...`,
+          quantity: item.quantity,
+          price: item.pricePerUnit,
+          image: "/images/hero1.jpg",
+        })),
+      }));
+
+      setOrders(mappedOrders);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to load orders";
+      setOrdersError(errorMsg);
+      console.error("Failed to load orders:", error);
+      // Fall back to empty orders (not dummy data)
+      setOrders([]);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
 
   // Redirect to login if not authenticated
   useEffect(() => {
