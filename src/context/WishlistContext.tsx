@@ -83,18 +83,32 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       loadWishlist();
     };
 
+    // Listen for logout event from AuthContext
+    const handleUserLoggedOut = () => {
+      setItems([]);
+      setError(null);
+    };
+
     // Listen for storage changes (login/logout from other tabs)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "auth_user") {
-        loadWishlist();
+        if (!e.newValue) {
+          // User logged out
+          setItems([]);
+        } else {
+          // User logged in
+          loadWishlist();
+        }
       }
     };
 
     window.addEventListener("userLoggedIn", handleUserLoggedIn);
+    window.addEventListener("userLoggedOut", handleUserLoggedOut);
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
       window.removeEventListener("userLoggedIn", handleUserLoggedIn);
+      window.removeEventListener("userLoggedOut", handleUserLoggedOut);
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
