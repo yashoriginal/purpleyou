@@ -107,6 +107,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const credentials = await authService.verifyOTP(mobile, otp);
       setUser(convertAuthUserToUser(credentials.user));
       setIsLoggedIn(true);
+
+      // Dispatch custom event to notify other contexts (e.g., WishlistContext) about login
+      window.dispatchEvent(
+        new CustomEvent("userLoggedIn", {
+          detail: { userId: credentials.user._id || credentials.user.id },
+        }),
+      );
     } catch (err) {
       const errorMessage =
         err instanceof AuthServiceError
