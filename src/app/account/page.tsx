@@ -848,6 +848,184 @@ export default function AccountPage() {
           </div>
         </div>
       </div>
+
+      {/* Address Form Modal */}
+      {showAddressForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-[#e6e0da] p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-light text-[#111111]">
+                {editingAddress ? "Edit Address" : "Add New Address"}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowAddressForm(false);
+                  setEditingAddress(null);
+                  setFormData({
+                    label: "",
+                    address: "",
+                    area: "",
+                    pincode: "",
+                    latitude: "",
+                    longitude: "",
+                    isDefault: false,
+                  });
+                }}
+                className="text-[#6b6b6b] hover:text-[#111111]"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#111111] mb-2">
+                  Label (e.g., Home, Office)
+                </label>
+                <input
+                  type="text"
+                  value={formData.label}
+                  onChange={(e) =>
+                    setFormData({ ...formData, label: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-[#e6e0da] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                  placeholder="Home"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#111111] mb-2">
+                  Address
+                </label>
+                <textarea
+                  value={formData.address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                  rows={2}
+                  className="w-full px-4 py-2 border border-[#e6e0da] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                  placeholder="221B Baker Street"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#111111] mb-2">
+                    Area
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.area}
+                    onChange={(e) =>
+                      setFormData({ ...formData, area: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-[#e6e0da] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                    placeholder="Marylebone"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#111111] mb-2">
+                    Pincode
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.pincode}
+                    onChange={(e) =>
+                      setFormData({ ...formData, pincode: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-[#e6e0da] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                    placeholder="NW16XE"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#111111] mb-2">
+                    Latitude
+                  </label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={formData.latitude}
+                    onChange={(e) =>
+                      setFormData({ ...formData, latitude: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-[#e6e0da] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                    placeholder="51.5237"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#111111] mb-2">
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={formData.longitude}
+                    onChange={(e) =>
+                      setFormData({ ...formData, longitude: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-[#e6e0da] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
+                    placeholder="-0.1585"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isDefault"
+                  checked={formData.isDefault}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isDefault: e.target.checked })
+                  }
+                  className="w-4 h-4 rounded border-[#e6e0da] focus:ring-[#5540b7]"
+                />
+                <label
+                  htmlFor="isDefault"
+                  className="ml-2 text-sm font-medium text-[#111111]"
+                >
+                  Set as default address
+                </label>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-white border-t border-[#e6e0da] p-6 flex gap-4 justify-end">
+              <button
+                onClick={() => {
+                  setShowAddressForm(false);
+                  setEditingAddress(null);
+                  setFormData({
+                    label: "",
+                    address: "",
+                    area: "",
+                    pincode: "",
+                    latitude: "",
+                    longitude: "",
+                    isDefault: false,
+                  });
+                }}
+                className="px-6 py-2 border border-[#e6e0da] text-[#111111] rounded-lg hover:bg-[#f8f5f2] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={editingAddress ? handleUpdateAddress : handleAddAddress}
+                disabled={addressFormLoading}
+                className="px-6 py-2 bg-[#5540b7] text-white rounded-lg hover:bg-[#3d2d7f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {addressFormLoading && (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
+                {editingAddress ? "Update Address" : "Add Address"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
