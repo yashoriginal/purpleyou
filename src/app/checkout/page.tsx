@@ -188,9 +188,12 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleAddressSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const handleAddressSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+    const isSelectedAddress = selectedAddressId !== null;
+    if (!validateForm(isSelectedAddress)) return;
 
     setPaymentError("");
     setIsProcessing(true);
