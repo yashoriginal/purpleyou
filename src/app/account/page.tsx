@@ -161,10 +161,26 @@ export default function AccountPage() {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [ordersPage, setOrdersPage] = useState(1);
   const [wishlistPage, setWishlistPage] = useState(1);
-  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState<string | null>(null);
+
+  // Address states
+  const [addresses, setAddresses] = useState<AddressObject[]>([]);
+  const [addressesLoading, setAddressesLoading] = useState(false);
+  const [addressesError, setAddressesError] = useState<string | null>(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<AddressObject | null>(null);
+  const [addressFormLoading, setAddressFormLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    label: "",
+    address: "",
+    area: "",
+    pincode: "",
+    latitude: "",
+    longitude: "",
+    isDefault: false,
+  });
 
   // Fetch user orders from API
   useEffect(() => {
