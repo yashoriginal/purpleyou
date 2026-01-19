@@ -9,7 +9,7 @@ This guide explains how to download and manage product images for your Purple Yo
 Run the image download script:
 
 ```bash
-npm run download-images
+npm run download-images 
 ```
 
 This will download **12 random jewelry images** from Unsplash and organize them into categories:
