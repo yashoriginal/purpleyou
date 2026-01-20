@@ -1,5 +1,7 @@
 import "@/app/globals.css";
+import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { Providers } from "@/components/Providers";
 import { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
