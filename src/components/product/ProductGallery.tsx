@@ -54,7 +54,7 @@ export default function ProductGallery({
 
   const handlePrev = () => {
     setCurrentIndex((prev) =>
-      prev === 0 ? galleryItems.length - 1 : prev - 1
+      prev === 0 ? galleryItems.length - 1 : prev - 1,
     );
   };
 
@@ -73,7 +73,10 @@ export default function ProductGallery({
   }, []);
 
   // Build gallery items (images + video if available)
-  const galleryItems: Array<{ type: "image" | "video"; data: ProductImage | string }> = [
+  const galleryItems: Array<{
+    type: "image" | "video";
+    data: ProductImage | string;
+  }> = [
     ...images.map((img) => ({ type: "image" as const, data: img })),
     ...(videoUrl ? [{ type: "video" as const, data: videoUrl }] : []),
   ];
@@ -195,7 +198,9 @@ export default function ProductGallery({
               {item.type === "image" ? (
                 <Image
                   src={(item.data as ProductImage).url}
-                  alt={(item.data as ProductImage).alt || `Thumbnail ${index + 1}`}
+                  alt={
+                    (item.data as ProductImage).alt || `Thumbnail ${index + 1}`
+                  }
                   fill
                   className="object-cover"
                   sizes="80px"

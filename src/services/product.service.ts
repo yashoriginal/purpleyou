@@ -92,11 +92,12 @@ function mapAPIProductToProduct(apiProduct: APIProduct): Product {
   }
 
   // Map all images for gallery display
-  const galleryImages = apiProduct.images?.map((img) => ({
-    url: validateImageUrl(img.url),
-    alt: img.alt || apiProduct.title,
-    isPrimary: img.isPrimary,
-  })) || [];
+  const galleryImages =
+    apiProduct.images?.map((img) => ({
+      url: validateImageUrl(img.url),
+      alt: img.alt || apiProduct.title,
+      isPrimary: img.isPrimary,
+    })) || [];
 
   return {
     id: parseInt(apiProduct.productId.replace(/\D/g, ""), 10) || Math.random(),
