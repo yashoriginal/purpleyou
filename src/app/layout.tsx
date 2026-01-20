@@ -62,7 +62,9 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
-              <Header />
+              <ClientOnlyWrapper>
+                <Header />
+              </ClientOnlyWrapper>
               <main className="min-h-screen">{children}</main>
               <Footer />
             </WishlistProvider>
