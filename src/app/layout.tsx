@@ -57,11 +57,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white text-black">
-        <Providers>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-        </Providers>
+        <main className="min-h-screen">{children}</main>
+        <Footer />
       </body>
     </html>
   );
