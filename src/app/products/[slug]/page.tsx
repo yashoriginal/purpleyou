@@ -15,6 +15,9 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+// Mark this page as dynamic to avoid static prerendering during build
+export const dynamic = "force-dynamic";
+
 /**
  * Disable static generation for now to allow build to complete
  * TODO: Implement proper static param generation once API is stable
