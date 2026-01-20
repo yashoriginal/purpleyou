@@ -25,6 +25,7 @@ export interface OrderDetails {
 export interface DeliveryDetails {
   deliveryDate: string;
   deliveryAddress: string;
+  phoneNumber?: string;
 }
 
 export interface PickupDetails {
@@ -146,9 +147,7 @@ export interface UserOrdersResponse {
 
 export async function getUserOrders(userId: string): Promise<OrderResponse[]> {
   try {
-    const data = await makeOrderRequest<UserOrdersResponse>(
-      `/user/${userId}`,
-    );
+    const data = await makeOrderRequest<UserOrdersResponse>(`/user/${userId}`);
     return data.orders || [];
   } catch (error) {
     // If the endpoint returns a single order instead of an array, handle it
