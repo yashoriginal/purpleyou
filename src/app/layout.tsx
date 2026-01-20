@@ -2,9 +2,6 @@ import "@/app/globals.css";
 import Footer from "@/components/layout/Footer";
 import { Metadata, Viewport } from "next";
 
-// Mark layout as dynamic to prevent prerendering issues
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://purpleyou.com"),
   title: {
