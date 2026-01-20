@@ -25,6 +25,7 @@ export interface OrderDetails {
 export interface DeliveryDetails {
   deliveryDate: string;
   deliveryAddress: string;
+  phoneNumber?: string;
 }
 
 export interface PickupDetails {
