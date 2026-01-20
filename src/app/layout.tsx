@@ -1,7 +1,6 @@
 import "@/app/globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { ClientOnly } from "@/components/ClientOnly";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { AuthProvider } from "@/context/AuthContext";
