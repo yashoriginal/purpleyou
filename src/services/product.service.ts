@@ -91,6 +91,13 @@ function mapAPIProductToProduct(apiProduct: APIProduct): Product {
     console.warn(`Product "${apiProduct.title}" has invalid slug:`, slug);
   }
 
+  // Map all images for gallery display
+  const galleryImages = apiProduct.images?.map((img) => ({
+    url: validateImageUrl(img.url),
+    alt: img.alt || apiProduct.title,
+    isPrimary: img.isPrimary,
+  })) || [];
+
   return {
     id: parseInt(apiProduct.productId.replace(/\D/g, ""), 10) || Math.random(),
     productId: apiProduct.productId, // Store original API productId for cart operations
@@ -102,6 +109,7 @@ function mapAPIProductToProduct(apiProduct: APIProduct): Product {
     slug: slug,
     image: validateImageUrl(primaryImage?.url),
     hoverImage: validateImageUrl(hoverImage?.url),
+    images: galleryImages,
     category: apiProduct.category?.toLowerCase() || "uncategorized",
     description: apiProduct.description,
     isBestseller: apiProduct.isBestseller ?? false,
