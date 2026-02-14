@@ -186,9 +186,10 @@ function mapV2APIProductToProduct(apiProduct: any): Product {
 
   // Ensure productId is a string (required)
   const productId = String(apiProduct.productId || `product-${Date.now()}`);
+  const internalId = parseInt(productId.replace(/\D/g, ""), 10) || Math.random();
 
-  return {
-    id: parseInt(productId.replace(/\D/g, ""), 10) || Math.random(),
+  const mappedProduct: Product = {
+    id: internalId,
     productId: productId,
     name: apiProduct.name || "Unnamed Product",
     category: (apiProduct.category || "").toLowerCase() || "uncategorized",
@@ -210,6 +211,10 @@ function mapV2APIProductToProduct(apiProduct: any): Product {
     hoverImage: hoverImage,
     price: apiProduct.base?.price,
   };
+
+  console.log(`[MAPPING] Mapped product: id=${internalId}, name="${mappedProduct.name}", category="${mappedProduct.category}", slug="${slug}"`);
+
+  return mappedProduct;
 }
 
 let cachedProducts: Product[] | null = null;
@@ -366,9 +371,17 @@ export async function getProductsByCollection(
     return products;
   }
 
-  return products.filter(
+  const filtered = products.filter(
     (product) => product.category.toLowerCase() === collection.toLowerCase(),
   );
+
+  console.log(`[COLLECTION] Filtering products for collection: "${collection}"`);
+  console.log(`[COLLECTION] Total products: ${products.length}`);
+  console.log(`[COLLECTION] Products by category:`, products.map(p => `${p.name} (${p.category})`).join(", "));
+  console.log(`[COLLECTION] Filtered results: ${filtered.length}`);
+  console.log(`[COLLECTION] Filtered products:`, filtered.map(p => `${p.name} (${p.category})`).join(", "));
+
+  return filtered;
 }
 
 export async function getAllProducts(): Promise<Product[]> {
