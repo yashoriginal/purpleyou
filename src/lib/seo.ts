@@ -97,7 +97,8 @@ export function generateCollectionMetadata(
  * Generate metadata for product page
  */
 export function generateProductMetadata(product: Product): Metadata {
-  const title = `${product.name} - PURPLE YOU | ₹${product.price.toLocaleString("en-IN")}`;
+  const price = product.price || product.base?.price || 0;
+  const title = `${product.name} - PURPLE YOU | ₹${price.toLocaleString("en-IN")}`;
   const description =
     product.description ||
     `Discover ${product.name} at PURPLE YOU. Premium jewelry handcrafted with care.`;
@@ -123,7 +124,7 @@ export function generateProductMetadata(product: Product): Metadata {
       siteName: SITE_NAME,
       images: [
         {
-          url: product.image,
+          url: product.image || "/images/hero1.jpg",
           width: 800,
           height: 1000,
           alt: product.name,
@@ -169,12 +170,13 @@ export function generateOrganizationSchema() {
  * Generate JSON-LD structured data for Product
  */
 export function generateProductSchema(product: Product, baseURL: string) {
+  const price = product.price || product.base?.price || 0;
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description,
-    image: product.image,
+    image: product.image || "/images/hero1.jpg",
     brand: {
       "@type": "Brand",
       name: SITE_NAME,
@@ -183,7 +185,7 @@ export function generateProductSchema(product: Product, baseURL: string) {
       "@type": "Offer",
       url: `${baseURL}/products/${product.slug}`,
       priceCurrency: "INR",
-      price: product.price.toString(),
+      price: price.toString(),
       priceValidUntil: new Date(new Date().setDate(new Date().getDate() + 30))
         .toISOString()
         .split("T")[0], // Valid for 30 days
@@ -216,17 +218,20 @@ export function generateCollectionSchema(
     description: category.description,
     image: category.image,
     url: `${baseURL}/collections/${category.slug}`,
-    hasPart: products.map((product) => ({
-      "@type": "Product",
-      name: product.name,
-      url: `${baseURL}/products/${product.slug}`,
-      image: product.image,
-      offers: {
-        "@type": "Offer",
-        priceCurrency: "INR",
-        price: product.price.toString(),
-      },
-    })),
+    hasPart: products.map((product) => {
+      const price = product.price || product.base?.price || 0;
+      return {
+        "@type": "Product",
+        name: product.name,
+        url: `${baseURL}/products/${product.slug}`,
+        image: product.image || "/images/hero1.jpg",
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "INR",
+          price: price.toString(),
+        },
+      };
+    }),
   };
 }
 

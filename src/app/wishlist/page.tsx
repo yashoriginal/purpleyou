@@ -110,7 +110,7 @@ export default function WishlistPage() {
             <Link href={`/products/${product.slug}`}>
               <div className="relative bg-[#f8f5f2] aspect-[3/4] mb-4 overflow-hidden cursor-pointer group">
                 <Image
-                  src={product.image}
+                  src={product.image || "/images/hero1.jpg"}
                   alt={product.name}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -138,13 +138,8 @@ export default function WishlistPage() {
             {/* Price */}
             <div className="flex gap-2 items-baseline mb-4">
               <span className="text-lg font-medium text-[#111111]">
-                ₹{product.price.toLocaleString("en-IN")}
+                ₹{(product.price || product.base?.price || 0).toLocaleString("en-IN")}
               </span>
-              {product.comparePrice && (
-                <span className="text-sm text-[#6b6b6b] line-through">
-                  ₹{product.comparePrice.toLocaleString("en-IN")}
-                </span>
-              )}
             </div>
 
             {/* Description */}

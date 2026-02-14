@@ -1,5 +1,7 @@
 "use client";
 
+"use client";
+
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -12,19 +14,24 @@ import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 
-const navLinks = [
-  { label: "Shop", href: "/collections/all" },
-  { label: "Earrings", href: "/collections/earrings" },
-  { label: "Necklaces", href: "/collections/necklaces" },
-  { label: "Rings", href: "/collections/rings" },
-  { label: "Bracelets", href: "/collections/bracelets" },
-  { label: "About", href: "/about" },
-];
+interface HeaderProps {
+  categories?: string[];
+}
 
-export default function Header() {
+export default function Header({ categories = [] }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const { totalItems } = useCart();
   const { itemCount } = useWishlist();
+
+  // Build nav links dynamically from categories
+  const navLinks = [
+    { label: "Shop", href: "/collections/all" },
+    ...categories.map((cat) => ({
+      label: cat.charAt(0).toUpperCase() + cat.slice(1),
+      href: `/collections/${cat}`,
+    })),
+    { label: "About", href: "/about" },
+  ];
 
   return (
     <header className="sticky top-0 z-40">

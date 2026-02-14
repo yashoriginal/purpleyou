@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import ProductAccordion from "@/components/product/ProductAccordion";
-import AddToCartButton from "@/components/product/AddToCartButton";
+import ProductDetailClient from "@/components/product/ProductDetailClient";
 import {
   generateProductMetadata,
   generateProductSchema,
@@ -44,6 +44,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 // ISR: Revalidate every 30 minutes (price updates, stock changes, etc.)
 export const revalidate = 1800;
 
+
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
@@ -73,7 +74,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       title: "Materials & Care",
       content: product.materials
         ? `${product.materials}. ${product.careInstructions || "Store safely and clean regularly with a soft cloth."}`
-        : "18K gold or gold plated. Care instructions available upon request.",
+        : "22K gold or gold plated. Care instructions available upon request.",
     },
     {
       title: "Size Guide",
@@ -87,7 +88,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
     },
   ];
 
-  const productSchema = generateProductSchema(product, "https://purpleyou.com");
+  const productSchema = generateProductSchema(
+    {
+      ...product,
+      price: product.base.price,
+    },
+    "https://purpleyou.com"
+  );
   const breadcrumbs = generateBreadcrumbSchema([
     { name: "Home", url: "https://purpleyou.com" },
     {
@@ -119,101 +126,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mb-16">
-        {/* Left Column - Media Gallery */}
-        <div className="flex flex-col gap-6">
-          {/* Main Image */}
-          <div className="relative bg-[#f8f5f2] aspect-[3/4] overflow-hidden">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-
-          {/* Thumbnail Images */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="relative bg-[#f8f5f2] aspect-square overflow-hidden cursor-pointer hover:opacity-70 transition-opacity">
-              <Image
-                src={product.image}
-                alt="Thumbnail 1"
-                fill
-                className="object-cover"
-              />
-            </div>
-            {product.hoverImage && (
-              <div className="relative bg-[#f8f5f2] aspect-square overflow-hidden cursor-pointer hover:opacity-70 transition-opacity">
-                <Image
-                  src={product.hoverImage}
-                  alt="Thumbnail 2"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
-            {product.videoUrl && (
-              <div className="relative bg-[#f8f5f2] aspect-square overflow-hidden cursor-pointer hover:opacity-70 transition-opacity flex items-center justify-center">
-                <video
-                  src={product.videoUrl}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                  <svg
-                    className="w-8 h-8 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                  </svg>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Video Section - Below Gallery */}
-          {product.videoUrl && (
-            <div className="relative bg-[#f8f5f2] aspect-video overflow-hidden">
-              <video
-                src={product.videoUrl}
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Right Column - Purchase Panel */}
-        <div className="flex flex-col">
-          {/* Product Header */}
-          <div className="pb-6 border-b border-[#e6e0da]">
-            <h1 className="text-3xl sm:text-4xl font-light text-[#111111] tracking-wide mb-3">
-              {product.name}
-            </h1>
-
-            {/* Price & Rating */}
-            <div className="flex items-baseline gap-3 mb-4">
-              <span className="text-3xl font-light text-[#111111]">
-                ₹{product.price.toLocaleString("en-IN")}
-              </span>
-              {product.comparePrice && (
-                <span className="text-lg text-[#6b6b6b] line-through">
-                  ₹{product.comparePrice.toLocaleString("en-IN")}
-                </span>
-              )}
-            </div>
-
-            {/* Description */}
-            <p className="text-sm text-[#6b6b6b] font-light leading-relaxed">
-              {product.description}
-            </p>
-          </div>
-
-          <AddToCartButton product={product} />
-        </div>
+        {/* Client Component - Handles all interactive parts */}
+        <ProductDetailClient product={product} />
       </div>
 
       {/* Accordions Section */}
@@ -240,7 +154,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 <div className="group cursor-pointer">
                   <div className="relative bg-[#f8f5f2] aspect-[3/4] mb-3 overflow-hidden">
                     <Image
-                      src={relatedProduct.image}
+                      src={relatedProduct.image || "/images/hero1.jpg"}
                       alt={relatedProduct.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -250,7 +164,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     {relatedProduct.name}
                   </h3>
                   <p className="text-sm font-medium text-[#111111] mt-2">
-                    ₹{relatedProduct.price.toLocaleString("en-IN")}
+                    ₹{relatedProduct.base.price.toLocaleString("en-IN")}
                   </p>
                 </div>
               </Link>

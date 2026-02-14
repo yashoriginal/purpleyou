@@ -3,29 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  comparePrice?: number;
-  slug: string;
-  image: string;
-  hoverImage?: string;
-  category: string;
-  description: string;
-  isBestseller?: boolean;
-  isNew?: boolean;
-}
+import { Product } from "@/types/product";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [isHovering, setIsHovering] = useState(false);
 
+  // Get hover image (prefer secondary variant image, then product hoverImage)
+  const hoverImageOption =
+    product.variants?.[1]?.overrides?.images?.[0] ||
+    product.variants?.[1]?.resolved?.images?.[0] ||
+    product.hoverImage;
+
   // Only use hover image if it exists and is different from main image
   const displayImage =
-    isHovering && product.hoverImage && product.hoverImage !== product.image
-      ? product.hoverImage
-      : product.image;
+    isHovering && hoverImageOption && hoverImageOption !== product.image
+      ? hoverImageOption
+      : product.image || "/images/hero1.jpg";
 
   return (
     <Link href={`/products/${product.slug}`}>
@@ -60,15 +53,24 @@ export default function ProductCard({ product }: { product: Product }) {
           <p className="text-xs text-[#6b6b6b] mt-2 font-light line-clamp-2">
             {product.description}
           </p>
+
+          {/* Variant options display */}
+          {product.variantSchema && Object.keys(product.variantSchema).length > 0 && (
+            <div className="mt-2 text-xs text-[#6b6b6b]">
+              {Object.entries(product.variantSchema)
+                .slice(0, 2)
+                .map(([key, options]) => (
+                  <div key={key} className="capitalize">
+                    <span className="font-medium">{key}:</span> {options.join(", ")}
+                  </div>
+                ))}
+            </div>
+          )}
+
           <div className="mt-3 flex gap-2 items-baseline">
             <span className="text-lg font-medium text-[#111111]">
-              ₹{product.price.toLocaleString("en-IN")}
+              ₹{(product.price || product.base?.price || 0).toLocaleString("en-IN")}
             </span>
-            {product.comparePrice && (
-              <span className="text-xs text-[#6b6b6b] line-through">
-                ₹{product.comparePrice.toLocaleString("en-IN")}
-              </span>
-            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import CollectionFilters from "./CollectionFilters";
@@ -15,19 +15,37 @@ export default function CollectionFiltersClient({
   products,
   collectionName,
 }: CollectionFiltersClientProps) {
+  // Calculate dynamic price range from actual products
+  const maxPrice = useMemo(() => {
+    if (products.length === 0) return 100000;
+    const prices = products.map((p) => p.price || p.base?.price || 0);
+    const max = Math.max(...prices);
+    // Round up to nearest 10000 for a cleaner UI
+    return Math.ceil(max / 10000) * 10000;
+  }, [products]);
+
   const [filters, setFilters] = useState({
-    priceRange: [0, 100000] as [number, number],
+    priceRange: [0, maxPrice] as [number, number],
     sortBy: "featured",
   });
+
+  // Update filter max price when products or maxPrice changes
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      priceRange: [prev.priceRange[0], maxPrice] as [number, number],
+    }));
+  }, [maxPrice]);
 
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
     // Filter by price
     result = result.filter((product) => {
+      const price = product.price || product.base?.price || 0;
       return (
-        product.price >= filters.priceRange[0] &&
-        product.price <= filters.priceRange[1]
+        price >= filters.priceRange[0] &&
+        price <= filters.priceRange[1]
       );
     });
 
@@ -37,10 +55,18 @@ export default function CollectionFiltersClient({
         result = result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
         break;
       case "price-low":
-        result = result.sort((a, b) => a.price - b.price);
+        result = result.sort((a, b) => {
+          const aPrice = a.price || a.base?.price || 0;
+          const bPrice = b.price || b.base?.price || 0;
+          return aPrice - bPrice;
+        });
         break;
       case "price-high":
-        result = result.sort((a, b) => b.price - a.price);
+        result = result.sort((a, b) => {
+          const aPrice = a.price || a.base?.price || 0;
+          const bPrice = b.price || b.base?.price || 0;
+          return bPrice - aPrice;
+        });
         break;
       case "featured":
       default:
@@ -87,6 +113,7 @@ export default function CollectionFiltersClient({
         <CollectionFilters
           onFilterChange={setFilters}
           productCount={filteredAndSortedProducts.length}
+          maxPrice={maxPrice}
         />
       </div>
 
@@ -97,6 +124,7 @@ export default function CollectionFiltersClient({
           <CollectionFilters
             onFilterChange={setFilters}
             productCount={filteredAndSortedProducts.length}
+            maxPrice={maxPrice}
           />
         </div>
 
@@ -125,7 +153,7 @@ export default function CollectionFiltersClient({
                   <div className="group cursor-pointer">
                     <div className="relative bg-[#f5f1ed] aspect-[3/4] mb-4 overflow-hidden">
                       <Image
-                        src={product.image}
+                        src={product.image || "/images/hero1.jpg"}
                         alt={product.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -146,13 +174,8 @@ export default function CollectionFiltersClient({
                     </h3>
                     <div className="mt-2 flex gap-2 items-baseline">
                       <span className="text-base font-medium text-[#111111]">
-                        ₹{product.price.toLocaleString("en-IN")}
+                        ₹{(product.price || product.base?.price || 0).toLocaleString("en-IN")}
                       </span>
-                      {product.comparePrice && (
-                        <span className="text-xs text-[#6b6b6b] line-through">
-                          ₹{product.comparePrice.toLocaleString("en-IN")}
-                        </span>
-                      )}
                     </div>
                   </div>
                 </Link>
