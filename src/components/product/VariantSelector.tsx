@@ -21,6 +21,26 @@ export default function VariantSelector({
     return Object.keys(product.variantSchema || {});
   }, [product.variantSchema]);
 
+  // Get only the available options that exist in the variants array
+  const availableOptions = useMemo(() => {
+    const options: Record<string, Set<string>> = {};
+
+    variantKeys.forEach((key) => {
+      options[key] = new Set<string>();
+    });
+
+    // Add only options that are present in actual variants
+    product.variants?.forEach((variant) => {
+      variantKeys.forEach((key) => {
+        if (variant.attributes[key]) {
+          options[key].add(variant.attributes[key]);
+        }
+      });
+    });
+
+    return options;
+  }, [product.variants, variantKeys]);
+
   // Find matching variant based on selected attributes
   const selectedVariant = useMemo(() => {
     if (variantKeys.length === 0) return null;
@@ -55,14 +75,14 @@ export default function VariantSelector({
   };
 
   // Don't render if no variants
-  if (!product.variantSchema || variantKeys.length === 0) {
+  if (!product.variants || product.variants.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-6 py-6 border-y border-[#e6e0da]">
       {variantKeys.map((key) => {
-        const options = product.variantSchema?.[key] || [];
+        const options = Array.from(availableOptions[key] || []).sort();
         const selectedValue = selectedAttributes[key];
 
         return (
@@ -93,27 +113,27 @@ export default function VariantSelector({
       {selectedVariant && (
         <div className="mt-6 pt-6 border-t border-[#e6e0da]">
           <div className="space-y-2">
-            {selectedVariant.resolved?.stock !== undefined && (
+            {selectedVariant.overrides?.stock !== undefined && (
               <div className="flex justify-between text-sm">
                 <span className="text-[#6b6b6b]">Stock:</span>
                 <span
                   className={
-                    selectedVariant.resolved.stock > 0
+                    selectedVariant.overrides.stock > 0
                       ? "text-green-600"
                       : "text-red-600"
                   }
                 >
-                  {selectedVariant.resolved.stock > 0
-                    ? `${selectedVariant.resolved.stock} available`
+                  {selectedVariant.overrides.stock > 0
+                    ? `${selectedVariant.overrides.stock} available`
                     : "Out of stock"}
                 </span>
               </div>
             )}
-            {selectedVariant.resolved?.price !== undefined && (
+            {selectedVariant.overrides?.price !== undefined && (
               <div className="flex justify-between text-sm">
                 <span className="text-[#6b6b6b]">Variant Price:</span>
                 <span className="font-medium text-[#111111]">
-                  ₹{selectedVariant.resolved.price.toLocaleString("en-IN")}
+                  ₹{selectedVariant.overrides.price.toLocaleString("en-IN")}
                 </span>
               </div>
             )}
