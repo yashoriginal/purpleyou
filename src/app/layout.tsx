@@ -1,7 +1,7 @@
 import "@/app/globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { Providers } from "@/components/Providers";
+import { ProvidersWrapper } from "@/components/ProvidersWrapper";
 import { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
@@ -56,11 +56,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white text-black">
-        <Providers>
+        <ProvidersWrapper>
           <Header />
           <main className="min-h-screen">{children}</main>
           <Footer />
-        </Providers>
+        </ProvidersWrapper>
       </body>
     </html>
   );

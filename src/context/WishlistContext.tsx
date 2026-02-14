@@ -132,21 +132,23 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
     try {
       setIsLoading(true);
+      const price = product.price || product.base?.price || 0;
       await wishlistService.addToWishlist(
         userId,
         productId,
         1,
-        product.price,
+        price,
         undefined,
       );
 
       // Update local state
+      const itemPrice = product.price || product.base?.price || 0;
       setItems((prevItems) => [
         ...prevItems,
         {
           productId,
           quantity: 1,
-          priceEach: product.price,
+          priceEach: itemPrice,
           currency: "INR",
         },
       ]);

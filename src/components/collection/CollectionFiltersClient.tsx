@@ -25,9 +25,10 @@ export default function CollectionFiltersClient({
 
     // Filter by price
     result = result.filter((product) => {
+      const price = product.price || product.base?.price || 0;
       return (
-        product.price >= filters.priceRange[0] &&
-        product.price <= filters.priceRange[1]
+        price >= filters.priceRange[0] &&
+        price <= filters.priceRange[1]
       );
     });
 
@@ -37,10 +38,18 @@ export default function CollectionFiltersClient({
         result = result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
         break;
       case "price-low":
-        result = result.sort((a, b) => a.price - b.price);
+        result = result.sort((a, b) => {
+          const aPrice = a.price || a.base?.price || 0;
+          const bPrice = b.price || b.base?.price || 0;
+          return aPrice - bPrice;
+        });
         break;
       case "price-high":
-        result = result.sort((a, b) => b.price - a.price);
+        result = result.sort((a, b) => {
+          const aPrice = a.price || a.base?.price || 0;
+          const bPrice = b.price || b.base?.price || 0;
+          return bPrice - aPrice;
+        });
         break;
       case "featured":
       default:
@@ -125,7 +134,7 @@ export default function CollectionFiltersClient({
                   <div className="group cursor-pointer">
                     <div className="relative bg-[#f5f1ed] aspect-[3/4] mb-4 overflow-hidden">
                       <Image
-                        src={product.image}
+                        src={product.image || "/images/hero1.jpg"}
                         alt={product.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -146,13 +155,8 @@ export default function CollectionFiltersClient({
                     </h3>
                     <div className="mt-2 flex gap-2 items-baseline">
                       <span className="text-base font-medium text-[#111111]">
-                        ₹{product.price.toLocaleString("en-IN")}
+                        ₹{(product.price || product.base?.price || 0).toLocaleString("en-IN")}
                       </span>
-                      {product.comparePrice && (
-                        <span className="text-xs text-[#6b6b6b] line-through">
-                          ₹{product.comparePrice.toLocaleString("en-IN")}
-                        </span>
-                      )}
                     </div>
                   </div>
                 </Link>

@@ -291,11 +291,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       // Call API to add item
       const productId = product.productId || String(product.id); // Fallback to numeric id if productId not available
+      const price = product.price || product.base?.price || 0;
       const cartData = await cartService.addToCart(
         currentUserId,
         productId,
         quantity,
-        product.price,
+        price,
         selectedVariants,
       );
 
@@ -311,14 +312,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
           return updatedItems;
         } else {
           // Add new item
+          const itemPrice = product.price || product.base?.price || 0;
           return [
             ...prevItems,
             {
               id: itemId,
               productId,
               productName: product.name,
-              price: product.price,
-              image: product.image,
+              price: itemPrice,
+              image: product.image || "/images/hero1.jpg",
               quantity,
               selectedVariants: selectedVariants || {},
             },

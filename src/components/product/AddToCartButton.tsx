@@ -109,33 +109,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
 
   return (
     <>
-      {/* Variants */}
-      {product.variants && product.variants.length > 0 && (
-        <div className="py-6 border-b border-[#e6e0da]">
-          {product.variants.map((variant, idx) => (
-            <div key={idx} className="mb-4 last:mb-0">
-              <label className="block text-sm font-medium text-[#111111] mb-3">
-                {variant.name}
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {variant.options.map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => handleVariantSelect(variant.name, option)}
-                    className={`px-4 py-2 border text-sm transition-colors ${
-                      selectedVariants[variant.name] === option
-                        ? "border-[#5540b7] bg-[#5540b7] text-white"
-                        : "border-[#e6e0da] text-[#111111] hover:border-[#5540b7] hover:text-[#5540b7]"
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Note: Variant selection is now handled by VariantSelector component in product detail page */}
 
       {/* Benefits */}
       <div className="py-6 space-y-3">

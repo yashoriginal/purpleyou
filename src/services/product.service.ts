@@ -1,47 +1,67 @@
-import { Product } from "@/types/product";
+import { Product, Variant, VariantSchema } from "@/types/product";
 
-const EXTERNAL_API_URL =
-  "https://purpleoneservice.onrender.com/api/v1/products";
+const EXTERNAL_API_URL = "https://purpleoneservice.onrender.com/api/v1";
 
+// API Response Types
 interface APIVariant {
-  color: string;
-  size: string;
-  stock: number;
-  sku: string;
-  price?: number;
-  name?: string;
-}
-
-interface APIImage {
-  url: string;
-  isPrimary: boolean;
-  alt?: string;
-}
-
-interface APIProduct {
-  productId: string;
-  title: string;
-  price: number;
-  comparePrice?: number;
-  slug: string;
-  category: string;
-  description: string;
-  images: APIImage[];
-  isBestseller?: boolean;
-  isNew?: boolean;
-  variants?: APIVariant[];
-  isActive: boolean;
-}
-
-interface APIResponse {
-  data: {
-    items: APIProduct[];
+  variantId: string;
+  attributes: Record<string, string>;
+  overrides?: {
+    stock?: number;
+    price?: number;
+    images?: string[];
+    sku?: string;
   };
-  success: boolean;
+  resolved?: {
+    price: number;
+    stock: number;
+    images?: string[];
+    sku?: string;
+  };
 }
 
-// Default fallback image
-const DEFAULT_IMAGE = "/images/hero1.jpg";
+interface APIProductBase {
+  productId: string;
+  name: string;
+  category: string;
+  subcategory?: string;
+  description: string;
+  state?: string;
+  base: {
+    stock: number;
+    price: number;
+  };
+  variantSchema?: Record<string, string[]>;
+  variants?: APIVariant[];
+  tags?: string[];
+  currency?: string;
+  brand?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface APIListResponse {
+  status: string;
+  data: {
+    products: APIProductBase[];
+  };
+  meta?: {
+    timestamp?: string;
+    apiVersion?: string;
+    pagination?: { limit: number };
+  };
+}
+
+interface APIDetailResponse {
+  status: string;
+  data: {
+    product: APIProductBase;
+  };
+  meta?: {
+    timestamp?: string;
+    apiVersion?: string;
+  };
+}
 
 // Generate URL-friendly slug from text
 function generateSlug(text: string): string {
@@ -54,58 +74,43 @@ function generateSlug(text: string): string {
     .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 }
 
-// Validate and normalize image URL
-function validateImageUrl(url?: string): string {
-  if (!url) return DEFAULT_IMAGE;
-
-  // If it's a local path, use it as-is
-  if (url.startsWith("/")) {
-    return url;
-  }
-
-  // If it's a valid external URL, use it
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    try {
-      new URL(url);
-      return url;
-    } catch {
-      return DEFAULT_IMAGE;
-    }
-  }
-
-  return DEFAULT_IMAGE;
-}
-
 // Map external API product to frontend Product type
-function mapAPIProductToProduct(apiProduct: APIProduct): Product {
-  // Get primary image or first image
+function mapAPIProductToProduct(apiProduct: APIProductBase): Product {
+  const slug = generateSlug(apiProduct.name);
+
+  // Get primary image from first variant or use default
   const primaryImage =
-    apiProduct.images?.find((img) => img.isPrimary) || apiProduct.images?.[0];
-  const hoverImage = apiProduct.images?.[1];
+    apiProduct.variants?.[0]?.resolved?.images?.[0] ||
+    apiProduct.variants?.[0]?.overrides?.images?.[0] ||
+    "/images/hero1.jpg";
 
-  // Generate slug from title if not provided
-  const slug = apiProduct.slug || generateSlug(apiProduct.title);
-
-  // Validate that slug is a non-empty string
-  if (!slug || typeof slug !== "string") {
-    console.warn(`Product "${apiProduct.title}" has invalid slug:`, slug);
-  }
+  // Get hover/secondary image from second variant
+  const hoverImage =
+    apiProduct.variants?.[1]?.resolved?.images?.[0] ||
+    apiProduct.variants?.[1]?.overrides?.images?.[0];
 
   return {
     id: parseInt(apiProduct.productId.replace(/\D/g, ""), 10) || Math.random(),
-    productId: apiProduct.productId, // Store original API productId for cart operations
-    name: apiProduct.title,
-    price: Math.floor(apiProduct.price),
-    comparePrice: apiProduct.comparePrice
-      ? Math.floor(apiProduct.comparePrice)
-      : undefined,
-    slug: slug,
-    image: validateImageUrl(primaryImage?.url),
-    hoverImage: validateImageUrl(hoverImage?.url),
+    productId: apiProduct.productId,
+    name: apiProduct.name,
     category: apiProduct.category?.toLowerCase() || "uncategorized",
+    subcategory: apiProduct.subcategory?.toLowerCase(),
     description: apiProduct.description,
-    isBestseller: apiProduct.isBestseller ?? false,
-    isNew: apiProduct.isNew ?? false,
+    slug: slug,
+    base: apiProduct.base,
+    variantSchema: apiProduct.variantSchema,
+    variants: apiProduct.variants as Variant[],
+    state: apiProduct.state,
+    tags: apiProduct.tags,
+    currency: apiProduct.currency,
+    brand: apiProduct.brand,
+    createdAt: apiProduct.createdAt,
+    updatedAt: apiProduct.updatedAt,
+
+    // Legacy fields for backward compatibility
+    image: primaryImage,
+    hoverImage: hoverImage,
+    price: apiProduct.base.price,
   };
 }
 
@@ -120,25 +125,25 @@ async function fetchProductsFromAPI(): Promise<Product[]> {
   }
 
   try {
-    const res = await fetch(EXTERNAL_API_URL, {
+    const res = await fetch(`${EXTERNAL_API_URL}/products`, {
       next: { revalidate: 600 },
     });
 
     if (!res.ok) {
       console.error("Failed to fetch products from API:", res.status);
-      return [];
+      return useFallbackProducts();
     }
 
-    const data: APIResponse = await res.json();
+    const data: APIListResponse = await res.json();
 
-    if (!data.success || !data.data?.items) {
-      console.error("Invalid API response structure");
-      return [];
+    if (data.status !== "SUCCESS" || !data.data?.products) {
+      console.warn("Invalid API response structure, using fallback data");
+      return useFallbackProducts();
     }
 
     // Filter only active products and map them
-    const products = data.data.items
-      .filter((item) => item.isActive !== false)
+    const products = data.data.products
+      .filter((item) => item.state !== "INACTIVE" && item.state !== "DRAFT")
       .map(mapAPIProductToProduct);
 
     // Cache the products
@@ -148,7 +153,59 @@ async function fetchProductsFromAPI(): Promise<Product[]> {
     return products;
   } catch (error) {
     console.error("Error fetching products from API:", error);
+    return useFallbackProducts();
+  }
+}
+
+/**
+ * Fallback to dummy data when API is unavailable
+ * This allows the app to display products during development
+ */
+function useFallbackProducts(): Product[] {
+  try {
+    const { products: dummyProducts } = require("@/lib/data");
+
+    // Convert dummy products to new format
+    return dummyProducts.map((product: any) => ({
+      ...product,
+      productId: product.productId || `P${product.id}`,
+      base: {
+        stock: 100, // Default stock
+        price: product.price || 0,
+      },
+      // For now, don't use variants from dummy data
+      // They can be added when proper variant data is available
+    }));
+  } catch {
+    console.error("Failed to load fallback products");
     return [];
+  }
+}
+
+async function fetchProductByIdFromAPI(
+  productId: string,
+): Promise<Product | null> {
+  try {
+    const res = await fetch(`${EXTERNAL_API_URL}/products/${productId}`, {
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) {
+      console.error(`Failed to fetch product ${productId}:`, res.status);
+      return null;
+    }
+
+    const data: APIDetailResponse = await res.json();
+
+    if (data.status !== "SUCCESS" || !data.data?.product) {
+      console.error("Invalid API response structure");
+      return null;
+    }
+
+    return mapAPIProductToProduct(data.data.product);
+  } catch (error) {
+    console.error(`Error fetching product ${productId}:`, error);
+    return null;
   }
 }
 
@@ -173,4 +230,8 @@ export async function getProductsByCollection(
 
 export async function getAllProducts(): Promise<Product[]> {
   return fetchProductsFromAPI();
+}
+
+export async function getProductById(productId: string): Promise<Product | null> {
+  return fetchProductByIdFromAPI(productId);
 }
