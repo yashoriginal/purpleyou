@@ -3,6 +3,48 @@ import { Product, Variant, VariantSchema } from "@/types/product";
 const EXTERNAL_API_URL = "https://purpleoneservice.onrender.com/api/v1";
 
 // API Response Types
+
+// Old API format (currently used by the backend)
+interface APIImage {
+  url: string;
+  isPrimary: boolean;
+  alt?: string;
+}
+
+interface APIVariantOld {
+  color: string;
+  size: string;
+  stock: number;
+  sku: string;
+  price?: number;
+  name?: string;
+}
+
+interface APIProductOld {
+  productId: string;
+  title: string;
+  price: number;
+  comparePrice?: number;
+  slug: string;
+  category: string;
+  description: string;
+  images: APIImage[];
+  isBestseller?: boolean;
+  isNew?: boolean;
+  variants?: APIVariantOld[];
+  isActive: boolean;
+}
+
+interface APIResponseOld {
+  data: {
+    items: APIProductOld[];
+  };
+  success: boolean;
+  statusCode?: number;
+  error?: string;
+}
+
+// New v2 API format (future)
 interface APIVariant {
   variantId: string;
   attributes: Record<string, string>;
@@ -74,9 +116,42 @@ function generateSlug(text: string): string {
     .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 }
 
-// Map external API product to frontend Product type
-function mapAPIProductToProduct(apiProduct: APIProductBase): Product {
-  const slug = generateSlug(apiProduct.name);
+// Map old API product format to new internal Product type
+function mapOldAPIProductToProduct(apiProduct: APIProductOld): Product {
+  const slug = (apiProduct.slug && typeof apiProduct.slug === 'string')
+    ? apiProduct.slug
+    : generateSlug(apiProduct.title || `product-${apiProduct.productId}`);
+
+  // Get primary image or first image
+  const primaryImage =
+    apiProduct.images?.find((img) => img.isPrimary) || apiProduct.images?.[0];
+  const hoverImage = apiProduct.images?.[1];
+
+  return {
+    id: parseInt(apiProduct.productId.replace(/\D/g, ""), 10) || Math.random(),
+    productId: apiProduct.productId,
+    name: apiProduct.title,
+    category: apiProduct.category?.toLowerCase() || "uncategorized",
+    description: apiProduct.description,
+    slug: slug,
+    base: {
+      stock: 100, // Old API doesn't provide stock, use default
+      price: Math.floor(apiProduct.price),
+    },
+    price: Math.floor(apiProduct.price),
+    comparePrice: apiProduct.comparePrice
+      ? Math.floor(apiProduct.comparePrice)
+      : undefined,
+    image: primaryImage?.url || "/images/hero1.jpg",
+    hoverImage: hoverImage?.url,
+    isBestseller: apiProduct.isBestseller ?? false,
+    isNew: apiProduct.isNew ?? false,
+  };
+}
+
+// Map new v2 API product format to internal Product type
+function mapV2APIProductToProduct(apiProduct: any): Product {
+  const slug = generateSlug(apiProduct.name || `product-${apiProduct.productId}`);
 
   // Get primary image from first variant or use default
   const primaryImage =
@@ -89,15 +164,18 @@ function mapAPIProductToProduct(apiProduct: APIProductBase): Product {
     apiProduct.variants?.[1]?.resolved?.images?.[0] ||
     apiProduct.variants?.[1]?.overrides?.images?.[0];
 
+  // Ensure productId is a string (required)
+  const productId = String(apiProduct.productId || `product-${Date.now()}`);
+
   return {
-    id: parseInt(apiProduct.productId.replace(/\D/g, ""), 10) || Math.random(),
-    productId: apiProduct.productId,
-    name: apiProduct.name,
-    category: apiProduct.category?.toLowerCase() || "uncategorized",
+    id: parseInt(productId.replace(/\D/g, ""), 10) || Math.random(),
+    productId: productId,
+    name: apiProduct.name || "Unnamed Product",
+    category: (apiProduct.category || "").toLowerCase() || "uncategorized",
     subcategory: apiProduct.subcategory?.toLowerCase(),
-    description: apiProduct.description,
+    description: apiProduct.description || "",
     slug: slug,
-    base: apiProduct.base,
+    base: apiProduct.base || { stock: 0, price: 0 },
     variantSchema: apiProduct.variantSchema,
     variants: apiProduct.variants as Variant[],
     state: apiProduct.state,
@@ -110,7 +188,7 @@ function mapAPIProductToProduct(apiProduct: APIProductBase): Product {
     // Legacy fields for backward compatibility
     image: primaryImage,
     hoverImage: hoverImage,
-    price: apiProduct.base.price,
+    price: apiProduct.base?.price,
   };
 }
 
@@ -125,31 +203,57 @@ async function fetchProductsFromAPI(): Promise<Product[]> {
   }
 
   try {
+    console.log(`[API] Fetching products from: ${EXTERNAL_API_URL}/products`);
     const res = await fetch(`${EXTERNAL_API_URL}/products`, {
       next: { revalidate: 600 },
     });
 
     if (!res.ok) {
-      console.error("Failed to fetch products from API:", res.status);
+      console.error(`[API] Failed to fetch - Status: ${res.status}`);
       return useFallbackProducts();
     }
 
-    const data: APIListResponse = await res.json();
+    const data = await res.json();
+    console.log(`[API] Response received`);
 
-    if (data.status !== "SUCCESS" || !data.data?.products) {
-      console.warn("Invalid API response structure, using fallback data");
+    let products: Product[] = [];
+
+    // Detect API format and handle accordingly
+    if (data.status === "SUCCESS" && data.data?.products) {
+      // Pure v2 API format
+      console.log(`[API] Detected pure v2 API format`);
+      products = data.data.products
+        .filter((item: APIProductBase) => item.state !== "INACTIVE" && item.state !== "DRAFT")
+        .map(mapV2APIProductToProduct);
+    } else if (data.success && data.data?.items && data.data.items.length > 0) {
+      // Hybrid format: old envelope (success, data.items) with v2 product data
+      const firstItem = data.data.items[0];
+
+      if (firstItem.base && firstItem.variantSchema !== undefined) {
+        // This is v2 product data in old envelope
+        console.log(`[API] ✅ Detected hybrid format: v2 products in old envelope (${data.data.items.length} items)`);
+        products = data.data.items
+          .filter((item: any) => item.state !== "INACTIVE" && item.state !== "DRAFT")
+          .map(mapV2APIProductToProduct);
+      } else {
+        // This is old format
+        console.log(`[API] ✅ Detected old API format (success=${data.success}, items=${data.data.items.length})`);
+        products = data.data.items
+          .filter((item: APIProductOld) => item.isActive !== false)
+          .map(mapOldAPIProductToProduct);
+      }
+    } else {
+      console.warn(`[API] Unknown API response structure`);
+      console.log(`[API] Response keys:`, Object.keys(data));
+      console.log(`[API] Response data keys:`, data.data ? Object.keys(data.data) : "No data");
       return useFallbackProducts();
     }
-
-    // Filter only active products and map them
-    const products = data.data.products
-      .filter((item) => item.state !== "INACTIVE" && item.state !== "DRAFT")
-      .map(mapAPIProductToProduct);
 
     // Cache the products
     cachedProducts = products;
     cacheTimestamp = Date.now();
 
+    console.log(`[API] Successfully loaded ${products.length} products from API`);
     return products;
   } catch (error) {
     console.error("Error fetching products from API:", error);
