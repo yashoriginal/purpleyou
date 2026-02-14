@@ -164,7 +164,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     {relatedProduct.name}
                   </h3>
                   <p className="text-sm font-medium text-[#111111] mt-2">
-                    ₹{relatedProduct.base.price.toLocaleString("en-IN")}
+                    ₹{relatedProduct.base?.price?.toLocaleString("en-IN") || "Price on request"}
                   </p>
                 </div>
               </Link>
