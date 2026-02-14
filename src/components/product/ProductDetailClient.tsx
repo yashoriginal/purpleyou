@@ -20,8 +20,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   };
 
   // Use selected variant price or default to base price
-  const displayPrice = selectedVariant?.resolved?.price || selectedVariant?.overrides?.price || product.base.price;
-  const displayStock = selectedVariant?.resolved?.stock || selectedVariant?.overrides?.stock || product.base.stock;
+  const displayPrice = selectedVariant?.resolved?.price || selectedVariant?.overrides?.price || product.base?.price;
+  const displayStock = selectedVariant?.resolved?.stock || selectedVariant?.overrides?.stock || product.base?.stock;
 
   return (
     <>
@@ -39,7 +39,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           {/* Price & Rating */}
           <div className="flex items-baseline gap-3 mb-4">
             <span className="text-3xl font-light text-[#111111]">
-              ₹{displayPrice.toLocaleString("en-IN")}
+              ₹{displayPrice?.toLocaleString("en-IN") || "Price on request"}
             </span>
           </div>
 
