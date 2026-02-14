@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HiOutlineChevronDown } from 'react-icons/hi';
 
 interface FilterState {
@@ -11,16 +11,26 @@ interface FilterState {
 export default function CollectionFilters({
   onFilterChange,
   productCount,
+  maxPrice = 100000,
 }: {
   onFilterChange: (filters: FilterState) => void;
   productCount: number;
+  maxPrice?: number;
 }) {
   const [filters, setFilters] = useState<FilterState>({
-    priceRange: [0, 100000],
+    priceRange: [0, maxPrice],
     sortBy: 'featured',
   });
 
   const [showFilters, setShowFilters] = useState(false);
+
+  // Update max price when it changes from parent
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      priceRange: [prev.priceRange[0], maxPrice] as [number, number],
+    }));
+  }, [maxPrice]);
 
   const handleSortChange = (value: string) => {
     const newFilters = { ...filters, sortBy: value };
@@ -90,7 +100,7 @@ export default function CollectionFilters({
                 value={filters.priceRange[0]}
                 onChange={(e) => handlePriceChange('min', parseInt(e.target.value))}
                 min="0"
-                max="100000"
+                max={maxPrice}
                 className="w-full px-3 py-2 border border-[#e6e0da] text-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
                 placeholder="₹0"
               />
@@ -102,9 +112,9 @@ export default function CollectionFilters({
                 value={filters.priceRange[1]}
                 onChange={(e) => handlePriceChange('max', parseInt(e.target.value))}
                 min="0"
-                max="100000"
+                max={maxPrice}
                 className="w-full px-3 py-2 border border-[#e6e0da] text-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#5540b7]"
-                placeholder="₹100,000"
+                placeholder={`₹${maxPrice.toLocaleString('en-IN')}`}
               />
             </div>
             <div className="text-xs text-[#6b6b6b]">

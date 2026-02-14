@@ -14,16 +14,41 @@ export default function VariantDisplay({ product }: VariantDisplayProps) {
   );
   const [mainImageIndex, setMainImageIndex] = useState(0);
 
+  // Validate image URLs - only accept absolute URLs or local paths starting with /
+  const validateImageUrl = (url: string): string => {
+    if (!url) return "/images/hero1.jpg";
+
+    // Already absolute URL
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+
+    // Already a local path
+    if (url.startsWith("/")) {
+      return url;
+    }
+
+    // Relative path or invalid - use fallback
+    console.warn(`Invalid image URL: ${url}, using fallback`);
+    return "/images/hero1.jpg";
+  };
+
   // Get images for display (variant images take precedence over base)
   const getDisplayImages = (): string[] => {
+    let images: string[] = [];
+
     if (selectedVariant?.resolved?.images) {
-      return selectedVariant.resolved.images;
+      images = selectedVariant.resolved.images;
+    } else if (selectedVariant?.overrides?.images) {
+      images = selectedVariant.overrides.images;
+    } else if (product.image) {
+      images = [product.image];
+    } else {
+      images = ["/images/hero1.jpg"];
     }
-    if (selectedVariant?.overrides?.images) {
-      return selectedVariant.overrides.images;
-    }
-    // Fallback to product image
-    return product.image ? [product.image] : ["/images/hero1.jpg"];
+
+    // Validate all image URLs
+    return images.map(validateImageUrl);
   };
 
   const displayImages = getDisplayImages();

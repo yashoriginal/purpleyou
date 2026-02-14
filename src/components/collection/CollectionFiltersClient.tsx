@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import CollectionFilters from "./CollectionFilters";
@@ -15,10 +15,27 @@ export default function CollectionFiltersClient({
   products,
   collectionName,
 }: CollectionFiltersClientProps) {
+  // Calculate dynamic price range from actual products
+  const maxPrice = useMemo(() => {
+    if (products.length === 0) return 100000;
+    const prices = products.map((p) => p.price || p.base?.price || 0);
+    const max = Math.max(...prices);
+    // Round up to nearest 10000 for a cleaner UI
+    return Math.ceil(max / 10000) * 10000;
+  }, [products]);
+
   const [filters, setFilters] = useState({
-    priceRange: [0, 100000] as [number, number],
+    priceRange: [0, maxPrice] as [number, number],
     sortBy: "featured",
   });
+
+  // Update filter max price when products or maxPrice changes
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      priceRange: [prev.priceRange[0], maxPrice] as [number, number],
+    }));
+  }, [maxPrice]);
 
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
@@ -96,6 +113,7 @@ export default function CollectionFiltersClient({
         <CollectionFilters
           onFilterChange={setFilters}
           productCount={filteredAndSortedProducts.length}
+          maxPrice={maxPrice}
         />
       </div>
 
@@ -106,6 +124,7 @@ export default function CollectionFiltersClient({
           <CollectionFilters
             onFilterChange={setFilters}
             productCount={filteredAndSortedProducts.length}
+            maxPrice={maxPrice}
           />
         </div>
 

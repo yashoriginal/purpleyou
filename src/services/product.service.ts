@@ -116,6 +116,24 @@ function generateSlug(text: string): string {
     .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 }
 
+// Validate and normalize image URLs
+function validateImageUrl(url?: string): string {
+  if (!url) return "/images/hero1.jpg";
+
+  // Already absolute URL
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  // Already a local path
+  if (url.startsWith("/")) {
+    return url;
+  }
+
+  // Relative path or invalid - use fallback
+  return "/images/hero1.jpg";
+}
+
 // Map old API product format to new internal Product type
 function mapOldAPIProductToProduct(apiProduct: APIProductOld): Product {
   const slug = (apiProduct.slug && typeof apiProduct.slug === 'string')
@@ -153,16 +171,18 @@ function mapOldAPIProductToProduct(apiProduct: APIProductOld): Product {
 function mapV2APIProductToProduct(apiProduct: any): Product {
   const slug = generateSlug(apiProduct.name || `product-${apiProduct.productId}`);
 
-  // Get primary image from first variant or use default
-  const primaryImage =
+  // Get primary image from first variant or use default (with validation)
+  const primaryImage = validateImageUrl(
     apiProduct.variants?.[0]?.resolved?.images?.[0] ||
     apiProduct.variants?.[0]?.overrides?.images?.[0] ||
-    "/images/hero1.jpg";
+    apiProduct.base?.images?.[0]
+  );
 
-  // Get hover/secondary image from second variant
-  const hoverImage =
+  // Get hover/secondary image from second variant (with validation)
+  const hoverImageRaw =
     apiProduct.variants?.[1]?.resolved?.images?.[0] ||
     apiProduct.variants?.[1]?.overrides?.images?.[0];
+  const hoverImage = hoverImageRaw ? validateImageUrl(hoverImageRaw) : undefined;
 
   // Ensure productId is a string (required)
   const productId = String(apiProduct.productId || `product-${Date.now()}`);
