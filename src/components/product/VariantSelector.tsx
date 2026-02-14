@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Product, Variant, VariantAttribute } from "@/types/product";
 
 interface VariantSelectorProps {
@@ -12,8 +12,38 @@ export default function VariantSelector({
   product,
   onVariantSelect,
 }: VariantSelectorProps) {
+  // Initialize with first available option for each variant key
+  const getDefaultAttributes = useMemo(() => {
+    const defaults: VariantAttribute = {};
+    const variantKeys = Object.keys(product.variantSchema || {});
+    const availableOptions: Record<string, Set<string>> = {};
+
+    variantKeys.forEach((key) => {
+      availableOptions[key] = new Set<string>();
+    });
+
+    // Collect all available options
+    product.variants?.forEach((variant) => {
+      variantKeys.forEach((key) => {
+        if (variant.attributes[key]) {
+          availableOptions[key].add(variant.attributes[key]);
+        }
+      });
+    });
+
+    // Set first option for each key
+    variantKeys.forEach((key) => {
+      const options = Array.from(availableOptions[key] || []).sort();
+      if (options.length > 0) {
+        defaults[key] = options[0];
+      }
+    });
+
+    return defaults;
+  }, [product.variantSchema, product.variants]);
+
   const [selectedAttributes, setSelectedAttributes] = useState<VariantAttribute>(
-    {}
+    getDefaultAttributes
   );
 
   // Get variant schema keys (like "color", "size", "material")
@@ -73,6 +103,19 @@ export default function VariantSelector({
       onVariantSelect(null, newAttributes);
     }
   };
+
+  // Call parent callback with default selected variant on mount
+  useEffect(() => {
+    if (variantKeys.length > 0) {
+      const allSelected = variantKeys.every((key) => selectedAttributes[key]);
+      if (allSelected) {
+        const matchingVariant = product.variants?.find((v) => {
+          return variantKeys.every((k) => v.attributes[k] === selectedAttributes[k]);
+        });
+        onVariantSelect(matchingVariant || null, selectedAttributes);
+      }
+    }
+  }, []); // Run only on mount
 
   // Don't render if no variants
   if (!product.variants || product.variants.length === 0) {
