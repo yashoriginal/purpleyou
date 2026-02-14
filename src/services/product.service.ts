@@ -350,7 +350,7 @@ async function fetchProductByIdFromAPI(
       return null;
     }
 
-    return mapAPIProductToProduct(data.data.product);
+    return mapV2APIProductToProduct(data.data.product);
   } catch (error) {
     console.error(`Error fetching product ${productId}:`, error);
     return null;
