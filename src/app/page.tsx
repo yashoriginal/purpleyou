@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Metadata } from "next";
 import { generateHomeMetadata, generateOrganizationSchema } from "@/lib/seo";
 import Script from "next/script";
-import { getAllProducts } from "@/services/product.service";
+import { getAllProducts, getAllCategories } from "@/services/product.service";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 export const metadata: Metadata = generateHomeMetadata();
@@ -15,6 +15,7 @@ export const revalidate = 600;
 
 export default async function HomePage() {
   const apiProducts = await getAllProducts();
+  const categories = await getAllCategories();
   const bestsellers = apiProducts.filter((p) => p.isBestseller).slice(0, 6);
 
   const organizationSchema = generateOrganizationSchema();
@@ -30,64 +31,32 @@ export default async function HomePage() {
       {/* Hero Section */}
       <Hero />
 
-      {/* Category Tiles Section */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Rings */}
-          <Link
-            href="/collections/rings"
-            className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square"
-          >
-            <Image
-              src="/images/hero1.jpg"
-              alt="Rings Collection"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-              <h3 className="text-3xl font-light text-white tracking-wider">
-                RINGS
-              </h3>
-            </div>
-          </Link>
-
-          {/* Necklaces */}
-          <Link
-            href="/collections/necklaces"
-            className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square"
-          >
-            <Image
-              src="/images/hero1.jpg"
-              alt="Necklaces Collection"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-              <h3 className="text-3xl font-light text-white tracking-wider">
-                NECKLACES
-              </h3>
-            </div>
-          </Link>
-
-          {/* Bracelets */}
-          <Link
-            href="/collections/bracelets"
-            className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square"
-          >
-            <Image
-              src="/images/hero1.jpg"
-              alt="Bracelets Collection"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-              <h3 className="text-3xl font-light text-white tracking-wider">
-                BRACELETS
-              </h3>
-            </div>
-          </Link>
-        </div>
-      </section>
+      {/* Category Tiles Section - Dynamically Generated from API */}
+      {categories.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
+          <div className={`grid grid-cols-1 ${categories.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"} gap-6`}>
+            {categories.map((category) => (
+              <Link
+                key={category}
+                href={`/collections/${category}`}
+                className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square"
+              >
+                <Image
+                  src="/images/hero1.jpg"
+                  alt={`${category} Collection`}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                  <h3 className="text-3xl font-light text-white tracking-wider capitalize">
+                    {category}
+                  </h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Best Sellers Section */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24 bg-[#f8f5f2]">

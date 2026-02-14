@@ -1,5 +1,5 @@
 import "@/app/globals.css";
-import Header from "@/components/layout/Header";
+import HeaderWithCategories from "@/components/layout/HeaderWithCategories";
 import Footer from "@/components/layout/Footer";
 import { ProvidersWrapper } from "@/components/ProvidersWrapper";
 import { Metadata, Viewport } from "next";
@@ -57,7 +57,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-white text-black">
         <ProvidersWrapper>
-          <Header />
+          <HeaderWithCategories />
           <main className="min-h-screen">{children}</main>
           <Footer />
         </ProvidersWrapper>

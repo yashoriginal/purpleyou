@@ -339,3 +339,15 @@ export async function getAllProducts(): Promise<Product[]> {
 export async function getProductById(productId: string): Promise<Product | null> {
   return fetchProductByIdFromAPI(productId);
 }
+
+/**
+ * Get unique categories from all products
+ * Used for dynamic navigation and category display
+ */
+export async function getAllCategories(): Promise<string[]> {
+  const products = await getAllProducts();
+  const categories = Array.from(
+    new Set(products.map((p) => p.category.toLowerCase()))
+  ).sort();
+  return categories;
+}
