@@ -65,7 +65,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 .slice(0, 2)
                 .map(([key, options]) => (
                   <div key={key} className="capitalize">
-                    <span className="font-medium">{key}:</span> {options.join(", ")}
+                    <span className="font-medium">{key}:</span> {Array.isArray(options) ? options.join(", ") : String(options)}
                   </div>
                 ))}
             </div>
