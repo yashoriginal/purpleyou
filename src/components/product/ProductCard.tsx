@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Product } from "@/types/product";
+import { normalizeImageUrl } from "@/lib/image";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [isHovering, setIsHovering] = useState(false);
@@ -15,10 +16,13 @@ export default function ProductCard({ product }: { product: Product }) {
     product.hoverImage;
 
   // Only use hover image if it exists and is different from main image
-  const displayImage =
+  const rawDisplayImage =
     isHovering && hoverImageOption && hoverImageOption !== product.image
       ? hoverImageOption
       : product.image || "/images/hero1.jpg";
+
+  // Normalize the image URL
+  const displayImage = normalizeImageUrl(rawDisplayImage);
 
   return (
     <Link href={`/products/${product.slug}`}>

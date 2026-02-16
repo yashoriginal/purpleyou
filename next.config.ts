@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "example.com",
       },
+      {
+        protocol: "https",
+        hostname: "purpleoneservice.onrender.com",
+        pathname: "/**",
+      },
     ],
   },
 };

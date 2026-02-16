@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import CollectionFilters from "./CollectionFilters";
 import { Product } from "@/types/product";
+import { normalizeImageUrl } from "@/lib/image";
 
 interface CollectionFiltersClientProps {
   products: Product[];
@@ -153,7 +154,7 @@ export default function CollectionFiltersClient({
                   <div className="group cursor-pointer">
                     <div className="relative bg-[#f5f1ed] aspect-[3/4] mb-4 overflow-hidden">
                       <Image
-                        src={product.image || "/images/hero1.jpg"}
+                        src={normalizeImageUrl(product.image)}
                         alt={product.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
