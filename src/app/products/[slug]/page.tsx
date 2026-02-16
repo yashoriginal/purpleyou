@@ -9,6 +9,7 @@ import {
   generateProductSchema,
   generateBreadcrumbSchema,
 } from "@/lib/seo";
+import { normalizeImageUrl } from "@/lib/image";
 import { getAllProducts, getProductBySlug } from "@/services/product.service";
 
 type PageProps = {
@@ -154,7 +155,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 <div className="group cursor-pointer">
                   <div className="relative bg-[#f8f5f2] aspect-[3/4] mb-3 overflow-hidden">
                     <Image
-                      src={relatedProduct.image || "/images/hero1.jpg"}
+                      src={normalizeImageUrl(relatedProduct.image)}
                       alt={relatedProduct.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"

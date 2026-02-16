@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Product, Variant } from "@/types/product";
+import { normalizeImageUrl } from "@/lib/image";
 
 interface VariantDisplayProps {
   product: Product;
@@ -13,25 +14,6 @@ export default function VariantDisplay({ product }: VariantDisplayProps) {
     undefined
   );
   const [mainImageIndex, setMainImageIndex] = useState(0);
-
-  // Validate image URLs - only accept absolute URLs or local paths starting with /
-  const validateImageUrl = (url: string): string => {
-    if (!url) return "/images/hero1.jpg";
-
-    // Already absolute URL
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
-    }
-
-    // Already a local path
-    if (url.startsWith("/")) {
-      return url;
-    }
-
-    // Relative path or invalid - use fallback
-    console.warn(`Invalid image URL: ${url}, using fallback`);
-    return "/images/hero1.jpg";
-  };
 
   // Get images for display (variant images take precedence over base)
   const getDisplayImages = (): string[] => {
@@ -47,12 +29,12 @@ export default function VariantDisplay({ product }: VariantDisplayProps) {
       images = ["/images/hero1.jpg"];
     }
 
-    // Validate all image URLs
-    return images.map(validateImageUrl);
+    // Normalize all image URLs
+    return images.map(normalizeImageUrl);
   };
 
   const displayImages = getDisplayImages();
-  const mainImage = displayImages[mainImageIndex] || product.image || "/images/hero1.jpg";
+  const mainImage = displayImages[mainImageIndex] || normalizeImageUrl(product.image);
 
   return (
     <div className="flex flex-col gap-6">

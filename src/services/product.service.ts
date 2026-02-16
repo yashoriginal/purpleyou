@@ -72,6 +72,7 @@ interface APIProductBase {
   base: {
     stock: number;
     price: number;
+    images?: string[];
   };
   variantSchema?: Record<string, string[]>;
   variants?: APIVariant[];
@@ -125,12 +126,20 @@ function validateImageUrl(url?: string): string {
     return url;
   }
 
-  // Already a local path
+  // Already a local path (starts with /)
   if (url.startsWith("/")) {
     return url;
   }
 
-  // Relative path or invalid - use fallback
+  // Relative path - convert to absolute URL from API domain
+  // e.g., "public/products/image.jpg" -> "https://purpleoneservice.onrender.com/public/products/image.jpg"
+  // or "path/to/image.jpg" -> "https://purpleoneservice.onrender.com/path/to/image.jpg"
+  if (url && !url.startsWith("http")) {
+    const apiBaseUrl = EXTERNAL_API_URL.replace("/api/v1", "");
+    return `${apiBaseUrl}/${url}`;
+  }
+
+  // Fallback for invalid URLs
   return "/images/hero1.jpg";
 }
 
