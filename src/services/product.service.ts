@@ -133,17 +133,10 @@ function validateImageUrl(url?: string): string {
 
   // Relative path - check if it includes directory structure
   if (url && !url.startsWith("http")) {
-    const apiBaseUrl = EXTERNAL_API_URL.replace("/api/v1", "");
-
-    // If it's just a filename (no slashes), prepend public/products/
-    // e.g., "emerald-bangle-1.jpeg" -> "https://purpleoneservice.onrender.com/public/products/emerald-bangle-1.jpeg"
-    if (!url.includes("/")) {
-      return `${apiBaseUrl}/public/products/${url}`;
-    }
-
-    // If it has path structure, use as-is
-    // e.g., "public/products/image.jpg" -> "https://purpleoneservice.onrender.com/public/products/image.jpg"
-    return `${apiBaseUrl}/${url}`;
+    // For relative filenames, just use them as local paths
+    // This allows Next.js Image component to handle them with proper loader configuration
+    // e.g., "emerald-bangle-1.jpeg" remains as the filename
+    return url;
   }
 
   // Fallback for invalid URLs
