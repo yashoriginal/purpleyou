@@ -17,6 +17,51 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+const categoryImages: { [key: string]: string } = {
+  bracelet: "/category/Bracelet.jpeg",
+  bracelets: "/category/Bracelet.jpeg",
+  earrings: "/category/Earrings.jpeg",
+  necklace: "/category/Necklace.jpeg",
+  necklaces: "/category/Necklace.jpeg",
+  ring: "/category/Ring.jpeg",
+  rings: "/category/Ring.jpeg",
+};
+
+// Function to get category image
+function getCategoryImage(slug: string): string {
+  if (slug === "all") {
+    return "/category/Bracelet.jpeg"; // Default for all products
+  }
+  
+  const cat = slug.toLowerCase().trim();
+  
+  // Direct lookup
+  if (categoryImages[cat]) {
+    return categoryImages[cat];
+  }
+  
+  // Try singular/plural variations
+  const singularForm = cat.endsWith('s') ? cat.slice(0, -1) : cat;
+  const pluralForm = `${cat}s`;
+  
+  if (categoryImages[singularForm]) {
+    return categoryImages[singularForm];
+  }
+  
+  if (categoryImages[pluralForm]) {
+    return categoryImages[pluralForm];
+  }
+  
+  // Fallback: construct path from category name
+  const categoryName = cat
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('')
+    .replace(/s$/, '');
+  
+  return `/category/${categoryName}.jpeg`;
+}
+
 /**
  * Generate static parameters for all collection pages
  * This enables static site generation (SSG) for each category
@@ -53,7 +98,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
         name: "All Products",
         slug: "all",
         description: "Browse our complete collection of premium jewelry",
-        image: "/images/hero1.jpg",
+        image: "/category/Bracelet.jpeg",
       },
       products.length,
     );
@@ -93,7 +138,7 @@ export default async function CategoryPage({ params }: PageProps) {
           name: "All Products",
           slug: "all",
           description: "Browse our complete collection",
-          image: "/images/hero1.jpg",
+          image: "/category/Bracelet.jpeg",
         }
       : null);
 
@@ -128,7 +173,7 @@ export default async function CategoryPage({ params }: PageProps) {
         {/* Right Column - Hero Image */}
         <div className="relative bg-[#f5f1ed] aspect-[4/3] overflow-hidden">
           <Image
-            src="/images/hero1.jpg"
+            src={getCategoryImage(slug)}
             alt={displayTitle}
             fill
             className="object-cover"

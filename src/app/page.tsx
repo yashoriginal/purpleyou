@@ -13,6 +13,42 @@ export const metadata: Metadata = generateHomeMetadata();
 // ISR: Revalidate every 10 minutes (to match API cache duration)
 export const revalidate = 600;
 
+const categoryImages: { [key: string]: string } = {
+  bracelet: "/category/Bracelet.jpeg",
+  bracelets: "/category/Bracelet.jpeg",
+  earrings: "/category/Earrings.jpeg",
+  necklace: "/category/Necklace.jpeg",
+  necklaces: "/category/Necklace.jpeg",
+  ring: "/category/Ring.jpeg",
+  rings: "/category/Ring.jpeg",
+};
+
+// Function to get category image with better matching
+function getCategoryImage(category: string): string {
+  const cat = category.toLowerCase();
+  
+  // Direct lookup
+  if (categoryImages[cat]) {
+    return categoryImages[cat];
+  }
+  
+  // Try singular/plural variations
+  const singularForm = cat.endsWith('s') ? cat.slice(0, -1) : cat;
+  const pluralForm = `${cat}s`;
+  
+  if (categoryImages[singularForm]) {
+    return categoryImages[singularForm];
+  }
+  
+  if (categoryImages[pluralForm]) {
+    return categoryImages[pluralForm];
+  }
+  
+  // Fallback: construct path from category name
+  const categoryName = cat.charAt(0).toUpperCase() + cat.slice(1).replace(/s$/, '');
+  return `/category/${categoryName}.jpeg`;
+}
+
 export default async function HomePage() {
   const apiProducts = await getAllProducts();
   const categories = await getAllCategories();
@@ -42,12 +78,12 @@ export default async function HomePage() {
                 className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square"
               >
                 <Image
-                  src="/images/hero1.jpg"
+                  src={getCategoryImage(category)}
                   alt={`${category} Collection`}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center z-10">
                   <h3 className="text-3xl font-light text-white tracking-wider capitalize">
                     {category}
                   </h3>
