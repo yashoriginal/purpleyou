@@ -54,6 +54,9 @@ export default async function HomePage() {
   const apiProducts = await getAllProducts();
   const categories = await getAllCategories();
   const bestsellers = apiProducts.filter((p) => p.tags?.includes("Best Seller")).slice(0, 6);
+  console.log(`[HOME] Total products: ${apiProducts.length}`);
+  console.log(`[HOME] Bestsellers found: ${bestsellers.length}`);
+  console.log(`[HOME] Bestseller products:`, bestsellers.map(p => `${p.name} (tags: ${p.tags?.join(", ") || "none"})`).join(", "));
 
   const organizationSchema = generateOrganizationSchema();
 
