@@ -210,6 +210,7 @@ function mapV2APIProductToProduct(apiProduct: any): Product {
     variants: Array.isArray(apiProduct.variants) ? (apiProduct.variants as Variant[]) : undefined,
     state: apiProduct.state,
     tags: Array.isArray(apiProduct.tags) ? apiProduct.tags : undefined,
+    highlights: Array.isArray(apiProduct.highlights) ? apiProduct.highlights : undefined,
     currency: apiProduct.currency,
     brand: apiProduct.brand,
     createdAt: apiProduct.createdAt,
