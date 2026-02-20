@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import CollectionFilters from "./CollectionFilters";
 import { Product } from "@/types/product";
 import { normalizeImageUrl } from "@/lib/image";
+import DynamicAspectImage from "@/components/DynamicAspectImage";
 
 interface CollectionFiltersClientProps {
   products: Product[];
@@ -152,13 +152,13 @@ export default function CollectionFiltersClient({
               {filteredAndSortedProducts.map((product) => (
                 <Link key={product.id} href={`/products/${product.slug}`}>
                   <div className="group cursor-pointer">
-                    <div className="relative bg-[#f5f1ed] aspect-[3/4] mb-4 overflow-hidden">
-                      <Image
-                        src={normalizeImageUrl(product.image)}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                    <DynamicAspectImage
+                      src={normalizeImageUrl(product.image)}
+                      alt={product.name}
+                      defaultAspectRatio={0.75}
+                      containerClassName="relative bg-[#f5f1ed] mb-4 overflow-hidden"
+                      imageClassName="object-cover group-hover:scale-105 transition-transform duration-300"
+                    >
                       {product.isBestseller && (
                         <div className="absolute top-3 right-3 bg-[#D3C9FF] text-[#111111] text-xs font-semibold px-3 py-1 rounded-full">
                           BESTSELLER
@@ -169,7 +169,7 @@ export default function CollectionFiltersClient({
                           NEW
                         </div>
                       )}
-                    </div>
+                    </DynamicAspectImage>
                     <h3 className="text-sm font-medium text-[#111111] line-clamp-2">
                       {product.name}
                     </h3>

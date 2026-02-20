@@ -4,6 +4,7 @@ import Link from "next/link";
 import Script from "next/script";
 import ProductAccordion from "@/components/product/ProductAccordion";
 import ProductDetailClient from "@/components/product/ProductDetailClient";
+import DynamicAspectImage from "@/components/DynamicAspectImage";
 import {
   generateProductMetadata,
   generateProductSchema,
@@ -153,14 +154,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 href={`/products/${relatedProduct.slug}`}
               >
                 <div className="group cursor-pointer">
-                  <div className="relative bg-[#f8f5f2] aspect-[3/4] mb-3 overflow-hidden">
-                    <Image
-                      src={normalizeImageUrl(relatedProduct.image)}
-                      alt={relatedProduct.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
+                  <DynamicAspectImage
+                    src={normalizeImageUrl(relatedProduct.image)}
+                    alt={relatedProduct.name}
+                    defaultAspectRatio={0.75}
+                    containerClassName="relative bg-[#f8f5f2] mb-3 overflow-hidden"
+                    imageClassName="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                   <h3 className="text-sm font-medium text-[#111111] line-clamp-2">
                     {relatedProduct.name}
                   </h3>

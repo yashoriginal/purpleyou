@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Product, Variant } from "@/types/product";
 import { normalizeImageUrl } from "@/lib/image";
+import DynamicAspectImage from "@/components/DynamicAspectImage";
+import Image from "next/image";
 
 interface VariantDisplayProps {
   product: Product;
@@ -39,15 +40,13 @@ export default function VariantDisplay({ product }: VariantDisplayProps) {
   return (
     <div className="flex flex-col gap-6">
       {/* Main Image */}
-      <div className="relative bg-[#f8f5f2] aspect-[3/4] overflow-hidden">
-        <Image
-          src={mainImage}
-          alt={product.name}
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
+      <DynamicAspectImage
+        src={mainImage}
+        alt={product.name}
+        defaultAspectRatio={0.75}
+        containerClassName="relative bg-[#f8f5f2] overflow-hidden"
+        imageClassName="object-cover"
+      />
 
       {/* Thumbnail Images */}
       {displayImages.length > 1 && (
@@ -56,15 +55,16 @@ export default function VariantDisplay({ product }: VariantDisplayProps) {
             <button
               key={index}
               onClick={() => setMainImageIndex(index)}
-              className={`relative bg-[#f8f5f2] aspect-square overflow-hidden cursor-pointer hover:opacity-70 transition-opacity border-2 ${
+              className={`cursor-pointer hover:opacity-70 transition-opacity border-2 ${
                 mainImageIndex === index ? "border-[#5540b7]" : "border-transparent"
               }`}
             >
-              <Image
+              <DynamicAspectImage
                 src={image}
                 alt={`Thumbnail ${index + 1}`}
-                fill
-                className="object-cover"
+                defaultAspectRatio={1}
+                containerClassName="relative bg-[#f8f5f2] overflow-hidden"
+                imageClassName="object-cover"
               />
             </button>
           ))}

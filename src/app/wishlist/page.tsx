@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { HiOutlineTrash, HiOutlineHeart } from "react-icons/hi";
 import { getAllProducts } from "@/services/product.service";
 import { Product } from "@/types/product";
+import DynamicAspectImage from "@/components/DynamicAspectImage";
 
 export default function WishlistPage() {
   const { items, removeFromWishlist } = useWishlist();
@@ -108,13 +109,13 @@ export default function WishlistPage() {
           >
             {/* Product Image */}
             <Link href={`/products/${product.slug}`}>
-              <div className="relative bg-[#f8f5f2] aspect-[3/4] mb-4 overflow-hidden cursor-pointer group">
-                <Image
-                  src={product.image || "/images/hero1.jpg"}
-                  alt={product.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+              <DynamicAspectImage
+                src={product.image || "/images/hero1.jpg"}
+                alt={product.name}
+                defaultAspectRatio={0.75}
+                containerClassName="relative bg-[#f8f5f2] mb-4 overflow-hidden cursor-pointer group"
+                imageClassName="object-cover group-hover:scale-105 transition-transform duration-300"
+              >
                 {product.isBestseller && (
                   <div className="absolute top-3 right-3 bg-[#D3C9FF] text-[#111111] text-xs font-semibold px-3 py-1 rounded-full">
                     BESTSELLER
@@ -125,7 +126,7 @@ export default function WishlistPage() {
                     NEW
                   </div>
                 )}
-              </div>
+              </DynamicAspectImage>
             </Link>
 
             {/* Product Details */}
