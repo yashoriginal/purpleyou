@@ -38,7 +38,7 @@ export default function ProductCard({ product }: { product: Product }) {
           containerClassName="relative overflow-hidden bg-[#f8f5f2] mb-4"
           imageClassName="object-cover transition-all duration-500 group-hover:scale-105"
         >
-          {product.isBestseller && (
+          {product.tags?.includes("Best Seller") && (
             <div className="absolute top-3 right-3 bg-[#D3C9FF] text-[#111111] text-xs font-semibold px-3 py-1 rounded-full">
               BESTSELLER
             </div>

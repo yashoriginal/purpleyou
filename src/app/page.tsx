@@ -53,7 +53,7 @@ function getCategoryImage(category: string): string {
 export default async function HomePage() {
   const apiProducts = await getAllProducts();
   const categories = await getAllCategories();
-  const bestsellers = apiProducts.filter((p) => p.isBestseller).slice(0, 6);
+  const bestsellers = apiProducts.filter((p) => p.tags?.includes("Best Seller")).slice(0, 6);
 
   const organizationSchema = generateOrganizationSchema();
 
