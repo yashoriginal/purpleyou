@@ -134,7 +134,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-[#e6e0da] flex flex-col sm:flex-row items-center justify-between">
           <p className="text-xs text-[#6b6b6b] font-light">
-            © 2025 PURPLE YOU. All rights reserved.
+            © 2026 PURPLE YOU. All rights reserved.
           </p>
           <p className="text-xs text-[#6b6b6b] font-light mt-4 sm:mt-0">
             Crafted with sustainable materials • Guaranteed for life
