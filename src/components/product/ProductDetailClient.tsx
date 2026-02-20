@@ -59,9 +59,13 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         {/* Stock Info */}
         <div className="py-6 border-b border-[#e6e0da]">
-          {displayStock > 0 ? (
+          {displayStock > 3 ? (
             <span className="text-sm text-green-600">
-              ✓ {displayStock} in stock
+              Available
+            </span>
+          ) : displayStock > 0 ? (
+            <span className="text-sm text-red-600">
+              {displayStock} in stock
             </span>
           ) : (
             <span className="text-sm text-red-600">Out of stock</span>
