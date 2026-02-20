@@ -33,6 +33,7 @@ interface APIProductOld {
   isNew?: boolean;
   variants?: APIVariantOld[];
   isActive: boolean;
+  tags?: string[];
 }
 
 interface APIResponseOld {
@@ -173,6 +174,7 @@ function mapOldAPIProductToProduct(apiProduct: APIProductOld): Product {
     hoverImage: hoverImage?.url,
     isBestseller: apiProduct.isBestseller ?? false,
     isNew: apiProduct.isNew ?? false,
+    tags: Array.isArray(apiProduct.tags) ? apiProduct.tags : undefined,
   };
 }
 
