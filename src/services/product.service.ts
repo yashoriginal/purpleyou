@@ -304,8 +304,6 @@ async function fetchProductsFromAPI(): Promise<Product[]> {
 
     if (products.length > 0) {
       console.log(`[API] ✅ Successfully loaded ${products.length} products from API`);
-      console.log(`[API] Products:`, products.map(p => `${p.name} (${p.category})`).join(", "));
-      console.log(`[API] Tags:`, products.map(p => `${p.name}: ${p.tags?.join(", ") || "none"}`).join(" | "));
     } else {
       console.log(`[API] ⚠️ Loaded 0 products from API`);
     }
