@@ -39,7 +39,7 @@ export default function Header({ categories = [] }: HeaderProps) {
       <div className="w-full bg-[#f5f2f0] border-b border-[#e6dcd4] text-xs">
         <div className="mx-auto max-w-7xl flex items-center justify-center px-4 py-2.5">
           <span className="text-[#5f6a66] tracking-wider">
-            Real jewelry for real life • Guaranteed for life
+            Free Shipping on orders above Rs. 2500!
           </span>
         </div>
       </div>
