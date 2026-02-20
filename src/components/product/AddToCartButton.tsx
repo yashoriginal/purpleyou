@@ -112,32 +112,18 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       {/* Note: Variant selection is now handled by VariantSelector component in product detail page */}
 
       {/* Benefits */}
-      <div className="py-6 space-y-3">
-        <div className="flex items-start gap-3">
-          <HiOutlineFire className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-[#6b6b6b] font-light">
-            Free shipping on orders above ₹3000
-          </span>
+      {product.highlights && product.highlights.length > 0 && (
+        <div className="py-6 space-y-3">
+          {product.highlights.map((highlight, index) => (
+            <div key={index} className="flex items-start gap-3">
+              <HiOutlineFire className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-[#6b6b6b] font-light">
+                {highlight}
+              </span>
+            </div>
+          ))}
         </div>
-        <div className="flex items-start gap-3">
-          <HiOutlineFire className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-[#6b6b6b] font-light">
-            Secure checkout with Razorpay (UPI, Cards, Netbanking)
-          </span>
-        </div>
-        <div className="flex items-start gap-3">
-          <HiOutlineFire className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-[#6b6b6b] font-light">
-            GST included • 15-day returns
-          </span>
-        </div>
-        <div className="flex items-start gap-3">
-          <HiOutlineFire className="w-5 h-5 text-[#5540b7] flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-[#6b6b6b] font-light">
-            COD available on select locations
-          </span>
-        </div>
-      </div>
+      )}
 
       {/* Add to Cart Section */}
       <div className="border-t border-[#e6e0da] pt-6 space-y-3">

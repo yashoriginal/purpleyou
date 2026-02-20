@@ -7,6 +7,7 @@ import { generateHomeMetadata, generateOrganizationSchema } from "@/lib/seo";
 import Script from "next/script";
 import { getAllProducts, getAllCategories } from "@/services/product.service";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
+import DynamicAspectImage from "@/components/DynamicAspectImage";
 
 export const metadata: Metadata = generateHomeMetadata();
 
@@ -75,19 +76,20 @@ export default async function HomePage() {
               <Link
                 key={category}
                 href={`/collections/${category}`}
-                className="category-tile group relative overflow-hidden bg-[#f8f5f2] aspect-square"
               >
-                <Image
+                <DynamicAspectImage
                   src={getCategoryImage(category)}
                   alt={`${category} Collection`}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center z-10">
-                  <h3 className="text-3xl font-light text-white tracking-wider capitalize">
-                    {category}
-                  </h3>
-                </div>
+                  defaultAspectRatio={1}
+                  containerClassName="category-tile group relative overflow-hidden bg-[#f8f5f2]"
+                  imageClassName="object-cover group-hover:scale-105 transition-transform duration-300"
+                >
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center z-10">
+                    <h3 className="text-3xl font-light text-white tracking-wider capitalize">
+                      {category}
+                    </h3>
+                  </div>
+                </DynamicAspectImage>
               </Link>
             ))}
           </div>
@@ -135,14 +137,13 @@ export default async function HomePage() {
               </button>
             </Link>
           </div>
-          <div className="relative aspect-square overflow-hidden">
-            <Image
-              src="/images/hero1.jpg"
-              alt="Purple You Brand Story"
-              fill
-              className="object-cover"
-            />
-          </div>
+          <DynamicAspectImage
+            src="/images/hero1.jpg"
+            alt="Purple You Brand Story"
+            defaultAspectRatio={1}
+            containerClassName="relative overflow-hidden"
+            imageClassName="object-cover"
+          />
         </div>
       </section>
 

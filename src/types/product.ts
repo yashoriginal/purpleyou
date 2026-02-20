@@ -52,6 +52,7 @@ export type Product = {
 
   // Additional metadata
   tags?: string[];
+  highlights?: string[];
   currency?: string;
   brand?: string;
   createdAt?: string;

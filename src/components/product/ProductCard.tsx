@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Product } from "@/types/product";
 import { normalizeImageUrl } from "@/lib/image";
+import DynamicAspectImage from "@/components/DynamicAspectImage";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [isHovering, setIsHovering] = useState(false);
@@ -31,13 +31,13 @@ export default function ProductCard({ product }: { product: Product }) {
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        <div className="relative overflow-hidden bg-[#f8f5f2] aspect-[3/4] mb-4">
-          <Image
-            src={displayImage}
-            alt={product.name}
-            fill
-            className="object-cover transition-all duration-500 group-hover:scale-105"
-          />
+        <DynamicAspectImage
+          src={displayImage}
+          alt={product.name}
+          defaultAspectRatio={0.75}
+          containerClassName="relative overflow-hidden bg-[#f8f5f2] mb-4"
+          imageClassName="object-cover transition-all duration-500 group-hover:scale-105"
+        >
           {product.isBestseller && (
             <div className="absolute top-3 right-3 bg-[#D3C9FF] text-[#111111] text-xs font-semibold px-3 py-1 rounded-full">
               BESTSELLER
@@ -48,7 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
               NEW
             </div>
           )}
-        </div>
+        </DynamicAspectImage>
 
         <div>
           <h3 className="text-sm font-medium text-[#111111] tracking-wide line-clamp-2">
