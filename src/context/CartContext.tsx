@@ -10,6 +10,7 @@ import React, {
 import { useRouter } from "next/navigation";
 import { Product } from "@/types/product";
 import * as cartService from "@/services/cart.service";
+import * as productService from "@/services/product.service";
 import { setPendingCartAction } from "@/lib/pendingCartAction";
 import Toast from "@/components/Toast";
 
@@ -234,11 +235,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const cartData = await cartService.getCart(userId);
 
-      // Create a map of products from the cart data
-      // Since we don't have full product details from cart API, we'll use partial info
+      // Fetch all products to map product IDs to names and images
+      const allProducts = await productService.getAllProducts();
       const productMap = new Map<string, Product>();
+      allProducts.forEach((product) => {
+        productMap.set(product.productId, product);
+      });
 
       const cartItems = cartData.items.map((apiItem) => {
+        const product = productMap.get(apiItem.productId);
+
         // Convert Variant (which has optional properties) to Record<string, string>
         const selectedVariants: Record<string, string> = {};
         if (apiItem.variant) {
@@ -253,9 +259,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return {
           id: itemId,
           productId: apiItem.productId,
-          productName: `Product ${apiItem.productId.substring(0, 8)}...`,
+          productName: product?.name || `Product ${apiItem.productId}`,
           price: apiItem.priceEach,
-          image: "/images/hero1.jpg", // Fallback image
+          image: product?.image || "/images/hero1.jpg",
           quantity: apiItem.quantity,
           selectedVariants,
         };
