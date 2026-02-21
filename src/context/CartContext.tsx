@@ -7,8 +7,11 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { Product } from "@/types/product";
 import * as cartService from "@/services/cart.service";
+import { setPendingCartAction } from "@/lib/pendingCartAction";
+import Toast from "@/components/Toast";
 
 export interface CartItem {
   id: string; // Unique identifier for this cart item
@@ -26,6 +29,7 @@ interface CartContextType {
   totalPrice: number;
   isLoading: boolean;
   error: string | null;
+  toastMessage: string | null;
   addToCart: (
     product: Product,
     selectedVariants?: Record<string, string>,
@@ -114,9 +118,11 @@ function mapCartItemsFromAPI(
 
 export function CartProvider({ children }: { children: ReactNode }) {
   // State management
+  const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -281,7 +287,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const currentUserId = userId || getUserIdFromLocalStorage();
 
     if (!currentUserId) {
-      setError("Please log in to add items to cart");
+      // Show toast notification
+      setToastMessage("Please log in to add items to cart");
+
+      // Store the pending action for execution after login
+      const productId = product.productId || String(product.id);
+      setPendingCartAction({
+        productId,
+        productName: product.name,
+        quantity,
+        selectedVariants,
+      });
+
+      // Redirect to login page after a brief delay to allow toast to show
+      setTimeout(() => {
+        router.push("/login");
+      }, 500);
+
       return;
     }
 
@@ -471,13 +493,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     totalPrice,
     isLoading,
     error,
+    toastMessage,
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
   };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {toastMessage && (
+        <Toast message={toastMessage} duration={3000} onClose={() => setToastMessage(null)} />
+      )}
+      {children}
+    </CartContext.Provider>
+  );
 }
 
 export function useCart(): CartContextType {
