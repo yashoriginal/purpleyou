@@ -398,16 +398,14 @@ function LoginPageContent() {
               {/* Info Help Text */}
               <div className="mt-4 p-3 bg-[#f8f5f2] rounded-lg text-xs text-[#6b6b6b]">
                 <p className="font-medium text-[#111111] mb-2">
-                  Authentication Flow:
+                  How it works:
                 </p>
                 <div className="space-y-2">
                   <p>
-                    <span className="font-medium">Existing Users:</span> Enter
-                    phone number and verify with OTP
+                    <span className="font-medium">Existing Users:</span> Enter your phone number and verify with OTP
                   </p>
                   <p>
-                    <span className="font-medium">New Users:</span> First
-                    register using the signup flow, then use OTP to login
+                    <span className="font-medium">New Users:</span> Register during the OTP verification process
                   </p>
                 </div>
               </div>
