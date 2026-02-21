@@ -5,6 +5,7 @@ import { Product, Variant, VariantAttribute } from "@/types/product";
 import VariantSelector from "./VariantSelector";
 import VariantDisplay from "./VariantDisplay";
 import AddToCartButton from "./AddToCartButton";
+import QuantitySelector from "./QuantitySelector";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -13,6 +14,7 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(undefined);
   const [selectedAttributes, setSelectedAttributes] = useState<VariantAttribute>({});
+  const [quantity, setQuantity] = useState(1);
 
   const handleVariantSelect = (variant: Variant | null, attributes: VariantAttribute) => {
     setSelectedVariant(variant || undefined);
@@ -72,8 +74,21 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           )}
         </div>
 
+        {/* Quantity Selector */}
+        <div className="py-6 border-b border-[#e6e0da]">
+          <label className="text-sm font-medium text-[#111111] block mb-3">
+            Quantity
+          </label>
+          <QuantitySelector
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            maxQuantity={Math.min(10, displayStock || 10)}
+            disabled={!displayStock || displayStock === 0}
+          />
+        </div>
+
         {/* Add to Cart Button - Client Component */}
-        <AddToCartButton product={product} />
+        <AddToCartButton product={product} quantity={quantity} />
       </div>
     </>
   );

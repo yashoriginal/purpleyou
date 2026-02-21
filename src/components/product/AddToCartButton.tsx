@@ -9,9 +9,10 @@ import { Product } from "@/types/product";
 
 interface AddToCartButtonProps {
   product: Product;
+  quantity?: number;
 }
 
-export default function AddToCartButton({ product }: AddToCartButtonProps) {
+export default function AddToCartButton({ product, quantity = 1 }: AddToCartButtonProps) {
   const router = useRouter();
   const { addToCart, removeFromCart, items, isLoading, error } = useCart();
   const {
@@ -79,7 +80,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
     } else {
       // Add to cart
       try {
-        await addToCart(product, selectedVariants, 1);
+        await addToCart(product, selectedVariants, quantity);
       } catch (err) {
         const errorMsg =
           err instanceof Error ? err.message : "Failed to add to cart";
@@ -93,7 +94,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
     setLocalError(null);
     setIsBuying(true);
     try {
-      await addToCart(product, selectedVariants, 1);
+      await addToCart(product, selectedVariants, quantity);
       // Small delay to ensure cart is updated before redirect
       setTimeout(() => {
         router.push("/checkout");
