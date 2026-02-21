@@ -12,6 +12,7 @@ import {
 import EditProfileForm from "@/components/profile/EditProfileForm";
 import * as orderService from "@/services/order.service";
 import * as authService from "@/services/auth.service";
+import * as productService from "@/services/product.service";
 import { AddressObject } from "@/services/auth.service";
 
 // Dummy data types
@@ -144,6 +145,13 @@ export default function AccountPage() {
     try {
       const apiOrders = await orderService.getUserOrders(userId);
 
+      // Fetch all products to map names and images
+      const allProducts = await productService.getAllProducts();
+      const productMap = new Map<string, any>();
+      allProducts.forEach((product) => {
+        productMap.set(product.productId, product);
+      });
+
       // Map API orders to the Order interface
       const mappedOrders: Order[] = apiOrders.map((apiOrder) => ({
         id: apiOrder.orderId,
@@ -151,12 +159,15 @@ export default function AccountPage() {
         date: apiOrder.createdAt,
         total: apiOrder.orderDetails.totalPrice,
         status: (apiOrder.status.toLowerCase() as any) || "confirmed",
-        items: apiOrder.items.map((item) => ({
-          productName: `Product ${item.productId.substring(0, 8)}...`,
-          quantity: item.quantity,
-          price: item.pricePerUnit,
-          image: "/images/hero1.jpg",
-        })),
+        items: apiOrder.items.map((item) => {
+          const product = productMap.get(item.productId);
+          return {
+            productName: product?.name || `Product ${item.productId.substring(0, 8)}...`,
+            quantity: item.quantity,
+            price: item.pricePerUnit,
+            image: product?.image || "/images/hero1.jpg",
+          };
+        }),
       }));
 
       setOrders(mappedOrders);
@@ -517,12 +528,11 @@ export default function AccountPage() {
                                   key={idx}
                                   className="flex gap-4 mb-4 last:mb-0"
                                 >
-                                  <div className="relative w-16 h-16 bg-[#f8f5f2] rounded flex-shrink-0 overflow-hidden">
-                                    <Image
+                                  <div className="w-16 h-16 flex-shrink-0 bg-[#f0ede9] rounded overflow-hidden">
+                                    <img
                                       src={item.image}
                                       alt={item.productName}
-                                      fill
-                                      className="object-cover"
+                                      className="w-full h-full object-cover"
                                     />
                                   </div>
                                   <div className="flex-1">
