@@ -1177,13 +1177,13 @@ export async function addAddress(
       {
         method: "POST",
         body: {
-          mobile: currentUser.mobile,
-          userName: currentUser.userName,
-          address: currentUser.address,
-          pincode: currentUser.pincode,
-          latitude: currentUser.latitude,
-          longitude: currentUser.longitude,
-          area: currentUser.area,
+          mobile: currentUser.mobile || "",
+          userName: currentUser.userName || "",
+          address: currentUser.address || "",
+          pincode: currentUser.pincode || "",
+          latitude: currentUser.latitude || "",
+          longitude: currentUser.longitude || "",
+          area: currentUser.area || "",
           addresses: finalAddresses,
         },
         requiresAuth: true,
@@ -1196,6 +1196,9 @@ export async function addAddress(
         response.error || "Failed to add address",
       );
     }
+
+    // Small delay to ensure backend has processed the update
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     return true;
   } catch (error) {
@@ -1266,13 +1269,13 @@ export async function updateAddress(
       {
         method: "POST",
         body: {
-          mobile: currentUser.mobile,
-          userName: currentUser.userName,
-          address: currentUser.address,
-          pincode: currentUser.pincode,
-          latitude: currentUser.latitude,
-          longitude: currentUser.longitude,
-          area: currentUser.area,
+          mobile: currentUser.mobile || "",
+          userName: currentUser.userName || "",
+          address: currentUser.address || "",
+          pincode: currentUser.pincode || "",
+          latitude: currentUser.latitude || "",
+          longitude: currentUser.longitude || "",
+          area: currentUser.area || "",
           addresses: finalAddresses,
         },
         requiresAuth: true,
@@ -1285,6 +1288,9 @@ export async function updateAddress(
         response.error || "Failed to update address",
       );
     }
+
+    // Small delay to ensure backend has processed the update
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     return true;
   } catch (error) {
@@ -1346,13 +1352,13 @@ export async function deleteAddress(
       {
         method: "POST",
         body: {
-          mobile: currentUser.mobile,
-          userName: currentUser.userName,
-          address: currentUser.address,
-          pincode: currentUser.pincode,
-          latitude: currentUser.latitude,
-          longitude: currentUser.longitude,
-          area: currentUser.area,
+          mobile: currentUser.mobile || "",
+          userName: currentUser.userName || "",
+          address: currentUser.address || "",
+          pincode: currentUser.pincode || "",
+          latitude: currentUser.latitude || "",
+          longitude: currentUser.longitude || "",
+          area: currentUser.area || "",
           addresses: finalAddresses,
         },
         requiresAuth: true,
@@ -1365,6 +1371,9 @@ export async function deleteAddress(
         response.error || "Failed to delete address",
       );
     }
+
+    // Small delay to ensure backend has processed the update
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     return true;
   } catch (error) {

@@ -189,7 +189,11 @@ export default function AccountPage() {
 
     try {
       const apiAddresses = await authService.getAddresses(userId);
-      setAddresses(apiAddresses);
+      if (apiAddresses && apiAddresses.length > 0) {
+        setAddresses(apiAddresses);
+      } else {
+        setAddresses([]);
+      }
     } catch (error) {
       const errorMsg =
         error instanceof Error ? error.message : "Failed to load addresses";
@@ -204,19 +208,46 @@ export default function AccountPage() {
   const handleAddAddress = async () => {
     if (!user?.userId) return;
 
+    // Validate required fields
+    if (!formData.label?.trim()) {
+      alert("Please enter an address label (e.g., Home, Office)");
+      return;
+    }
+
+    if (!formData.address?.trim()) {
+      alert("Please enter the address");
+      return;
+    }
+
+    if (!formData.area?.trim()) {
+      alert("Please enter the area/city");
+      return;
+    }
+
+    if (!formData.pincode?.trim()) {
+      alert("Please enter the pincode");
+      return;
+    }
+
+    if (!formData.latitude?.trim() || !formData.longitude?.trim()) {
+      alert("Please enter latitude and longitude");
+      return;
+    }
+
     setAddressFormLoading(true);
     try {
+      // Add the address
       await authService.addAddress(user.userId, {
-        label: formData.label,
-        address: formData.address,
-        area: formData.area,
-        pincode: formData.pincode,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
+        label: formData.label.trim(),
+        address: formData.address.trim(),
+        area: formData.area.trim(),
+        pincode: formData.pincode.trim(),
+        latitude: formData.latitude.trim(),
+        longitude: formData.longitude.trim(),
         isDefault: formData.isDefault,
       });
 
-      // Reload addresses
+      // Reload addresses to refresh the list
       await loadAddresses(user.userId);
 
       // Reset form and close modal
