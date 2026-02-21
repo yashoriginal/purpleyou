@@ -1111,7 +1111,7 @@ export async function getAddresses(userId: string): Promise<AddressObject[]> {
 }
 
 /**
- * Add a new address for a user
+ * Add a new address for a user using the unified update endpoint
  * @param userId - User ID
  * @param data - Address data
  * @returns Success boolean
@@ -1141,11 +1141,51 @@ export async function addAddress(
       throw new Error("Area is required");
     }
 
-    const response = await makeRequest<AddAddressResponse>(
-      `/users/${userId}/addresses`,
+    // Get current user to fetch existing addresses and user details
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error("Current user not found");
+    }
+
+    // Fetch existing addresses
+    const existingAddresses = await getAddresses(userId);
+
+    // Create new address with a unique ID
+    const newAddress: AddressObject = {
+      addressId: `addr_${Date.now()}`,
+      label: data.label,
+      address: data.address,
+      area: data.area,
+      pincode: data.pincode,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      isDefault: data.isDefault,
+    };
+
+    // Add new address to the list
+    const updatedAddresses = [...existingAddresses, newAddress];
+
+    // If this is marked as default, unset other defaults
+    const finalAddresses = updatedAddresses.map((addr) => ({
+      ...addr,
+      isDefault: addr.addressId === newAddress.addressId && data.isDefault,
+    }));
+
+    // Call the unified update endpoint
+    const response = await makeRequest<UpdateUserDetailsResponse>(
+      "/users/update-user-details",
       {
         method: "POST",
-        body: data,
+        body: {
+          mobile: currentUser.mobile,
+          userName: currentUser.userName,
+          address: currentUser.address,
+          pincode: currentUser.pincode,
+          latitude: currentUser.latitude,
+          longitude: currentUser.longitude,
+          area: currentUser.area,
+          addresses: finalAddresses,
+        },
         requiresAuth: true,
       },
     );
@@ -1157,7 +1197,7 @@ export async function addAddress(
       );
     }
 
-    return response.data || false;
+    return true;
   } catch (error) {
     if (error instanceof AuthServiceError) {
       throw error;
@@ -1170,7 +1210,7 @@ export async function addAddress(
 }
 
 /**
- * Update an existing address
+ * Update an existing address using the unified update endpoint
  * @param userId - User ID
  * @param addressId - Address ID
  * @param data - Address data to update
@@ -1194,11 +1234,47 @@ export async function updateAddress(
       throw new Error("At least one field to update is required");
     }
 
-    const response = await makeRequest<UpdateAddressResponse>(
-      `/users/${userId}/addresses/${addressId}`,
+    // Get current user
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error("Current user not found");
+    }
+
+    // Fetch existing addresses
+    const existingAddresses = await getAddresses(userId);
+
+    // Update the specific address
+    const updatedAddresses = existingAddresses.map((addr) => {
+      if (addr.addressId === addressId) {
+        return {
+          ...addr,
+          ...data,
+        };
+      }
+      return addr;
+    });
+
+    // If this address is marked as default, unset other defaults
+    const finalAddresses = updatedAddresses.map((addr) => ({
+      ...addr,
+      isDefault: addr.addressId === addressId ? data.isDefault ?? addr.isDefault : false,
+    }));
+
+    // Call the unified update endpoint
+    const response = await makeRequest<UpdateUserDetailsResponse>(
+      "/users/update-user-details",
       {
-        method: "PATCH",
-        body: data,
+        method: "POST",
+        body: {
+          mobile: currentUser.mobile,
+          userName: currentUser.userName,
+          address: currentUser.address,
+          pincode: currentUser.pincode,
+          latitude: currentUser.latitude,
+          longitude: currentUser.longitude,
+          area: currentUser.area,
+          addresses: finalAddresses,
+        },
         requiresAuth: true,
       },
     );
@@ -1210,7 +1286,7 @@ export async function updateAddress(
       );
     }
 
-    return response.data || false;
+    return true;
   } catch (error) {
     if (error instanceof AuthServiceError) {
       throw error;
@@ -1223,7 +1299,7 @@ export async function updateAddress(
 }
 
 /**
- * Delete an address
+ * Delete an address using the unified update endpoint
  * @param userId - User ID
  * @param addressId - Address ID
  * @returns Success boolean
@@ -1241,10 +1317,44 @@ export async function deleteAddress(
       throw new Error("Address ID is required");
     }
 
-    const response = await makeRequest<DeleteAddressResponse>(
-      `/users/${userId}/addresses/${addressId}`,
+    // Get current user
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error("Current user not found");
+    }
+
+    // Fetch existing addresses
+    const existingAddresses = await getAddresses(userId);
+
+    // Remove the specified address
+    const updatedAddresses = existingAddresses.filter(
+      (addr) => addr.addressId !== addressId,
+    );
+
+    // If we deleted the default address, make the first one default
+    let finalAddresses = updatedAddresses;
+    if (existingAddresses.find((a) => a.addressId === addressId)?.isDefault) {
+      finalAddresses = updatedAddresses.map((addr, index) => ({
+        ...addr,
+        isDefault: index === 0,
+      }));
+    }
+
+    // Call the unified update endpoint
+    const response = await makeRequest<UpdateUserDetailsResponse>(
+      "/users/update-user-details",
       {
-        method: "DELETE",
+        method: "POST",
+        body: {
+          mobile: currentUser.mobile,
+          userName: currentUser.userName,
+          address: currentUser.address,
+          pincode: currentUser.pincode,
+          latitude: currentUser.latitude,
+          longitude: currentUser.longitude,
+          area: currentUser.area,
+          addresses: finalAddresses,
+        },
         requiresAuth: true,
       },
     );
@@ -1256,7 +1366,7 @@ export async function deleteAddress(
       );
     }
 
-    return response.data || false;
+    return true;
   } catch (error) {
     if (error instanceof AuthServiceError) {
       throw error;
