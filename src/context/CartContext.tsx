@@ -225,7 +225,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
    */
   async function loadCart() {
     if (!userId) {
-      console.debug("loadCart: no userId, skipping");
       return;
     }
 
@@ -233,7 +232,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      console.debug(`Loading cart for userId: ${userId}`);
       const cartData = await cartService.getCart(userId);
 
       // Create a map of products from the cart data
@@ -263,7 +261,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         };
       });
 
-      console.debug(`Cart loaded successfully: ${cartItems.length} items`);
       setItems(cartItems);
     } catch (err) {
       const errorMessage =
