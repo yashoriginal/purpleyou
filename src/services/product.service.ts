@@ -132,12 +132,10 @@ function validateImageUrl(url?: string): string {
     return url;
   }
 
-  // Relative path - check if it includes directory structure
+  // Relative path (filename only) - convert to local path
+  // e.g., "emerald-bangle-1.jpeg" becomes "/products/emerald-bangle-1.jpeg"
   if (url && !url.startsWith("http")) {
-    // For relative filenames, just use them as local paths
-    // This allows Next.js Image component to handle them with proper loader configuration
-    // e.g., "emerald-bangle-1.jpeg" remains as the filename
-    return url;
+    return `/products/${url}`;
   }
 
   // Fallback for invalid URLs
