@@ -112,6 +112,16 @@ export default function CheckoutPage() {
     loadAddresses();
   }, []);
 
+  // Auto-select default address when addresses are loaded
+  useEffect(() => {
+    if (savedAddresses.length > 0 && !selectedAddressId) {
+      const defaultAddress = savedAddresses.find((addr) => addr.isDefault);
+      if (defaultAddress) {
+        handleSelectAddress(defaultAddress);
+      }
+    }
+  }, [savedAddresses]);
+
   const loadAddresses = async () => {
     setAddressesLoading(true);
     try {
