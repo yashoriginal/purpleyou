@@ -85,7 +85,7 @@ export default function CheckoutPage() {
   );
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
-  const shippingCost = totalPrice >= 3000 ? 0 : 99;
+  const shippingCost = totalPrice >= 3000 ? 0 : 1;
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
 

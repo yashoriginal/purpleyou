@@ -20,7 +20,7 @@ export default function CartPage() {
   const [operationError, setOperationError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
-  const shippingCost = totalPrice >= 3000 ? 0 : 99;
+  const shippingCost = totalPrice >= 3000 ? 0 : 1;
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
 
