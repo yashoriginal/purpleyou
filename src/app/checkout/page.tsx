@@ -842,8 +842,18 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex justify-between items-start"
+                    className="flex justify-between items-start gap-3"
                   >
+                    {/* Product Image */}
+                    <div className="w-12 h-12 flex-shrink-0 bg-[#f0ede9] rounded overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.productName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Product Details */}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[#111111] line-clamp-2">
                         {item.productName}
@@ -852,6 +862,8 @@ export default function CheckoutPage() {
                         Qty: {item.quantity}
                       </p>
                     </div>
+
+                    {/* Price */}
                     <p className="text-sm font-medium text-[#111111] ml-2 flex-shrink-0">
                       ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                     </p>
