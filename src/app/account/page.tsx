@@ -130,6 +130,18 @@ export default function AccountPage() {
     isDefault: false,
   });
 
+  // Delete confirmation states
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    show: boolean;
+    addressId: string | null;
+    addressLabel: string;
+  }>({
+    show: false,
+    addressId: null,
+    addressLabel: "",
+  });
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   // Fetch user orders and addresses from API
   useEffect(() => {
     if (isLoggedIn && user?.userId) {
@@ -315,22 +327,44 @@ export default function AccountPage() {
     }
   };
 
-  const handleDeleteAddress = async (addressId: string) => {
-    if (
-      !user?.userId ||
-      !confirm("Are you sure you want to delete this address?")
-    )
-      return;
+  const handleDeleteAddress = (address: AddressObject) => {
+    setDeleteConfirmation({
+      show: true,
+      addressId: address.addressId || null,
+      addressLabel: address.label,
+    });
+  };
 
+  const confirmDeleteAddress = async () => {
+    if (!user?.userId || !deleteConfirmation.addressId) return;
+
+    setDeleteLoading(true);
     try {
-      await authService.deleteAddress(user.userId, addressId);
+      await authService.deleteAddress(user.userId, deleteConfirmation.addressId);
       // Reload addresses
       await loadAddresses(user.userId);
+
+      // Close confirmation modal
+      setDeleteConfirmation({
+        show: false,
+        addressId: null,
+        addressLabel: "",
+      });
     } catch (error) {
       const errorMsg =
         error instanceof Error ? error.message : "Failed to delete address";
       alert(`Error: ${errorMsg}`);
+    } finally {
+      setDeleteLoading(false);
     }
+  };
+
+  const cancelDeleteAddress = () => {
+    setDeleteConfirmation({
+      show: false,
+      addressId: null,
+      addressLabel: "",
+    });
   };
 
   const openAddForm = () => {
@@ -724,10 +758,7 @@ export default function AccountPage() {
                               Edit
                             </button>
                             <button
-                              onClick={() =>
-                                address.addressId &&
-                                handleDeleteAddress(address.addressId)
-                              }
+                              onClick={() => handleDeleteAddress(address)}
                               className="text-red-600 font-medium hover:underline"
                             >
                               Delete
@@ -919,6 +950,42 @@ export default function AccountPage() {
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
                 {editingAddress ? "Update Address" : "Add Address"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Address Confirmation Modal */}
+      {deleteConfirmation.show && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-2xl font-light text-[#111111] mb-2">
+                Delete Address
+              </h2>
+              <p className="text-[#6b6b6b] mb-6">
+                Are you sure you want to delete "{deleteConfirmation.addressLabel}"? This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex gap-4 justify-end p-6 border-t border-[#e6e0da]">
+              <button
+                onClick={cancelDeleteAddress}
+                disabled={deleteLoading}
+                className="px-6 py-2 border border-[#e6e0da] text-[#111111] rounded-lg hover:bg-[#f8f5f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteAddress}
+                disabled={deleteLoading}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {deleteLoading && (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
+                Delete Address
               </button>
             </div>
           </div>
