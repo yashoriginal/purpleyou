@@ -453,15 +453,8 @@ async function makeRequest<T = unknown>(
         throw new AuthServiceError(401, "No authentication token found");
       }
 
-      // Check if token is expired and refresh if needed
-      if (isTokenExpired(token)) {
-        const newToken = await refreshAccessToken();
-        if (!newToken) {
-          throw new AuthServiceError(401, "Token expired and refresh failed");
-        }
-      }
-
-      finalHeaders.Authorization = `Bearer ${getAuthToken()}`;
+      // Add token to header - let server validate token expiration
+      finalHeaders.Authorization = `Bearer ${token}`;
     }
 
     // Make request
@@ -477,20 +470,13 @@ async function makeRequest<T = unknown>(
 
     // Handle non-successful responses
     if (!response.ok) {
-      // Handle 401 Unauthorized - try token refresh
-      if (response.status === 401 && requiresAuth && retries > 0) {
-        const newToken = await refreshAccessToken();
-        if (newToken) {
-          // Retry request with new token
-          return makeRequest<T>(endpoint, { ...options, retries: retries - 1 });
-        } else {
-          // Refresh failed - clear auth and throw error
-          clearCredentials();
-          throw new AuthServiceError(
-            401,
-            "Authentication failed. Please login again.",
-          );
-        }
+      // Handle 401 Unauthorized - clear auth and ask user to login
+      if (response.status === 401) {
+        clearCredentials();
+        throw new AuthServiceError(
+          401,
+          "Your session has expired. Please login again.",
+        );
       }
 
       // Check if it's an API error response with our format

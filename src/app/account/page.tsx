@@ -198,7 +198,13 @@ export default function AccountPage() {
       const errorMsg =
         error instanceof Error ? error.message : "Failed to load addresses";
       setAddressesError(errorMsg);
-      console.error("Failed to load addresses:", error);
+
+      // If it's a 401 error, redirect to login
+      if (errorMsg.includes("session has expired") || errorMsg.includes("No authentication token")) {
+        router.push("/login?redirect=/account");
+        return;
+      }
+
       setAddresses([]);
     } finally {
       setAddressesLoading(false);
