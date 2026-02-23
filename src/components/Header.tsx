@@ -29,9 +29,9 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Close menu on outside click and scroll
+  // Close menu on outside click/touch and handle scrolling
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node;
       if (
         mobileOpen &&
@@ -44,20 +44,15 @@ export default function Header() {
       }
     };
 
-    const handleScroll = () => {
-      if (mobileOpen) {
-        setMobileOpen(false);
-      }
-    };
-
     if (mobileOpen) {
-      document.addEventListener("click", handleClickOutside);
-      window.addEventListener("scroll", handleScroll);
+      // Allow scrolling - don't prevent default
+      document.addEventListener("click", handleClickOutside as EventListener);
+      document.addEventListener("touchend", handleClickOutside as EventListener);
     }
 
     return () => {
-      document.removeEventListener("click", handleClickOutside);
-      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("click", handleClickOutside as EventListener);
+      document.removeEventListener("touchend", handleClickOutside as EventListener);
     };
   }, [mobileOpen]);
 
@@ -157,7 +152,7 @@ export default function Header() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <nav ref={menuRef} className="sm:hidden border-t border-[#e6e0da] bg-white">
+          <nav ref={menuRef} className="sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-120px)] overflow-y-auto">
             <div className="flex flex-col px-4 py-4 text-sm">
               {mainNavLinks.map((item) => (
                 <div key={item.href}>
