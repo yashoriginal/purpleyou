@@ -25,29 +25,22 @@ const mainNavLinks = [
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [shopOpen, setShopOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const headerRef = useRef<HTMLHeadElement>(null);
 
-  // Close menu on outside click/touch and handle scrolling
+  // Close menu on outside click/touch
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      const target = event.target as Node;
-      if (
-        mobileOpen &&
-        menuRef.current &&
-        !menuRef.current.contains(target) &&
-        menuButtonRef.current &&
-        !menuButtonRef.current.contains(target)
-      ) {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
         setMobileOpen(false);
       }
     };
 
     if (mobileOpen) {
-      // Allow scrolling - don't prevent default
-      document.addEventListener("click", handleClickOutside as EventListener);
-      document.addEventListener("touchend", handleClickOutside as EventListener);
+      // Use a small delay to ensure the click event is properly captured
+      setTimeout(() => {
+        document.addEventListener("click", handleClickOutside as EventListener);
+        document.addEventListener("touchend", handleClickOutside as EventListener);
+      }, 0);
     }
 
     return () => {
@@ -56,8 +49,12 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
+  const closeMenu = () => {
+    setMobileOpen(false);
+  };
+
   return (
-    <header className="sticky top-0 z-50 bg-white">
+    <header ref={headerRef} className="sticky top-0 z-50 bg-white">
       {/* Top announcement bar */}
       <div className="w-full bg-[#D3C9FF] border-b border-[#e6e0da] text-xs">
         <div className="mx-auto max-w-7xl flex items-center justify-center px-4 py-3">
@@ -74,7 +71,6 @@ export default function Header() {
           <div className="flex items-center gap-4">
             {/* mobile menu button */}
             <button
-              ref={menuButtonRef}
               className="inline-flex sm:hidden text-[#111111]"
               aria-label="Menu"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -83,7 +79,7 @@ export default function Header() {
             </button>
 
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
+            <Link href="/" className="flex-shrink-0" onClick={closeMenu}>
               <div className="bg-[#D3C9FF] px-3 py-1.5 rounded">
                 <span className="text-lg font-bold text-[#111111] tracking-wider" style={{ fontFamily: "Tan Tangkiwood, sans-serif" }}>
                   PURPLE YOU
@@ -152,14 +148,14 @@ export default function Header() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <nav ref={menuRef} className="sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-120px)] overflow-y-auto">
+          <nav className="sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-120px)] overflow-y-auto">
             <div className="flex flex-col px-4 py-4 text-sm">
               {mainNavLinks.map((item) => (
                 <div key={item.href}>
                   <Link
                     href={item.href}
                     className="py-3 text-[#111111] font-medium uppercase tracking-wider hover:text-[#5540b7] block border-b border-[#e6e0da] last:border-b-0"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={closeMenu}
                   >
                     {item.label}
                   </Link>
@@ -170,7 +166,7 @@ export default function Header() {
                           key={sub.href}
                           href={sub.href}
                           className="block py-2 text-xs text-[#6b6b6b] hover:text-[#5540b7]"
-                          onClick={() => setMobileOpen(false)}
+                          onClick={closeMenu}
                         >
                           {sub.label}
                         </Link>
