@@ -1,11 +1,10 @@
 /**
  * Wishlist Service
  * Handles all wishlist-related API calls to the backend
- * API Base: https://purpleoneservice.onrender.com/api/v1/wishlist
+ * Uses local API proxy routes that forward to the actual backend
  */
 
-const WISHLIST_API_BASE =
-  "https://purpleoneservice.onrender.com/api/v1/wishlist";
+const WISHLIST_API_BASE = "/api/wishlist";
 
 // ============================================================================
 // TYPE DEFINITIONS

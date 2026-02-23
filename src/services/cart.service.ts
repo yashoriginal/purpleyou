@@ -1,10 +1,10 @@
 /**
  * Cart Service
  * Handles all cart-related API calls to the backend
- * API Base: https://purpleoneservice.onrender.com/api/v1/cart
+ * Uses local API proxy routes that forward to the actual backend
  */
 
-const CART_API_BASE = "https://purpleoneservice.onrender.com/api/v1/cart";
+const CART_API_BASE = "/api/cart";
 
 // ============================================================================
 // TYPE DEFINITIONS
