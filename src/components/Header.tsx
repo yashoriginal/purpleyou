@@ -29,23 +29,23 @@ export default function Header() {
 
   // Close menu on outside click/touch
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+    if (!mobileOpen) return;
+
+    const handleClickOutside = (event: Event) => {
+      const target = event.target as HTMLElement;
+      // Check if click is outside header
+      if (headerRef.current && !headerRef.current.contains(target)) {
         setMobileOpen(false);
       }
     };
 
-    if (mobileOpen) {
-      // Use a small delay to ensure the click event is properly captured
-      setTimeout(() => {
-        document.addEventListener("click", handleClickOutside as EventListener);
-        document.addEventListener("touchend", handleClickOutside as EventListener);
-      }, 0);
-    }
+    // Use capture phase to detect clicks more reliably
+    document.addEventListener("click", handleClickOutside, true);
+    document.addEventListener("touchend", handleClickOutside, true);
 
     return () => {
-      document.removeEventListener("click", handleClickOutside as EventListener);
-      document.removeEventListener("touchend", handleClickOutside as EventListener);
+      document.removeEventListener("click", handleClickOutside, true);
+      document.removeEventListener("touchend", handleClickOutside, true);
     };
   }, [mobileOpen]);
 
