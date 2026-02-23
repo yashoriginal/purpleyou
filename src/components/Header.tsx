@@ -1,7 +1,7 @@
 // components/Header.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { HiOutlineSearch, HiOutlineHeart, HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import Link from "next/link";
@@ -26,6 +26,40 @@ const mainNavLinks = [
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Close menu on outside click and scroll
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        mobileOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(target)
+      ) {
+        setMobileOpen(false);
+      }
+    };
+
+    const handleScroll = () => {
+      if (mobileOpen) {
+        setMobileOpen(false);
+      }
+    };
+
+    if (mobileOpen) {
+      document.addEventListener("click", handleClickOutside);
+      window.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [mobileOpen]);
 
   return (
     <header className="sticky top-0 z-50 bg-white">
@@ -45,6 +79,7 @@ export default function Header() {
           <div className="flex items-center gap-4">
             {/* mobile menu button */}
             <button
+              ref={menuButtonRef}
               className="inline-flex sm:hidden text-[#111111]"
               aria-label="Menu"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -122,13 +157,14 @@ export default function Header() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <nav className="sm:hidden border-t border-[#e6e0da] bg-white">
+          <nav ref={menuRef} className="sm:hidden border-t border-[#e6e0da] bg-white">
             <div className="flex flex-col px-4 py-4 text-sm">
               {mainNavLinks.map((item) => (
                 <div key={item.href}>
                   <Link
                     href={item.href}
                     className="py-3 text-[#111111] font-medium uppercase tracking-wider hover:text-[#5540b7] block border-b border-[#e6e0da] last:border-b-0"
+                    onClick={() => setMobileOpen(false)}
                   >
                     {item.label}
                   </Link>
@@ -139,6 +175,7 @@ export default function Header() {
                           key={sub.href}
                           href={sub.href}
                           className="block py-2 text-xs text-[#6b6b6b] hover:text-[#5540b7]"
+                          onClick={() => setMobileOpen(false)}
                         >
                           {sub.label}
                         </Link>
