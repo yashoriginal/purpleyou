@@ -1,7 +1,7 @@
 // components/Header.tsx
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { HiOutlineSearch, HiOutlineHeart, HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import Link from "next/link";
@@ -25,36 +25,13 @@ const mainNavLinks = [
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const headerRef = useRef<HTMLHeadElement>(null);
-
-  // Close menu on outside click/touch
-  useEffect(() => {
-    if (!mobileOpen) return;
-
-    const handleClickOutside = (event: Event) => {
-      const target = event.target as HTMLElement;
-      // Check if click is outside header
-      if (headerRef.current && !headerRef.current.contains(target)) {
-        setMobileOpen(false);
-      }
-    };
-
-    // Use capture phase to detect clicks more reliably
-    document.addEventListener("click", handleClickOutside, true);
-    document.addEventListener("touchend", handleClickOutside, true);
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-      document.removeEventListener("touchend", handleClickOutside, true);
-    };
-  }, [mobileOpen]);
 
   const closeMenu = () => {
     setMobileOpen(false);
   };
 
   return (
-    <header ref={headerRef} className="sticky top-0 z-50 bg-white">
+    <header className="sticky top-0 z-50 bg-white">
       {/* Top announcement bar */}
       <div className="w-full bg-[#D3C9FF] border-b border-[#e6e0da] text-xs">
         <div className="mx-auto max-w-7xl flex items-center justify-center px-4 py-3">
@@ -148,35 +125,44 @@ export default function Header() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <nav className="sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-120px)] overflow-y-auto">
-            <div className="flex flex-col px-4 py-4 text-sm">
-              {mainNavLinks.map((item) => (
-                <div key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="py-3 text-[#111111] font-medium uppercase tracking-wider hover:text-[#5540b7] block border-b border-[#e6e0da] last:border-b-0"
-                    onClick={closeMenu}
-                  >
-                    {item.label}
-                  </Link>
-                  {item.submenu && (
-                    <div className="bg-[#f8f5f2] px-4 py-2">
-                      {item.submenu.map((sub) => (
-                        <Link
-                          key={sub.href}
-                          href={sub.href}
-                          className="block py-2 text-xs text-[#6b6b6b] hover:text-[#5540b7]"
-                          onClick={closeMenu}
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </nav>
+          <>
+            {/* Backdrop overlay - closes menu when clicked */}
+            <div
+              className="fixed inset-0 sm:hidden z-40 bg-transparent"
+              onClick={closeMenu}
+            />
+
+            {/* Menu content */}
+            <nav className="relative sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-120px)] overflow-y-auto z-41">
+              <div className="flex flex-col px-4 py-4 text-sm">
+                {mainNavLinks.map((item) => (
+                  <div key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="py-3 text-[#111111] font-medium uppercase tracking-wider hover:text-[#5540b7] block border-b border-[#e6e0da] last:border-b-0"
+                      onClick={closeMenu}
+                    >
+                      {item.label}
+                    </Link>
+                    {item.submenu && (
+                      <div className="bg-[#f8f5f2] px-4 py-2">
+                        {item.submenu.map((sub) => (
+                          <Link
+                            key={sub.href}
+                            href={sub.href}
+                            className="block py-2 text-xs text-[#6b6b6b] hover:text-[#5540b7]"
+                            onClick={closeMenu}
+                          >
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </nav>
+          </>
         )}
       </div>
     </header>
