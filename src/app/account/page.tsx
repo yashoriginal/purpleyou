@@ -10,6 +10,7 @@ import {
   HiOutlineChevronRight,
 } from "react-icons/hi";
 import EditProfileForm from "@/components/profile/EditProfileForm";
+import MapPicker from "@/components/address/MapPicker";
 import * as orderService from "@/services/order.service";
 import * as authService from "@/services/auth.service";
 import * as productService from "@/services/product.service";
@@ -141,6 +142,9 @@ export default function AccountPage() {
     addressLabel: "",
   });
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Map picker states
+  const [showMapPicker, setShowMapPicker] = useState(false);
 
   // Fetch user orders and addresses from API
   useEffect(() => {
@@ -365,6 +369,15 @@ export default function AccountPage() {
       addressId: null,
       addressLabel: "",
     });
+  };
+
+  const handleMapLocationSelect = (latitude: string, longitude: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude,
+      longitude,
+    }));
+    setShowMapPicker(false);
   };
 
   const openAddForm = () => {
@@ -867,6 +880,19 @@ export default function AccountPage() {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-[#111111] mb-2">
+                  Location Coordinates *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowMapPicker(true)}
+                  className="w-full mb-4 px-4 py-2 bg-[#D3C9FF] text-[#5540b7] rounded-lg font-medium hover:bg-[#c8b8ff] transition-colors text-sm"
+                >
+                  📍 Pick Location from Map
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#111111] mb-2">
@@ -951,6 +977,33 @@ export default function AccountPage() {
                 )}
                 {editingAddress ? "Update Address" : "Add Address"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Map Picker Modal */}
+      {showMapPicker && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-[#e6e0da] p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-light text-[#111111]">
+                Select Location on Map
+              </h2>
+              <button
+                onClick={() => setShowMapPicker(false)}
+                className="text-[#6b6b6b] hover:text-[#111111]"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6">
+              <MapPicker
+                onSelectLocation={handleMapLocationSelect}
+                initialLatitude={formData.latitude}
+                initialLongitude={formData.longitude}
+              />
             </div>
           </div>
         </div>
