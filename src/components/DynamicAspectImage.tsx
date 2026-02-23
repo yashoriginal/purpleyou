@@ -4,13 +4,15 @@ import Image from "next/image";
 import { useState } from "react";
 
 interface DynamicAspectImageProps {
-  src: string;
+  src?: string | null;
   alt: string;
   defaultAspectRatio?: number; // Fallback aspect ratio (width/height)
   containerClassName?: string;
   imageClassName?: string;
   children?: React.ReactNode;
 }
+
+const DEFAULT_IMAGE = "/images/hero1.jpg";
 
 export default function DynamicAspectImage({
   src,
@@ -21,6 +23,9 @@ export default function DynamicAspectImage({
   children,
 }: DynamicAspectImageProps) {
   const [aspectRatio, setAspectRatio] = useState(defaultAspectRatio);
+
+  // Ensure we always have a valid image URL
+  const validSrc = src || DEFAULT_IMAGE;
 
   const handleImageLoad = (result: any) => {
     if (result.naturalWidth && result.naturalHeight) {
@@ -37,7 +42,7 @@ export default function DynamicAspectImage({
       }}
     >
       <Image
-        src={src}
+        src={validSrc}
         alt={alt}
         fill
         className={imageClassName}

@@ -102,7 +102,7 @@ export default function ShippingAndDeliveryPage() {
           <p className="mb-4 font-light leading-relaxed">
             <strong>Free Shipping:</strong> On all orders above ₹3000
             <br />
-            <strong>Standard Shipping:</strong> ₹99 for orders below ₹3000
+            <strong>Standard Shipping:</strong> ₹1 for orders below ₹3000
             <br />
             <strong>Express Shipping:</strong> ₹299 (2-3 business days)
             <br />

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,6 +10,7 @@ import {
   HiOutlinePlus,
   HiOutlineArrowLeft,
 } from "react-icons/hi";
+import CartProductImage from "@/components/cart/CartProductImage";
 
 export default function CartPage() {
   const { items, totalPrice, totalItems, removeFromCart, updateQuantity, isLoading, error } =
@@ -20,7 +20,7 @@ export default function CartPage() {
   const [operationError, setOperationError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
-  const shippingCost = totalPrice >= 3000 ? 0 : 99;
+  const shippingCost = totalPrice >= 3000 ? 0 : 1;
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
 
@@ -135,14 +135,7 @@ export default function CartPage() {
                 >
                   {/* Product Image */}
                   <Link href={`/products/${item.productId}`}>
-                    <div className="relative bg-[#f8f5f2] w-20 h-28 sm:w-24 sm:h-32 flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-75 transition-opacity">
-                      <Image
-                        src={item.image}
-                        alt={item.productName}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+                    <CartProductImage item={item} />
                   </Link>
 
                   {/* Product Details */}

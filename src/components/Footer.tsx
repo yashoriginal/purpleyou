@@ -145,7 +145,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[#6b6b6b] font-light">
-            © 2025 PURPLE YOU. All rights reserved. Made in India.
+            © 2026 PURPLE YOU. All rights reserved. Made in India.
           </p>
           <div className="flex gap-6 text-xs text-[#6b6b6b]">
             <a href="#" className="hover:text-[#111111] transition-colors">

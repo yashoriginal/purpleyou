@@ -85,7 +85,7 @@ export default function CheckoutPage() {
   );
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
-  const shippingCost = totalPrice >= 3000 ? 0 : 99;
+  const shippingCost = totalPrice >= 3000 ? 0 : 1;
   const gst = Math.round(totalPrice * 0.18);
   const totalAmount = totalPrice + shippingCost + gst;
 
@@ -111,6 +111,16 @@ export default function CheckoutPage() {
   useEffect(() => {
     loadAddresses();
   }, []);
+
+  // Auto-select default address when addresses are loaded
+  useEffect(() => {
+    if (savedAddresses.length > 0 && !selectedAddressId) {
+      const defaultAddress = savedAddresses.find((addr) => addr.isDefault);
+      if (defaultAddress) {
+        handleSelectAddress(defaultAddress);
+      }
+    }
+  }, [savedAddresses]);
 
   const loadAddresses = async () => {
     setAddressesLoading(true);
@@ -523,20 +533,6 @@ export default function CheckoutPage() {
                     >
                       + Use a different address
                     </button>
-
-                    {selectedAddressId && (
-                      <button
-                        onClick={handleAddressSubmit}
-                        disabled={isProcessing || !razorpayLoaded}
-                        className={`py-2 px-6 text-sm font-semibold rounded-lg transition-all ${
-                          isProcessing || !razorpayLoaded
-                            ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
-                            : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
-                        }`}
-                      >
-                        {isProcessing ? "Processing..." : "Continue to Payment"}
-                      </button>
-                    )}
                   </div>
                   <div className="mt-6 border-t border-[#e6e0da] pt-6"></div>
                 </div>
@@ -842,8 +838,18 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex justify-between items-start"
+                    className="flex justify-between items-start gap-3"
                   >
+                    {/* Product Image */}
+                    <div className="w-12 h-12 flex-shrink-0 bg-[#f0ede9] rounded overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.productName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Product Details */}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[#111111] line-clamp-2">
                         {item.productName}
@@ -852,6 +858,8 @@ export default function CheckoutPage() {
                         Qty: {item.quantity}
                       </p>
                     </div>
+
+                    {/* Price */}
                     <p className="text-sm font-medium text-[#111111] ml-2 flex-shrink-0">
                       ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                     </p>
@@ -885,9 +893,24 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <p className="text-xs text-[#6b6b6b] text-center">
+              <p className="text-xs text-[#6b6b6b] text-center mb-6">
                 🔒 Secure payment powered by Razorpay
               </p>
+
+              {selectedAddressId && (
+                <button
+                  onClick={handleAddressSubmit}
+                  disabled={isProcessing || !razorpayLoaded}
+                  className={`w-full py-4 text-sm font-semibold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${
+                    isProcessing || !razorpayLoaded
+                      ? "bg-[#d0c0e0] text-[#6b6b6b] cursor-not-allowed"
+                      : "bg-[#5540b7] text-white hover:bg-[#3d2d7f]"
+                  }`}
+                >
+                  <span className="text-base">🔒</span>
+                  {isProcessing ? "Processing Payment..." : "Continue to Payment"}
+                </button>
+              )}
             </div>
           </div>
         </div>

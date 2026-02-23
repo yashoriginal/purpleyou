@@ -17,27 +17,21 @@ const categoryImages: { [key: string]: string } = {
 // Function to get category image with better matching
 function getCategoryImage(category: string): string {
   const cat = category.toLowerCase().trim();
-  console.log(`[getCategoryImage] Input: "${category}", Normalized: "${cat}"`);
-  
+
   // Direct lookup
   if (categoryImages[cat]) {
-    console.log(`[getCategoryImage] Found direct match: ${categoryImages[cat]}`);
     return categoryImages[cat];
   }
   
   // Try singular/plural variations
   const singularForm = cat.endsWith('s') ? cat.slice(0, -1) : cat;
   const pluralForm = `${cat}s`;
-  
-  console.log(`[getCategoryImage] Trying singular: "${singularForm}", plural: "${pluralForm}"`);
-  
+
   if (categoryImages[singularForm]) {
-    console.log(`[getCategoryImage] Found singular match: ${categoryImages[singularForm]}`);
     return categoryImages[singularForm];
   }
-  
+
   if (categoryImages[pluralForm]) {
-    console.log(`[getCategoryImage] Found plural match: ${categoryImages[pluralForm]}`);
     return categoryImages[pluralForm];
   }
   
@@ -49,15 +43,11 @@ function getCategoryImage(category: string): string {
     .replace(/s$/, '');
   
   const fallbackPath = `/category/${categoryName}.jpeg`;
-  console.log(`[getCategoryImage] Using fallback: ${fallbackPath}`);
   return fallbackPath;
 }
 
 export default async function CollectionsIndex() {
   const categories = await getAllCategories();
-  
-  console.log("[Collections Page] Categories from API:", categories);
-  console.log("[Collections Page] Available image keys:", Object.keys(categoryImages));
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">

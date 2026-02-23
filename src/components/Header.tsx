@@ -25,7 +25,10 @@ const mainNavLinks = [
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [shopOpen, setShopOpen] = useState(false);
+
+  const closeMenu = () => {
+    setMobileOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white">
@@ -53,7 +56,7 @@ export default function Header() {
             </button>
 
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
+            <Link href="/" className="flex-shrink-0" onClick={closeMenu}>
               <div className="bg-[#D3C9FF] px-3 py-1.5 rounded">
                 <span className="text-lg font-bold text-[#111111] tracking-wider" style={{ fontFamily: "Tan Tangkiwood, sans-serif" }}>
                   PURPLE YOU
@@ -122,33 +125,44 @@ export default function Header() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <nav className="sm:hidden border-t border-[#e6e0da] bg-white">
-            <div className="flex flex-col px-4 py-4 text-sm">
-              {mainNavLinks.map((item) => (
-                <div key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="py-3 text-[#111111] font-medium uppercase tracking-wider hover:text-[#5540b7] block border-b border-[#e6e0da] last:border-b-0"
-                  >
-                    {item.label}
-                  </Link>
-                  {item.submenu && (
-                    <div className="bg-[#f8f5f2] px-4 py-2">
-                      {item.submenu.map((sub) => (
-                        <Link
-                          key={sub.href}
-                          href={sub.href}
-                          className="block py-2 text-xs text-[#6b6b6b] hover:text-[#5540b7]"
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </nav>
+          <>
+            {/* Backdrop overlay - closes menu when clicked */}
+            <div
+              className="fixed inset-0 sm:hidden z-40 bg-black/0"
+              onClick={closeMenu}
+            />
+
+            {/* Menu content */}
+            <nav className="fixed top-[108px] left-0 right-0 sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-108px)] overflow-y-auto z-50">
+              <div className="flex flex-col px-4 py-4 text-sm">
+                {mainNavLinks.map((item) => (
+                  <div key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="py-3 text-[#111111] font-medium uppercase tracking-wider hover:text-[#5540b7] block border-b border-[#e6e0da] last:border-b-0"
+                      onClick={closeMenu}
+                    >
+                      {item.label}
+                    </Link>
+                    {item.submenu && (
+                      <div className="bg-[#f8f5f2] px-4 py-2">
+                        {item.submenu.map((sub) => (
+                          <Link
+                            key={sub.href}
+                            href={sub.href}
+                            className="block py-2 text-xs text-[#6b6b6b] hover:text-[#5540b7]"
+                            onClick={closeMenu}
+                          >
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </nav>
+          </>
         )}
       </div>
     </header>

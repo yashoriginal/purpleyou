@@ -33,6 +33,7 @@ interface APIProductOld {
   isNew?: boolean;
   variants?: APIVariantOld[];
   isActive: boolean;
+  tags?: string[];
 }
 
 interface APIResponseOld {
@@ -131,12 +132,10 @@ function validateImageUrl(url?: string): string {
     return url;
   }
 
-  // Relative path - check if it includes directory structure
+  // Relative path (filename only) - convert to local path
+  // e.g., "emerald-bangle-1.jpeg" becomes "/products/emerald-bangle-1.jpeg"
   if (url && !url.startsWith("http")) {
-    // For relative filenames, just use them as local paths
-    // This allows Next.js Image component to handle them with proper loader configuration
-    // e.g., "emerald-bangle-1.jpeg" remains as the filename
-    return url;
+    return `/products/${url}`;
   }
 
   // Fallback for invalid URLs
@@ -173,6 +172,7 @@ function mapOldAPIProductToProduct(apiProduct: APIProductOld): Product {
     hoverImage: hoverImage?.url,
     isBestseller: apiProduct.isBestseller ?? false,
     isNew: apiProduct.isNew ?? false,
+    tags: Array.isArray(apiProduct.tags) ? apiProduct.tags : undefined,
   };
 }
 
@@ -222,8 +222,6 @@ function mapV2APIProductToProduct(apiProduct: any): Product {
     price: apiProduct.base?.price,
   };
 
-  console.log(`[MAPPING] Mapped product: id=${internalId}, name="${mappedProduct.name}", category="${mappedProduct.category}", slug="${slug}"`);
-
   return mappedProduct;
 }
 
@@ -238,7 +236,6 @@ async function fetchProductsFromAPI(): Promise<Product[]> {
   }
 
   try {
-    console.log(`[API] Fetching products from: ${EXTERNAL_API_URL}/products`);
     const res = await fetch(`${EXTERNAL_API_URL}/products`, {
       next: { revalidate: 600 },
     });
@@ -249,50 +246,31 @@ async function fetchProductsFromAPI(): Promise<Product[]> {
     }
 
     const data = await res.json();
-    console.log(`[API] Response received`);
-    console.log(`[API] Full response structure:`, {
-      statusCode: data.statusCode,
-      status: data.status,
-      success: data.success,
-      productsLength: data.data?.products?.length,
-      itemsLength: data.data?.items?.length,
-      hasNextPage: data.data?.pagination?.hasNextPage,
-      totalCount: data.meta?.pagination?.total,
-    });
 
     let products: Product[] = [];
 
     // Detect API format and handle accordingly
     if (data.status === "SUCCESS" && data.data?.products) {
       // Pure v2 API format
-      console.log(`[API] ✅ Detected pure v2 API format (status=SUCCESS, ${data.data.products.length} products)`);
       products = data.data.products
         .filter((item: APIProductBase) => item.state !== "INACTIVE" && item.state !== "DRAFT")
         .map(mapV2APIProductToProduct);
     } else if (data.success && data.data?.items && data.data.items.length > 0) {
       // Hybrid format: old envelope (success, data.items) with v2 product data
       const firstItem = data.data.items[0];
-      console.log(`[API] Detected hybrid format: ${data.data.items.length} items, checking first item...`);
 
       if (firstItem.base && firstItem.variantSchema !== undefined) {
         // This is v2 product data in old envelope
-        console.log(`[API] ✅ Hybrid format confirmed: v2 products in old envelope (${data.data.items.length} items)`);
         products = data.data.items
           .filter((item: any) => item.state !== "INACTIVE" && item.state !== "DRAFT")
           .map(mapV2APIProductToProduct);
       } else {
         // This is old format
-        console.log(`[API] ✅ Detected old API format (success=${data.success}, items=${data.data.items.length})`);
         products = data.data.items
           .filter((item: APIProductOld) => item.isActive !== false)
           .map(mapOldAPIProductToProduct);
       }
     } else {
-      console.warn(`[API] ❌ Unknown API response structure`);
-      console.log(`[API] data.status:`, data.status);
-      console.log(`[API] data.success:`, data.success);
-      console.log(`[API] data.data?.products:`, data.data?.products ? `${data.data.products.length} items` : "undefined");
-      console.log(`[API] data.data?.items:`, data.data?.items ? `${data.data.items.length} items` : "undefined");
       return useFallbackProducts();
     }
 
@@ -300,12 +278,6 @@ async function fetchProductsFromAPI(): Promise<Product[]> {
     cachedProducts = products;
     cacheTimestamp = Date.now();
 
-    if (products.length > 0) {
-      console.log(`[API] ✅ Successfully loaded ${products.length} products from API`);
-      console.log(`[API] Products:`, products.map(p => `${p.name} (${p.category})`).join(", "));
-    } else {
-      console.log(`[API] ⚠️ Loaded 0 products from API`);
-    }
     return products;
   } catch (error) {
     console.error("Error fetching products from API:", error);
@@ -320,8 +292,6 @@ async function fetchProductsFromAPI(): Promise<Product[]> {
 function useFallbackProducts(): Product[] {
   try {
     const { products: dummyProducts } = require("@/lib/data");
-
-    console.log(`[FALLBACK] Using ${dummyProducts.length} dummy products for demo`);
 
     // Convert dummy products to new format
     return dummyProducts.map((product: any) => ({
@@ -384,12 +354,6 @@ export async function getProductsByCollection(
   const filtered = products.filter(
     (product) => product.category.toLowerCase() === collection.toLowerCase(),
   );
-
-  console.log(`[COLLECTION] Filtering products for collection: "${collection}"`);
-  console.log(`[COLLECTION] Total products: ${products.length}`);
-  console.log(`[COLLECTION] Products by category:`, products.map(p => `${p.name} (${p.category})`).join(", "));
-  console.log(`[COLLECTION] Filtered results: ${filtered.length}`);
-  console.log(`[COLLECTION] Filtered products:`, filtered.map(p => `${p.name} (${p.category})`).join(", "));
 
   return filtered;
 }

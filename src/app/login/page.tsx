@@ -4,11 +4,17 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
+import { getAllProducts } from "@/services/product.service";
 import {
   AuthServiceError,
   authService,
   type AddressObject,
 } from "@/services/auth.service";
+import {
+  getPendingCartAction,
+  clearPendingCartAction,
+} from "@/lib/pendingCartAction";
 
 type AuthStep = "phone" | "otp" | "profile" | "success";
 
@@ -20,6 +26,7 @@ function LoginPageContent() {
     verifyOTP: contextVerifyOTP,
     register: contextRegister,
   } = useAuth();
+  const { addToCart } = useCart();
 
   const [step, setStep] = useState<AuthStep>("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -32,22 +39,53 @@ function LoginPageContent() {
   const [error, setError] = useState("");
   const [isNewUser, setIsNewUser] = useState(false);
 
-  // Auto-redirect after successful login
+  // Handle post-login actions (execute pending cart actions, then redirect)
   useEffect(() => {
     if (isLoggedIn) {
-      router.push("/");
-    }
-  }, [isLoggedIn, router]);
+      // Check for pending cart actions
+      const pendingAction = getPendingCartAction();
 
-  // Auto-redirect after success screen is shown (after 2 seconds)
-  useEffect(() => {
-    if (step === "success") {
-      const timer = setTimeout(() => {
+      if (pendingAction) {
+        // Execute the pending cart action
+        (async () => {
+          try {
+            // Fetch all products to find the one we need to add to cart
+            const products = await getAllProducts();
+            const product = products.find(
+              (p) => p.productId === pendingAction.productId || String(p.id) === pendingAction.productId
+            );
+
+            if (product) {
+              // Add the product to cart
+              await addToCart(product, pendingAction.selectedVariants, pendingAction.quantity);
+
+              // Clear the pending action
+              clearPendingCartAction();
+
+              // Redirect to product page
+              setTimeout(() => {
+                router.push(`/products/${product.slug}`);
+              }, 500);
+            } else {
+              // Product not found, just redirect home
+              clearPendingCartAction();
+              router.push("/");
+            }
+          } catch (error) {
+            console.error("Failed to execute pending cart action:", error);
+            clearPendingCartAction();
+            router.push("/");
+          }
+        })();
+      } else {
+        // No pending action, just redirect home
         router.push("/");
-      }, 2000);
-      return () => clearTimeout(timer);
+      }
     }
-  }, [step, router]);
+  }, [isLoggedIn, router, addToCart]);
+
+  // Note: Redirect is now handled by the isLoggedIn useEffect above
+  // which checks for pending cart actions before redirecting
 
   // Handle Login or Register - Initial step
   const handleSendOTP = async (e: React.FormEvent) => {
@@ -360,16 +398,14 @@ function LoginPageContent() {
               {/* Info Help Text */}
               <div className="mt-4 p-3 bg-[#f8f5f2] rounded-lg text-xs text-[#6b6b6b]">
                 <p className="font-medium text-[#111111] mb-2">
-                  Authentication Flow:
+                  How it works:
                 </p>
                 <div className="space-y-2">
                   <p>
-                    <span className="font-medium">Existing Users:</span> Enter
-                    phone number and verify with OTP
+                    <span className="font-medium">Existing Users:</span> Enter your phone number and verify with OTP
                   </p>
                   <p>
-                    <span className="font-medium">New Users:</span> First
-                    register using the signup flow, then use OTP to login
+                    <span className="font-medium">New Users:</span> Register during the OTP verification process
                   </p>
                 </div>
               </div>

@@ -6,13 +6,14 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import {
-  HiOutlineHeart,
   HiOutlineChevronLeft,
   HiOutlineChevronRight,
 } from "react-icons/hi";
 import EditProfileForm from "@/components/profile/EditProfileForm";
+import MapPicker from "@/components/address/MapPicker";
 import * as orderService from "@/services/order.service";
 import * as authService from "@/services/auth.service";
+import * as productService from "@/services/product.service";
 import { AddressObject } from "@/services/auth.service";
 
 // Dummy data types
@@ -33,15 +34,6 @@ interface OrderItem {
 }
 
 // Using AddressObject from auth.service
-
-interface WishlistItem {
-  id: string;
-  productId: number;
-  productName: string;
-  price: number;
-  image: string;
-  addedDate: string;
-}
 
 // Dummy data - API placeholders
 const DUMMY_ORDERS: Order[] = [
@@ -107,59 +99,15 @@ const DUMMY_ORDERS: Order[] = [
   },
 ];
 
-const DUMMY_WISHLIST: WishlistItem[] = [
-  {
-    id: "1",
-    productId: 1,
-    productName: "Diamond Pendant",
-    price: 12999,
-    image: "/images/hero1.jpg",
-    addedDate: "2025-01-01",
-  },
-  {
-    id: "2",
-    productId: 2,
-    productName: "Pearl Necklace",
-    price: 9999,
-    image: "/images/hero1.jpg",
-    addedDate: "2024-12-28",
-  },
-  {
-    id: "3",
-    productId: 3,
-    productName: "Rose Gold Ring",
-    price: 7999,
-    image: "/images/hero1.jpg",
-    addedDate: "2024-12-20",
-  },
-  {
-    id: "4",
-    productId: 4,
-    productName: "Sapphire Earrings",
-    price: 14999,
-    image: "/images/hero1.jpg",
-    addedDate: "2024-12-15",
-  },
-  {
-    id: "5",
-    productId: 5,
-    productName: "Emerald Bracelet",
-    price: 10999,
-    image: "/images/hero1.jpg",
-    addedDate: "2024-12-10",
-  },
-];
-
 const ITEMS_PER_PAGE = 2;
 
-type Tab = "profile" | "orders" | "addresses" | "wishlist";
+type Tab = "profile" | "orders" | "addresses";
 
 export default function AccountPage() {
   const router = useRouter();
   const { isLoggedIn, user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [ordersPage, setOrdersPage] = useState(1);
-  const [wishlistPage, setWishlistPage] = useState(1);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState<string | null>(null);
@@ -183,6 +131,21 @@ export default function AccountPage() {
     isDefault: false,
   });
 
+  // Delete confirmation states
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    show: boolean;
+    addressId: string | null;
+    addressLabel: string;
+  }>({
+    show: false,
+    addressId: null,
+    addressLabel: "",
+  });
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Map picker states
+  const [showMapPicker, setShowMapPicker] = useState(false);
+
   // Fetch user orders and addresses from API
   useEffect(() => {
     if (isLoggedIn && user?.userId) {
@@ -198,6 +161,13 @@ export default function AccountPage() {
     try {
       const apiOrders = await orderService.getUserOrders(userId);
 
+      // Fetch all products to map names and images
+      const allProducts = await productService.getAllProducts();
+      const productMap = new Map<string, any>();
+      allProducts.forEach((product) => {
+        productMap.set(product.productId, product);
+      });
+
       // Map API orders to the Order interface
       const mappedOrders: Order[] = apiOrders.map((apiOrder) => ({
         id: apiOrder.orderId,
@@ -205,12 +175,15 @@ export default function AccountPage() {
         date: apiOrder.createdAt,
         total: apiOrder.orderDetails.totalPrice,
         status: (apiOrder.status.toLowerCase() as any) || "confirmed",
-        items: apiOrder.items.map((item) => ({
-          productName: `Product ${item.productId.substring(0, 8)}...`,
-          quantity: item.quantity,
-          price: item.pricePerUnit,
-          image: "/images/hero1.jpg",
-        })),
+        items: apiOrder.items.map((item) => {
+          const product = productMap.get(item.productId);
+          return {
+            productName: product?.name || `Product ${item.productId.substring(0, 8)}...`,
+            quantity: item.quantity,
+            price: item.pricePerUnit,
+            image: product?.image || "/images/hero1.jpg",
+          };
+        }),
       }));
 
       setOrders(mappedOrders);
@@ -232,12 +205,22 @@ export default function AccountPage() {
 
     try {
       const apiAddresses = await authService.getAddresses(userId);
-      setAddresses(apiAddresses);
+      if (apiAddresses && apiAddresses.length > 0) {
+        setAddresses(apiAddresses);
+      } else {
+        setAddresses([]);
+      }
     } catch (error) {
       const errorMsg =
         error instanceof Error ? error.message : "Failed to load addresses";
       setAddressesError(errorMsg);
-      console.error("Failed to load addresses:", error);
+
+      // If it's a 401 error, redirect to login
+      if (errorMsg.includes("session has expired") || errorMsg.includes("No authentication token")) {
+        router.push("/login?redirect=/account");
+        return;
+      }
+
       setAddresses([]);
     } finally {
       setAddressesLoading(false);
@@ -247,19 +230,46 @@ export default function AccountPage() {
   const handleAddAddress = async () => {
     if (!user?.userId) return;
 
+    // Validate required fields
+    if (!formData.label?.trim()) {
+      alert("Please enter an address label (e.g., Home, Office)");
+      return;
+    }
+
+    if (!formData.address?.trim()) {
+      alert("Please enter the address");
+      return;
+    }
+
+    if (!formData.area?.trim()) {
+      alert("Please enter the area/city");
+      return;
+    }
+
+    if (!formData.pincode?.trim()) {
+      alert("Please enter the pincode");
+      return;
+    }
+
+    if (!formData.latitude?.trim() || !formData.longitude?.trim()) {
+      alert("Please enter latitude and longitude");
+      return;
+    }
+
     setAddressFormLoading(true);
     try {
+      // Add the address
       await authService.addAddress(user.userId, {
-        label: formData.label,
-        address: formData.address,
-        area: formData.area,
-        pincode: formData.pincode,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
+        label: formData.label.trim(),
+        address: formData.address.trim(),
+        area: formData.area.trim(),
+        pincode: formData.pincode.trim(),
+        latitude: formData.latitude.trim(),
+        longitude: formData.longitude.trim(),
         isDefault: formData.isDefault,
       });
 
-      // Reload addresses
+      // Reload addresses to refresh the list
       await loadAddresses(user.userId);
 
       // Reset form and close modal
@@ -321,22 +331,53 @@ export default function AccountPage() {
     }
   };
 
-  const handleDeleteAddress = async (addressId: string) => {
-    if (
-      !user?.userId ||
-      !confirm("Are you sure you want to delete this address?")
-    )
-      return;
+  const handleDeleteAddress = (address: AddressObject) => {
+    setDeleteConfirmation({
+      show: true,
+      addressId: address.addressId || null,
+      addressLabel: address.label,
+    });
+  };
 
+  const confirmDeleteAddress = async () => {
+    if (!user?.userId || !deleteConfirmation.addressId) return;
+
+    setDeleteLoading(true);
     try {
-      await authService.deleteAddress(user.userId, addressId);
+      await authService.deleteAddress(user.userId, deleteConfirmation.addressId);
       // Reload addresses
       await loadAddresses(user.userId);
+
+      // Close confirmation modal
+      setDeleteConfirmation({
+        show: false,
+        addressId: null,
+        addressLabel: "",
+      });
     } catch (error) {
       const errorMsg =
         error instanceof Error ? error.message : "Failed to delete address";
       alert(`Error: ${errorMsg}`);
+    } finally {
+      setDeleteLoading(false);
     }
+  };
+
+  const cancelDeleteAddress = () => {
+    setDeleteConfirmation({
+      show: false,
+      addressId: null,
+      addressLabel: "",
+    });
+  };
+
+  const handleMapLocationSelect = (latitude: string, longitude: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude,
+      longitude,
+    }));
+    setShowMapPicker(false);
   };
 
   const openAddForm = () => {
@@ -381,16 +422,10 @@ export default function AccountPage() {
 
   // Pagination calculations
   const totalOrderPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
-  const totalWishlistPages = Math.ceil(DUMMY_WISHLIST.length / ITEMS_PER_PAGE);
 
   const paginatedOrders = orders.slice(
     (ordersPage - 1) * ITEMS_PER_PAGE,
     ordersPage * ITEMS_PER_PAGE,
-  );
-
-  const paginatedWishlist = DUMMY_WISHLIST.slice(
-    (wishlistPage - 1) * ITEMS_PER_PAGE,
-    wishlistPage * ITEMS_PER_PAGE,
   );
 
   const getStatusColor = (status: Order["status"]) => {
@@ -473,18 +508,6 @@ export default function AccountPage() {
                 >
                   <span className="text-lg">📍</span>
                   <span className="text-sm font-medium">Addresses</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab("wishlist")}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
-                    activeTab === "wishlist"
-                      ? "bg-white text-[#5540b7]"
-                      : "text-[#111111] hover:bg-white hover:text-[#5540b7]"
-                  }`}
-                >
-                  <HiOutlineHeart className="w-5 h-5" />
-                  <span className="text-sm font-medium">Wishlist</span>
                 </button>
               </nav>
 
@@ -589,12 +612,11 @@ export default function AccountPage() {
                                   key={idx}
                                   className="flex gap-4 mb-4 last:mb-0"
                                 >
-                                  <div className="relative w-16 h-16 bg-[#f8f5f2] rounded flex-shrink-0 overflow-hidden">
-                                    <Image
+                                  <div className="w-16 h-16 flex-shrink-0 bg-[#f0ede9] rounded overflow-hidden">
+                                    <img
                                       src={item.image}
                                       alt={item.productName}
-                                      fill
-                                      className="object-cover"
+                                      className="w-full h-full object-cover"
                                     />
                                   </div>
                                   <div className="flex-1">
@@ -749,10 +771,7 @@ export default function AccountPage() {
                               Edit
                             </button>
                             <button
-                              onClick={() =>
-                                address.addressId &&
-                                handleDeleteAddress(address.addressId)
-                              }
+                              onClick={() => handleDeleteAddress(address)}
                               className="text-red-600 font-medium hover:underline"
                             >
                               Delete
@@ -766,102 +785,6 @@ export default function AccountPage() {
               </div>
             )}
 
-            {/* Wishlist Tab */}
-            {activeTab === "wishlist" && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-light text-[#111111] mb-6 tracking-wide">
-                    Your Wishlist
-                  </h2>
-
-                  {DUMMY_WISHLIST.length === 0 ? (
-                    <div className="text-center py-12">
-                      <p className="text-[#6b6b6b] font-light mb-4">
-                        Your wishlist is empty
-                      </p>
-                      <Link
-                        href="/collections/all"
-                        className="text-[#5540b7] font-medium hover:underline"
-                      >
-                        Continue Shopping
-                      </Link>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {paginatedWishlist.map((item) => (
-                          <div
-                            key={item.id}
-                            className="border border-[#e6e0da] rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-                          >
-                            <div className="relative w-full h-48 bg-[#f8f5f2] overflow-hidden">
-                              <Image
-                                src={item.image}
-                                alt={item.productName}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <div className="p-4">
-                              <h3 className="text-base font-medium text-[#111111] mb-2">
-                                {item.productName}
-                              </h3>
-                              <p className="text-xs text-[#6b6b6b] mb-3">
-                                Added on{" "}
-                                {new Date(item.addedDate).toLocaleDateString(
-                                  "en-IN",
-                                )}
-                              </p>
-                              <div className="flex items-center justify-between">
-                                <p className="text-lg font-semibold text-[#111111]">
-                                  ₹{item.price.toLocaleString("en-IN")}
-                                </p>
-                                <button className="px-4 py-2 bg-[#5540b7] text-white text-xs font-medium rounded hover:bg-[#3d2d7f] transition-colors">
-                                  Add to Cart
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Pagination */}
-                      {totalWishlistPages > 1 && (
-                        <div className="flex items-center justify-center gap-4 mt-8">
-                          <button
-                            onClick={() =>
-                              setWishlistPage((p) => Math.max(1, p - 1))
-                            }
-                            disabled={wishlistPage === 1}
-                            className="flex items-center gap-1 px-3 py-2 border border-[#e6e0da] text-[#111111] rounded hover:bg-[#f8f5f2] disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <HiOutlineChevronLeft className="w-4 h-4" />
-                            Previous
-                          </button>
-
-                          <div className="text-sm text-[#6b6b6b]">
-                            Page {wishlistPage} of {totalWishlistPages}
-                          </div>
-
-                          <button
-                            onClick={() =>
-                              setWishlistPage((p) =>
-                                Math.min(totalWishlistPages, p + 1),
-                              )
-                            }
-                            disabled={wishlistPage === totalWishlistPages}
-                            className="flex items-center gap-1 px-3 py-2 border border-[#e6e0da] text-[#111111] rounded hover:bg-[#f8f5f2] disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Next
-                            <HiOutlineChevronRight className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -957,6 +880,19 @@ export default function AccountPage() {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-[#111111] mb-2">
+                  Location Coordinates *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowMapPicker(true)}
+                  className="w-full mb-4 px-4 py-2 bg-[#D3C9FF] text-[#5540b7] rounded-lg font-medium hover:bg-[#c8b8ff] transition-colors text-sm"
+                >
+                  📍 Pick Location from Map
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#111111] mb-2">
@@ -1040,6 +976,69 @@ export default function AccountPage() {
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
                 {editingAddress ? "Update Address" : "Add Address"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Map Picker Modal */}
+      {showMapPicker && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-[#e6e0da] p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-light text-[#111111]">
+                Select Location on Map
+              </h2>
+              <button
+                onClick={() => setShowMapPicker(false)}
+                className="text-[#6b6b6b] hover:text-[#111111]"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6">
+              <MapPicker
+                onSelectLocation={handleMapLocationSelect}
+                initialLatitude={formData.latitude}
+                initialLongitude={formData.longitude}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Address Confirmation Modal */}
+      {deleteConfirmation.show && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-2xl font-light text-[#111111] mb-2">
+                Delete Address
+              </h2>
+              <p className="text-[#6b6b6b] mb-6">
+                Are you sure you want to delete "{deleteConfirmation.addressLabel}"? This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex gap-4 justify-end p-6 border-t border-[#e6e0da]">
+              <button
+                onClick={cancelDeleteAddress}
+                disabled={deleteLoading}
+                className="px-6 py-2 border border-[#e6e0da] text-[#111111] rounded-lg hover:bg-[#f8f5f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteAddress}
+                disabled={deleteLoading}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {deleteLoading && (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
+                Delete Address
               </button>
             </div>
           </div>

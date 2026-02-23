@@ -53,7 +53,7 @@ function getCategoryImage(category: string): string {
 export default async function HomePage() {
   const apiProducts = await getAllProducts();
   const categories = await getAllCategories();
-  const bestsellers = apiProducts.filter((p) => p.isBestseller).slice(0, 6);
+  const bestsellers = apiProducts.filter((p) => p.tags?.includes("Best Seller")).slice(0, 6);
 
   const organizationSchema = generateOrganizationSchema();
 
@@ -97,21 +97,19 @@ export default async function HomePage() {
       )}
 
       {/* Best Sellers Section */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24 bg-[#f8f5f2]">
-        <div className="mb-12">
-          <h2 className="text-4xl sm:text-5xl font-light text-[#111111] tracking-wider mb-3">
-            Best Sellers
-          </h2>
-          <p className="text-base text-[#6b6b6b] max-w-2xl font-light">
-            Discover the jewelry pieces loved by our customers.
-          </p>
-        </div>
-        {bestsellers.length > 0 ? (
+      {bestsellers.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24 bg-[#f8f5f2]">
+          <div className="mb-12">
+            <h2 className="text-4xl sm:text-5xl font-light text-[#111111] tracking-wider mb-3">
+              Best Sellers
+            </h2>
+            <p className="text-base text-[#6b6b6b] max-w-2xl font-light">
+              Discover the jewelry pieces loved by our customers.
+            </p>
+          </div>
           <ProductGrid products={bestsellers} />
-        ) : (
-          <p className="text-center text-[#6b6b6b]">No products available</p>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* Brand Story Section */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
