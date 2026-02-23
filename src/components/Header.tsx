@@ -128,12 +128,12 @@ export default function Header() {
           <>
             {/* Backdrop overlay - closes menu when clicked */}
             <div
-              className="fixed inset-0 sm:hidden z-40 bg-transparent"
+              className="fixed inset-0 sm:hidden z-40 bg-black/0"
               onClick={closeMenu}
             />
 
             {/* Menu content */}
-            <nav className="relative sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-120px)] overflow-y-auto z-50">
+            <nav className="fixed top-[108px] left-0 right-0 sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-108px)] overflow-y-auto z-50">
               <div className="flex flex-col px-4 py-4 text-sm">
                 {mainNavLinks.map((item) => (
                   <div key={item.href}>
