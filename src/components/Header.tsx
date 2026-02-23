@@ -133,7 +133,7 @@ export default function Header() {
             />
 
             {/* Menu content */}
-            <nav className="relative sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-120px)] overflow-y-auto z-41">
+            <nav className="relative sm:hidden border-t border-[#e6e0da] bg-white max-h-[calc(100vh-120px)] overflow-y-auto z-50">
               <div className="flex flex-col px-4 py-4 text-sm">
                 {mainNavLinks.map((item) => (
                   <div key={item.href}>
