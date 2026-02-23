@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Route config
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const WISHLIST_API_BASE = "https://purpleoneservice.onrender.com/api/v1/wishlist";
 
 export async function DELETE(
