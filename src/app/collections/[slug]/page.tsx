@@ -1,191 +1,291 @@
-import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import Script from "next/script";
-import { categories } from "@/lib/data";
-import {
-  generateCollectionMetadata,
-  generateCollectionSchema,
-} from "@/lib/seo";
-import CollectionFiltersClient from "@/components/collection/CollectionFiltersClient";
-import {
-  getAllProducts,
-  getProductsByCollection,
-} from "@/services/product.service";
+import type { Metadata } from "next";
 
-type PageProps = {
-  params: Promise<{ slug: string }>;
-};
+import { notFound } from "next/navigation";
 
-const categoryImages: { [key: string]: string } = {
-  bracelet: "/category/Bracelet.jpeg",
-  bracelets: "/category/Bracelet.jpeg",
-  earrings: "/category/Earrings.jpeg",
-  necklace: "/category/Necklace.jpeg",
-  necklaces: "/category/Necklace.jpeg",
-  ring: "/category/Ring.jpeg",
-  rings: "/category/Ring.jpeg",
-};
+import { CollectionHeader } from "@/components/collection/collection-header";
+import { CollectionSidebar } from "@/components/collection/collection-sidebar";
+import { ProductCard } from "@/components/product/product-card";
 
-// Function to get category image
-function getCategoryImage(slug: string): string {
-  if (slug === "all") {
-    return "/category/Bracelet.jpeg"; // Default for all products
-  }
-  
-  const cat = slug.toLowerCase().trim();
-  
-  // Direct lookup
-  if (categoryImages[cat]) {
-    return categoryImages[cat];
-  }
-  
-  // Try singular/plural variations
-  const singularForm = cat.endsWith('s') ? cat.slice(0, -1) : cat;
-  const pluralForm = `${cat}s`;
-  
-  if (categoryImages[singularForm]) {
-    return categoryImages[singularForm];
-  }
-  
-  if (categoryImages[pluralForm]) {
-    return categoryImages[pluralForm];
-  }
-  
-  // Fallback: construct path from category name
-  const categoryName = cat
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('')
-    .replace(/s$/, '');
-  
-  return `/category/${categoryName}.jpeg`;
+import { getCollection } from "@/lib/collections";
+import { getProducts } from "@/services/products.service";
+
+import type { Product } from "@/types/product";
+
+import { MobileCollectionFilters } from "@/components/collection/mobile-collection-filters";
+
+interface CollectionPageProps {
+  params: Promise<{
+    slug: string;
+  }>;
+
+  searchParams: Promise<{
+    sort?: string | string[];
+    stock?: string | string[];
+    min?: string | string[];
+    max?: string | string[];
+  }>;
 }
 
-/**
- * Generate static parameters for all collection pages
- * This enables static site generation (SSG) for each category
- */
-export async function generateStaticParams() {
-  return [{ slug: "all" }, ...categories.map((cat) => ({ slug: cat.slug }))];
-}
+export async function generateMetadata({
+  params,
+}: CollectionPageProps): Promise<Metadata> {
+  const { slug } = await params;
 
-/**
- * Dynamic metadata generation for each collection
- */
-export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const params = await props.params;
-  const slug = params.slug;
+  const collection = getCollection(slug);
 
-  const category = categories.find((c) => c.slug === slug);
-
-  if (!category && slug !== "all") {
+  if (!collection) {
     return {
-      title: "Collection Not Found",
-      description: "The collection you're looking for doesn't exist.",
+      title: "Collection | PurpleYou",
     };
   }
 
-  const products =
-    slug === "all"
-      ? await getAllProducts()
-      : await getProductsByCollection(slug);
-
-  if (slug === "all") {
-    return generateCollectionMetadata(
-      {
-        id: 0,
-        name: "All Products",
-        slug: "all",
-        description: "Browse our complete collection of premium jewelry",
-        image: "/category/Bracelet.jpeg",
-      },
-      products.length,
-    );
-  }
-
-  return generateCollectionMetadata(category!, products.length);
+  return {
+    title: `${collection.title} | PurpleYou`,
+    description: collection.description,
+  };
 }
 
-// ISR: Revalidate every 10 minutes (product additions, price changes, etc.)
-export const revalidate = 600;
-
-export default async function CategoryPage({ params }: PageProps) {
+export default async function CollectionPage({
+  params,
+  searchParams,
+}: CollectionPageProps) {
   const { slug } = await params;
+  const filters = await searchParams;
 
-  const normalizedCategory = (slug ?? "").toLowerCase();
+  const collection = getCollection(slug);
 
-  // Fetch products from the external API service
-  const baseProducts =
-    normalizedCategory === "all"
-      ? await getAllProducts()
-      : await getProductsByCollection(normalizedCategory);
+  if (!collection) {
+    notFound();
+  }
 
-  if (baseProducts.length === 0) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center text-sm text-[#6b6b6b]">
-        No products found in "{slug}".
-      </div>
+  const { products } = await getProducts({
+    taxonomy: collection.taxonomy,
+    limit: 60,
+  });
+
+  const sort = normalizeParam(filters.sort);
+  const stock = normalizeParam(filters.stock);
+  const min = normalizeParam(filters.min);
+  const max = normalizeParam(filters.max);
+
+  const visibleProducts = prepareCollectionProducts(
+    products,
+    sort,
+    stock,
+    min,
+    max,
+  );
+
+  const prices = products.map((product) => product.base.price);
+
+  const minAvailablePrice = prices.length > 0 ? Math.min(...prices) : undefined;
+
+  const maxAvailablePrice = prices.length > 0 ? Math.max(...prices) : undefined;
+
+  return (
+    <main>
+      <CollectionHeader
+        eyebrow={collection.eyebrow}
+        title={collection.title}
+        description={collection.description}
+        productCount={visibleProducts.length}
+      />
+
+      <section
+        className="
+          site-container
+          py-8
+          lg:py-14
+        "
+      >
+        <MobileCollectionFilters
+          productCount={visibleProducts.length}
+          minAvailablePrice={minAvailablePrice}
+          maxAvailablePrice={maxAvailablePrice}
+        />
+        <div
+          className="
+            grid
+            grid-cols-1
+            gap-10
+            lg:grid-cols-[240px_minmax(0,1fr)]
+            lg:gap-10
+            xl:grid-cols-[270px_minmax(0,1fr)]
+            xl:gap-14
+          "
+        >
+          <div className="hidden lg:block">
+            <CollectionSidebar
+              productCount={visibleProducts.length}
+              minAvailablePrice={minAvailablePrice}
+              maxAvailablePrice={maxAvailablePrice}
+            />
+          </div>
+
+          <div className="min-w-0">
+            {visibleProducts.length > 0 ? (
+              <div
+                className="
+                  grid
+                  grid-cols-2
+                  gap-x-4
+                  gap-y-10
+                  md:grid-cols-3
+                  xl:grid-cols-4
+                  xl:gap-x-5
+                "
+              >
+                {visibleProducts.map((product) => (
+                  <ProductCard
+                    key={product.productId}
+                    product={product}
+                    compact
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyCollection />
+            )}
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function prepareCollectionProducts(
+  products: Product[],
+  sort?: string,
+  stock?: string,
+  min?: string,
+  max?: string,
+): Product[] {
+  let result = [...products];
+
+  /*
+   * Availability
+   */
+  if (stock === "in") {
+    result = result.filter(
+      (product) => product.state !== "OUT_OF_STOCK" && product.base.stock > 0,
     );
   }
 
-  const displayTitle = slug === "all" ? "All Products" : slug.replace("-", " ");
-  const category =
-    categories.find((c) => c.slug === slug) ||
-    (slug === "all"
-      ? {
-          id: 0,
-          name: "All Products",
-          slug: "all",
-          description: "Browse our complete collection",
-          image: "/category/Bracelet.jpeg",
-        }
-      : null);
+  /*
+   * Price range
+   */
+  const minimumPrice = parsePriceParam(min);
 
-  const collectionSchema = category
-    ? generateCollectionSchema(category, "https://purpleyou.com", baseProducts)
-    : null;
+  const maximumPrice = parsePriceParam(max);
 
+  if (minimumPrice !== undefined) {
+    result = result.filter((product) => product.base.price >= minimumPrice);
+  }
+
+  if (maximumPrice !== undefined) {
+    result = result.filter((product) => product.base.price <= maximumPrice);
+  }
+
+  /*
+   * Sorting
+   */
+  switch (sort) {
+    case "price-low": {
+      result.sort((a, b) => a.base.price - b.base.price);
+
+      break;
+    }
+
+    case "price-high": {
+      result.sort((a, b) => b.base.price - a.base.price);
+
+      break;
+    }
+
+    case "name": {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+
+      break;
+    }
+
+    /*
+     * "featured" uses the order returned
+     * from the backend.
+     */
+    default:
+      break;
+  }
+
+  return result;
+}
+
+function normalizeParam(value?: string | string[]): string | undefined {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+
+  return value;
+}
+
+function parsePriceParam(value?: string): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+
+  if (Number.isNaN(parsed) || parsed < 0) {
+    return undefined;
+  }
+
+  return parsed;
+}
+
+function EmptyCollection() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
-      {/* JSON-LD Structured Data for Collection */}
-      {collectionSchema && (
-        <Script
-          id={`collection-schema-${slug}`}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
-        />
-      )}
+    <div
+      className="
+        flex
+        min-h-[45vh]
+        items-center
+        justify-center
+        text-center
+      "
+    >
+      <div>
+        <p
+          className="
+            text-[10px]
+            uppercase
+            tracking-[0.3em]
+            text-[var(--muted-foreground)]
+          "
+        >
+          PurpleYou
+        </p>
 
-      {/* Hero Header Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 items-start">
-        {/* Left Column - Title and Description */}
-        <div className="flex flex-col justify-center">
-          <h1 className="text-5xl font-light text-[#111111] tracking-wide capitalize mb-4">
-            {displayTitle} 25% Off
-          </h1>
-          <p className="text-base text-[#6b6b6b] font-light">
-            The closest to playing good{" "}
-            {slug === "all" ? "jewelry" : slug.toLowerCase()} will ever get.
-          </p>
-        </div>
+        <h2
+          className="
+            mt-4
+            text-2xl
+            font-medium
+          "
+        >
+          No pieces found.
+        </h2>
 
-        {/* Right Column - Hero Image */}
-        <div className="relative bg-[#f5f1ed] aspect-[4/3] overflow-hidden">
-          <Image
-            src={getCategoryImage(slug)}
-            alt={displayTitle}
-            fill
-            className="object-cover"
-          />
-        </div>
+        <p
+          className="
+            mt-3
+            max-w-sm
+            text-sm
+            leading-6
+            text-[var(--muted-foreground)]
+          "
+        >
+          Try adjusting your filters to discover more pieces.
+        </p>
       </div>
-
-      {/* Client-side filtering wrapper */}
-      <CollectionFiltersClient
-        products={baseProducts}
-        collectionName={displayTitle}
-      />
-    </section>
+    </div>
   );
 }

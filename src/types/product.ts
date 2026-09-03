@@ -1,71 +1,101 @@
-export type VariantAttribute = Record<string, string>;
+export type ProductState = "DRAFT" | "PUBLISHED" | "OUT_OF_STOCK";
 
-export type VariantOverride = {
-  stock?: number;
+export type ProductCategory =
+  | "JEWELS"
+  | "DRESS"
+  | "ACCESSORIES"
+  | "BAGS"
+  | "FOOTWEAR"
+  | "BANGLE"
+  | "NECKLACE"
+  | "EARRINGS"
+  | "RING"
+  | "BRACELET";
+
+export type VariantAttributes = Record<string, string>;
+
+export interface ProductTaxonomy {
+  department?: string;
+  category?: string;
+  subcategory?: string;
+  productType?: string;
+  productSubtype?: string;
+}
+
+export interface ProductBase {
+  price: number;
+  undiscountedPrice?: number;
+  stock: number;
+  images: string[];
+  attributes?: VariantAttributes;
+  taxonomy?: ProductTaxonomy;
+}
+
+export interface VariantOverrides {
   price?: number;
+  undiscountedPrice?: number;
+  stock?: number;
   images?: string[];
   sku?: string;
-};
 
-export type VariantResolved = {
+  [key: string]: unknown;
+}
+
+export interface VariantResolved {
   price: number;
+  undiscountedPrice?: number;
   stock: number;
   images?: string[];
   sku?: string;
-};
 
-export type Variant = {
+  [key: string]: unknown;
+}
+
+export interface ProductVariant {
   variantId: string;
-  attributes: VariantAttribute;
-  // For list API: overrides
-  // For detail API: resolved
-  overrides?: VariantOverride;
-  resolved?: VariantResolved;
-};
+  attributes: VariantAttributes;
 
-export type BaseDetails = {
-  stock: number;
-  price: number;
-};
+  // List API returns overrides.
+  overrides?: VariantOverrides;
+
+  // Product detail API returns resolved values.
+  resolved?: VariantResolved;
+}
 
 export type VariantSchema = Record<string, string[]>;
 
-export type Product = {
-  // Internal use
-  id: number;
-  slug: string;
-
-  // API data
+export interface ApiProduct {
   productId: string;
   name: string;
-  category: string;
-  subcategory?: string;
   description: string;
-  state?: string;
+  category: ProductCategory;
+  subcategory?: string;
 
-  // Base details (defaults)
-  base: BaseDetails;
+  state: ProductState;
 
-  // Variant information
-  variantSchema?: VariantSchema; // Defines available variant options
-  variants?: Variant[]; // Actual variant instances
+  base: ProductBase;
 
-  // Additional metadata
+  variantSchema?: VariantSchema;
+  variants?: ProductVariant[];
+
   tags?: string[];
   highlights?: string[];
+
   currency?: string;
   brand?: string;
+  shopId?: string;
+
   createdAt?: string;
   updatedAt?: string;
+}
 
-  // Legacy fields (for backward compatibility)
-  image?: string;
-  price?: number;
-  comparePrice?: number;
-  hoverImage?: string;
-  isBestseller?: boolean;
-  isNew?: boolean;
-  materials?: string;
-  careInstructions?: string;
-  videoUrl?: string;
-};
+/**
+ * Product model consumed by the PurpleYou V2 storefront.
+ *
+ * We preserve the backend data and only add fields that
+ * belong to the frontend, such as slug and normalized images.
+ */
+export interface Product extends ApiProduct {
+  slug: string;
+  images: string[];
+}

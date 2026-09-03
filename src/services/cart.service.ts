@@ -1,202 +1,122 @@
-/**
- * Cart Service
- * Handles all cart-related API calls to the backend
- * Uses local API proxy routes that forward to the actual backend
- */
+import { getCurrentUser } from "@/services/auth.service";
+import { clientApiFetch } from "@/services/client-api";
 
-const CART_API_BASE = "/api/cart";
+import type { BackendResponse } from "@/types/auth";
+import type { CartData, CartItemVariant } from "@/types/cart";
 
-// ============================================================================
-// TYPE DEFINITIONS
-// ============================================================================
-
-/**
- * Variant selection for a product
- */
-export interface Variant {
-  color?: string;
-  size?: string;
-  [key: string]: string | undefined;
-}
-
-/**
- * Cart item as stored in the backend
- */
-export interface CartItemData {
+export interface AddCartItemInput {
   productId: string;
   quantity: number;
   priceEach: number;
-  currency: string;
-  variant?: Variant;
+  currency?: string;
+  variant?: CartItemVariant;
 }
 
-/**
- * Cart data returned from the API
- */
-export interface CartData {
-  userId: string;
-  items: CartItemData[];
-  totalItems: number;
-  totalQuantity: number;
-  subtotal: number;
-  currency: string;
-  createdAt: string;
-  updatedAt: string;
+export interface UpdateCartItemInput {
+  productId: string;
+  quantity: number;
+  variant?: CartItemVariant;
 }
 
-/**
- * Standard API response
- */
-export interface ApiResponse<T = unknown> {
-  data?: T;
-  success: boolean;
-  error: string | null;
-  statusCode: number;
+export interface RemoveCartItemInput {
+  productId: string;
+  variant?: CartItemVariant;
 }
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
+async function getRequiredUserId(): Promise<string> {
+  const user = await getCurrentUser();
 
-/**
- * Get auth token from localStorage
- */
-function getAuthToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("auth_token");
-}
-
-/**
- * Make authenticated request to cart API
- */
-async function makeCartRequest<T = unknown>(
-  endpoint: string,
-  options: RequestInit = {},
-): Promise<T> {
-  const token = getAuthToken();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  if (!user?.userId) {
+    throw new Error("Please sign in to manage your bag.");
   }
 
-  const response = await fetch(`${CART_API_BASE}${endpoint}`, {
-    ...options,
-    headers,
-    timeout: 10000,
-  } as any);
-
-  if (!response.ok) {
-    const errorData: ApiResponse = await response.json().catch(() => ({
-      success: false,
-      error: `HTTP ${response.status}`,
-      statusCode: response.status,
-    }));
-
-    throw new Error(errorData.error || `Cart API error: ${response.status}`);
-  }
-
-  const data: ApiResponse<T> = await response.json();
-
-  if (!data.success) {
-    throw new Error(data.error || "Cart operation failed");
-  }
-
-  return data.data as T;
+  return user.userId;
 }
 
-// ============================================================================
-// CART API FUNCTIONS
-// ============================================================================
+export async function getCart(): Promise<CartData> {
+  const userId = await getRequiredUserId();
 
-/**
- * Get cart items for a user
- * GET /api/v1/cart?userId={userId}
- */
-export async function getCart(userId: string): Promise<CartData> {
-  return makeCartRequest<CartData>(`?userId=${userId}`);
-}
-
-/**
- * Add item to cart
- * POST /api/v1/cart/items
- */
-export async function addToCart(
-  userId: string,
-  productId: string,
-  quantity: number,
-  priceEach: number,
-  variant?: Variant,
-): Promise<CartData> {
-  const payload = {
-    userId,
-    productId,
-    quantity,
-    variant: variant || {},
-    priceEach,
-    currency: "INR",
-  };
-
-  return makeCartRequest<CartData>("/items", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-/**
- * Update item quantity in cart
- * PATCH /api/v1/cart/items/{productId}
- */
-export async function updateCartItem(
-  userId: string,
-  productId: string,
-  quantity: number,
-  variant?: Variant,
-): Promise<CartData> {
-  const payload = {
-    userId,
-    quantity,
-    variant: variant || {},
-  };
-
-  return makeCartRequest<CartData>(`/items/${productId}`, {
-    method: "PATCH",
-    body: JSON.stringify(payload),
-  });
-}
-
-/**
- * Remove item from cart
- * DELETE /api/v1/cart/items/{productId}?userId={userId}
- */
-export async function removeFromCart(
-  userId: string,
-  productId: string,
-  variant?: Variant,
-): Promise<CartData> {
-  const options: RequestInit = {
-    method: "DELETE",
-  };
-
-  // Only include body if variant is provided
-  if (variant) {
-    options.body = JSON.stringify({ variant });
-  }
-
-  return makeCartRequest<CartData>(
-    `/items/${productId}?userId=${userId}`,
-    options,
+  const response = await clientApiFetch<BackendResponse<CartData>>(
+    `/cart?userId=${encodeURIComponent(userId)}`,
+    {
+      method: "GET",
+    },
   );
+
+  return response.data;
 }
 
-/**
- * Clear entire cart
- * DELETE /api/v1/cart?userId={userId}
- */
-export async function clearCart(userId: string): Promise<CartData> {
-  return makeCartRequest<CartData>(`?userId=${userId}`, {
-    method: "DELETE",
-  });
+export async function addCartItem(input: AddCartItemInput): Promise<CartData> {
+  const userId = await getRequiredUserId();
+
+  const response = await clientApiFetch<BackendResponse<CartData>>(
+    "/cart/items",
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+        userId,
+        productId: input.productId,
+        quantity: input.quantity,
+        priceEach: input.priceEach,
+        currency: input.currency ?? "INR",
+        variant: input.variant,
+      }),
+    },
+  );
+
+  return response.data;
+}
+
+export async function updateCartItem(
+  input: UpdateCartItemInput,
+): Promise<CartData> {
+  const userId = await getRequiredUserId();
+
+  const response = await clientApiFetch<BackendResponse<CartData>>(
+    `/cart/items/${encodeURIComponent(input.productId)}`,
+    {
+      method: "PATCH",
+
+      body: JSON.stringify({
+        userId,
+        quantity: input.quantity,
+        variant: input.variant,
+      }),
+    },
+  );
+
+  return response.data;
+}
+
+export async function removeCartItem(
+  input: RemoveCartItemInput,
+): Promise<CartData> {
+  const userId = await getRequiredUserId();
+
+  const response = await clientApiFetch<BackendResponse<CartData>>(
+    `/cart/items/${encodeURIComponent(
+      input.productId,
+    )}?userId=${encodeURIComponent(userId)}`,
+    {
+      method: "DELETE",
+
+      body: JSON.stringify({
+        variant: input.variant,
+      }),
+    },
+  );
+
+  return response.data;
+}
+
+export async function clearCart(): Promise<void> {
+  const userId = await getRequiredUserId();
+
+  await clientApiFetch<BackendResponse<null>>(
+    `/cart?userId=${encodeURIComponent(userId)}`,
+    {
+      method: "DELETE",
+    },
+  );
 }

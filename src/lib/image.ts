@@ -1,36 +1,24 @@
-/**
- * Image URL normalization utilities
- * Handles conversion of relative paths to absolute URLs for API-hosted images
- */
+const IMAGE_BASE_URL =
+  process.env.NEXT_PUBLIC_PURPLEYOU_IMAGE_BASE_URL?.replace(/\/+$/, "") ?? "";
 
-const DEFAULT_FALLBACK_IMAGE = "/images/hero1.jpg";
-
-/**
- * Normalize image URLs - convert relative paths to proper paths
- * @param url - The image URL (can be relative, absolute, or local path)
- * @returns Normalized image path safe for use with next/image
- */
-export function normalizeImageUrl(url?: string): string {
-  if (!url) return DEFAULT_FALLBACK_IMAGE;
-
-  // Already a local path
-  if (url.startsWith("/")) {
-    return url;
+export function normalizeProductImageUrl(image: unknown): string | null {
+  if (typeof image !== "string") {
+    return null;
   }
 
-  // Already an absolute URL
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
+  const value = image.trim();
+
+  if (!value) {
+    return null;
   }
 
-  // Relative path - prepend /products/ directory
-  // This handles filenames like "emerald-bangle-1.jpeg" from the API
-  // Returns path like "/products/emerald-bangle-1.jpeg"
-  if (url) {
-    return `/products/${url}`;
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return value;
   }
 
-  return DEFAULT_FALLBACK_IMAGE;
+  const path = value.startsWith("/")
+    ? value
+    : `/products/${value.replace(/^products\//, "")}`;
+
+  return IMAGE_BASE_URL ? `${IMAGE_BASE_URL}${path}` : path;
 }
-
-export { DEFAULT_FALLBACK_IMAGE };

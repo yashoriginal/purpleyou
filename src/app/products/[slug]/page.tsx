@@ -1,177 +1,322 @@
-import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import Script from "next/script";
-import ProductAccordion from "@/components/product/ProductAccordion";
-import ProductDetailClient from "@/components/product/ProductDetailClient";
-import DynamicAspectImage from "@/components/DynamicAspectImage";
-import {
-  generateProductMetadata,
-  generateProductSchema,
-  generateBreadcrumbSchema,
-} from "@/lib/seo";
-import { normalizeImageUrl } from "@/lib/image";
-import { getAllProducts, getProductBySlug } from "@/services/product.service";
+import type { Metadata } from "next";
 
-type PageProps = {
-  params: Promise<{ slug: string }>;
-};
+import { notFound } from "next/navigation";
 
-/**
- * Disable static generation for now to allow build to complete
- * TODO: Implement proper static param generation once API is stable
- */
-export async function generateStaticParams() {
-  // Return empty array - routes will be generated on-demand (ISR)
-  return [];
+import { ProductGallery } from "@/components/product/product-gallery";
+import { ProductPurchasePanel } from "@/components/product/product-purchase-panel";
+import { RelatedProducts } from "@/components/product/related-products";
+
+import { getProductBySlug } from "@/services/products.service";
+
+interface ProductPageProps {
+  params: Promise<{
+    slug: string;
+  }>;
 }
 
-/**
- * Dynamic metadata generation for each product
- */
-export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const params = await props.params;
-  const product = await getProductBySlug(params.slug);
-
-  if (!product) {
-    return {
-      title: "Product Not Found",
-      description: "The product you're looking for doesn't exist.",
-    };
-  }
-
-  return generateProductMetadata(product);
-}
-
-// ISR: Revalidate every 30 minutes (price updates, stock changes, etc.)
-export const revalidate = 1800;
-
-
-export default async function ProductDetailPage({ params }: PageProps) {
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
 
   const product = await getProductBySlug(slug);
-  const allProducts = await getAllProducts();
 
   if (!product) {
-    return (
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24 flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <h1 className="text-2xl font-light text-[#111111] tracking-wide">
-            Product not found
-          </h1>
-        </div>
-      </section>
-    );
+    return {
+      title: "Product Not Found | PurpleYou",
+    };
   }
 
-  const accordionItems = [
-    {
-      title: "Description",
-      content:
-        product.description ||
-        "A versatile piece of jewelry crafted with precision and care.",
-    },
-    {
-      title: "Materials & Care",
-      content: product.materials
-        ? `${product.materials}. ${product.careInstructions || "Store safely and clean regularly with a soft cloth."}`
-        : "22K gold or gold plated. Care instructions available upon request.",
-    },
-    {
-      title: "Size Guide",
-      content:
-        "Size varies by product. For rings, measure your ring size by wrapping a piece of string around your finger. For necklaces and bracelets, standard sizes are provided with options for customization.",
-    },
-    {
-      title: "Shipping & Returns",
-      content:
-        "Free shipping on orders above ₹3000 in India. Standard delivery: 5-7 business days. Hassle-free returns within 15 days. GST included in all prices.",
-    },
-  ];
+  return {
+    title: `${product.name} | PurpleYou`,
+    description: product.description || `Shop ${product.name} at PurpleYou.`,
+  };
+}
 
-  const productSchema = generateProductSchema(
-    {
-      ...product,
-      price: product.base.price,
-    },
-    "https://purpleyou.com"
-  );
-  const breadcrumbs = generateBreadcrumbSchema([
-    { name: "Home", url: "https://purpleyou.com" },
-    {
-      name: "Products",
-      url: "https://purpleyou.com/collections/all",
-    },
-    {
-      name: product.category,
-      url: `https://purpleyou.com/collections/${product.category}`,
-    },
-    {
-      name: product.name,
-      url: `https://purpleyou.com/products/${product.slug}`,
-    },
-  ]);
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { slug } = await params;
+
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    notFound();
+  }
+
+  const hasDiscount =
+    typeof product.base.undiscountedPrice === "number" &&
+    product.base.undiscountedPrice > product.base.price;
+
+  const discountPercentage = hasDiscount
+    ? Math.round(
+        ((product.base.undiscountedPrice! - product.base.price) /
+          product.base.undiscountedPrice!) *
+          100,
+      )
+    : null;
+
+  const isOutOfStock =
+    product.state === "OUT_OF_STOCK" || product.base.stock <= 0;
+
+  const productType = product.base.taxonomy?.productType;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
-      {/* JSON-LD Structured Data */}
-      <Script
-        id={`product-schema-${product.id}`}
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-      />
-      <Script
-        id={`breadcrumb-schema-${product.id}`}
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
-      />
+    <main>
+      {/* Main product */}
+      <section
+        className="
+          site-container
+          py-6
+          sm:py-8
+          lg:py-12
+        "
+      >
+        <div
+          className="
+            grid
+            grid-cols-1
+            gap-10
+            lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1.1fr)]
+            lg:gap-16
+          "
+        >
+          {/* Gallery */}
+          <div className="min-w-0">
+            <ProductGallery
+              productName={product.name}
+              images={product.images}
+            />
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mb-16">
-        {/* Client Component - Handles all interactive parts */}
-        <ProductDetailClient product={product} />
-      </div>
+          {/* Product information */}
+          <section
+            className="
+              min-w-0
+              lg:sticky
+              lg:top-32
+              lg:self-start
+            "
+          >
+            {/* Category */}
+            <p
+              className="
+                text-[10px]
+                uppercase
+                tracking-[0.28em]
+                text-[var(--muted-foreground)]
+              "
+            >
+              {productType ?? product.category}
+            </p>
 
-      {/* Accordions Section */}
-      <div className="mb-16">
-        <ProductAccordion items={accordionItems} />
-      </div>
+            {/* Name */}
+            <h1
+              className="
+                mt-4
+                max-w-2xl
+                text-4xl
+                font-medium
+                leading-[1.04]
+                tracking-[-0.04em]
+                sm:text-5xl
+                lg:text-6xl
+              "
+            >
+              {product.name}
+            </h1>
 
-      {/* Related Products Section */}
-      <div className="border-t border-[#e6e0da] pt-16">
-        <h2 className="text-3xl font-light text-[#111111] tracking-wide mb-8">
-          You May Also Like
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {allProducts
-            .filter(
-              (p) => p.category === product.category && p.id !== product.id,
-            )
-            .slice(0, 4)
-            .map((relatedProduct) => (
-              <Link
-                key={relatedProduct.id}
-                href={`/products/${relatedProduct.slug}`}
+            {/* Price */}
+            <div
+              className="
+                mt-7
+                flex
+                flex-wrap
+                items-center
+                gap-3
+              "
+            >
+              <span className="text-xl">
+                {formatPrice(product.base.price, product.currency)}
+              </span>
+
+              {hasDiscount && (
+                <>
+                  <span
+                    className="
+                      text-sm
+                      text-[var(--muted-foreground)]
+                      line-through
+                    "
+                  >
+                    {formatPrice(
+                      product.base.undiscountedPrice!,
+                      product.currency,
+                    )}
+                  </span>
+
+                  {discountPercentage !== null && (
+                    <span
+                      className="
+                        text-xs
+                        uppercase
+                        tracking-[0.12em]
+                        text-[var(--muted-foreground)]
+                      "
+                    >
+                      -{discountPercentage}%
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Availability */}
+            <div
+              className="
+                mt-8
+                border-y
+                border-[var(--border)]
+                py-5
+              "
+            >
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-3
+                "
               >
-                <div className="group cursor-pointer">
-                  <DynamicAspectImage
-                    src={normalizeImageUrl(relatedProduct.image)}
-                    alt={relatedProduct.name}
-                    defaultAspectRatio={0.75}
-                    containerClassName="relative bg-[#f8f5f2] mb-3 overflow-hidden"
-                    imageClassName="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <h3 className="text-sm font-medium text-[#111111] line-clamp-2">
-                    {relatedProduct.name}
-                  </h3>
-                  <p className="text-sm font-medium text-[#111111] mt-2">
-                    ₹{relatedProduct.base?.price?.toLocaleString("en-IN") || "Price on request"}
-                  </p>
-                </div>
-              </Link>
-            ))}
+                <span
+                  className={`
+                    h-2
+                    w-2
+                    rounded-full
+                    ${
+                      isOutOfStock
+                        ? "bg-[var(--muted-foreground)]"
+                        : "bg-[var(--success)]"
+                    }
+                  `}
+                />
+
+                <p
+                  className="
+                    text-[10px]
+                    uppercase
+                    tracking-[0.2em]
+                  "
+                >
+                  {isOutOfStock ? "Currently unavailable" : "In stock"}
+                </p>
+              </div>
+            </div>
+
+            {/* Description */}
+            {product.description && (
+              <div
+                className="
+                  border-b
+                  border-[var(--border)]
+                  py-8
+                "
+              >
+                <p
+                  className="
+                    max-w-xl
+                    text-sm
+                    leading-7
+                    text-[var(--muted-foreground)]
+                    sm:text-base
+                  "
+                >
+                  {product.description}
+                </p>
+              </div>
+            )}
+
+            {/* Highlights */}
+            {product.highlights && product.highlights.length > 0 && (
+              <div
+                className="
+                    border-b
+                    border-[var(--border)]
+                    py-8
+                  "
+              >
+                <h2
+                  className="
+                      text-[10px]
+                      uppercase
+                      tracking-[0.25em]
+                    "
+                >
+                  Details
+                </h2>
+
+                <ul
+                  className="
+                      mt-5
+                      space-y-3
+                    "
+                >
+                  {product.highlights.map((highlight) => (
+                    <li
+                      key={highlight}
+                      className="
+                            flex
+                            gap-3
+                            text-sm
+                            leading-6
+                            text-[var(--muted-foreground)]
+                          "
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="
+                              text-[var(--foreground)]
+                            "
+                      >
+                        —
+                      </span>
+
+                      <span>{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Purchase controls */}
+            <ProductPurchasePanel
+              productId={product.productId}
+              price={product.base.price}
+              currency={product.currency}
+              stock={product.base.stock}
+              isOutOfStock={isOutOfStock}
+              variantSchema={
+                product.variantSchema as Record<string, unknown> | undefined
+              }
+            />
+          </section>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Related products */}
+      <RelatedProducts
+        currentProductId={product.productId}
+        productType={productType}
+      />
+    </main>
   );
+}
+
+function formatPrice(value: number, currency = "INR") {
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `₹${value}`;
+  }
 }

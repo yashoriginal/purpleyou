@@ -1,294 +1,56 @@
-"use client";
+import type { Metadata } from "next";
 
-import { useCart } from "@/context/CartContext";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import {
-  HiOutlineTrash,
-  HiOutlineMinus,
-  HiOutlinePlus,
-  HiOutlineArrowLeft,
-} from "react-icons/hi";
-import CartProductImage from "@/components/cart/CartProductImage";
+import { CartPageContent } from "@/components/cart/cart-page-content";
+
+export const metadata: Metadata = {
+  title: "Your Bag | PurpleYou",
+  description: "Review your PurpleYou shopping bag.",
+};
 
 export default function CartPage() {
-  const { items, totalPrice, totalItems, removeFromCart, updateQuantity, isLoading, error } =
-    useCart();
-  const router = useRouter();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [operationError, setOperationError] = useState<string | null>(null);
-  const [isUpdating, setIsUpdating] = useState<string | null>(null);
-
-  const shippingCost = totalPrice >= 3000 ? 0 : 1;
-  const gst = Math.round(totalPrice * 0.18);
-  const totalAmount = totalPrice + shippingCost + gst;
-
-  const handleQuantityChange = async (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      await handleRemoveItem(itemId);
-      return;
-    }
-
-    setOperationError(null);
-    setIsUpdating(itemId);
-    try {
-      await updateQuantity(itemId, newQuantity);
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Failed to update quantity";
-      setOperationError(errorMsg);
-      console.error("Failed to update quantity:", err);
-    } finally {
-      setIsUpdating(null);
-    }
-  };
-
-  const handleRemoveItem = async (itemId: string) => {
-    setOperationError(null);
-    setIsUpdating(itemId);
-    try {
-      await removeFromCart(itemId);
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Failed to remove item";
-      setOperationError(errorMsg);
-      console.error("Failed to remove item:", err);
-    } finally {
-      setIsUpdating(null);
-    }
-  };
-
-  const handleCheckout = () => {
-    setIsCheckingOut(true);
-    router.push("/checkout");
-  };
-
-  if (items.length === 0) {
-    return (
-      <section className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center px-4">
-          <h1 className="text-4xl font-light text-[#111111] tracking-wide mb-3">
-            Your Bag is Empty
-          </h1>
-          <p className="text-[#6b6b6b] font-light mb-8 text-lg">
-            Add some beautiful pieces to your collection
-          </p>
-          <Link
-            href="/collections/all"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#5540b7] text-white font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors"
-          >
-            <HiOutlineArrowLeft className="w-5 h-5" />
-            Continue Shopping
-          </Link>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="border-b border-[#e6e0da]">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-light text-[#111111] tracking-wide">
-                Your Bag
-              </h1>
-              <p className="text-[#6b6b6b] font-light mt-1">
-                {totalItems} {totalItems === 1 ? "item" : "items"}
-              </p>
-            </div>
-            <Link
-              href="/collections/all"
-              className="text-[#5540b7] font-medium text-sm hover:underline flex items-center gap-1"
-            >
-              <HiOutlineArrowLeft className="w-4 h-4" />
-              Continue Shopping
-            </Link>
-          </div>
+    <main>
+      <header
+        className="
+          border-b
+          border-[var(--border)]
+        "
+      >
+        <div
+          className="
+            site-container
+            py-12
+            sm:py-16
+            lg:py-20
+          "
+        >
+          <p
+            className="
+              text-[10px]
+              uppercase
+              tracking-[0.3em]
+              text-[var(--muted-foreground)]
+            "
+          >
+            PurpleYou
+          </p>
+
+          <h1
+            className="
+              mt-4
+              text-4xl
+              font-medium
+              tracking-[-0.04em]
+              sm:text-5xl
+              lg:text-6xl
+            "
+          >
+            Your Bag
+          </h1>
         </div>
-      </div>
+      </header>
 
-      {/* Main Content */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
-        {(operationError || error) && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded p-4 text-sm text-red-700">
-            {operationError || error}
-          </div>
-        )}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
-          <div className="lg:col-span-2">
-            {isLoading && (
-              <div className="text-center py-8">
-                <p className="text-[#6b6b6b]">Loading your cart...</p>
-              </div>
-            )}
-            {!isLoading && (
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-4 sm:gap-6 py-6 border-b border-[#e6e0da] last:border-0"
-                >
-                  {/* Product Image */}
-                  <Link href={`/products/${item.productId}`}>
-                    <CartProductImage item={item} />
-                  </Link>
-
-                  {/* Product Details */}
-                  <div className="flex-1 flex flex-col justify-between min-w-0">
-                    <div>
-                      <Link href={`/products/${item.productId}`}>
-                        <h3 className="text-base font-medium text-[#111111] hover:text-[#5540b7] transition-colors cursor-pointer line-clamp-2">
-                          {item.productName}
-                        </h3>
-                      </Link>
-
-                      {/* Variant Details */}
-                      {item.selectedVariants &&
-                        Object.keys(item.selectedVariants).length > 0 && (
-                          <div className="mt-2 space-y-0.5">
-                            {Object.entries(item.selectedVariants).map(
-                              ([key, value]) => (
-                                <p
-                                  key={key}
-                                  className="text-xs text-[#6b6b6b] font-light"
-                                >
-                                  <span className="font-medium">{key}:</span>{" "}
-                                  {value}
-                                </p>
-                              ),
-                            )}
-                          </div>
-                        )}
-
-                      {/* Price */}
-                      <p className="text-base font-semibold text-[#111111] mt-3">
-                        ₹{item.price.toLocaleString("en-IN")}
-                      </p>
-                    </div>
-
-                    {/* Quantity & Remove */}
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center border border-[#e6e0da] bg-white">
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(item.id, item.quantity - 1)
-                          }
-                          disabled={isUpdating === item.id || isLoading}
-                          className="p-2 hover:bg-[#f8f5f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label="Decrease quantity"
-                        >
-                          <HiOutlineMinus className="w-4 h-4" />
-                        </button>
-                        <span className="px-4 py-2 text-sm font-medium w-10 text-center">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(item.id, item.quantity + 1)
-                          }
-                          disabled={isUpdating === item.id || isLoading}
-                          className="p-2 hover:bg-[#f8f5f2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label="Increase quantity"
-                        >
-                          <HiOutlinePlus className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => handleRemoveItem(item.id)}
-                        disabled={isUpdating === item.id || isLoading}
-                        className="p-2 text-[#6b6b6b] hover:text-red-600 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label="Remove item"
-                      >
-                        <HiOutlineTrash className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Item Total */}
-                  <div className="flex flex-col items-end justify-between py-6 flex-shrink-0">
-                    <p className="text-base font-semibold text-[#111111]">
-                      ₹{(item.price * item.quantity).toLocaleString("en-IN")}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            )}
-          </div>
-
-          {/* Order Summary - Sticky */}
-          <div className="lg:col-span-1">
-            <div className="bg-[#f8f5f2] p-6 sm:p-8 sticky top-20 rounded-lg">
-              <h2 className="text-lg font-medium text-[#111111] mb-6 tracking-wide">
-                Order Summary
-              </h2>
-
-              {/* Pricing Details */}
-              <div className="space-y-4 mb-6 pb-6 border-b border-[#e6e0da]">
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#6b6b6b]">Subtotal</span>
-                  <span className="text-[#111111] font-medium">
-                    ₹{totalPrice.toLocaleString("en-IN")}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#6b6b6b]">Shipping</span>
-                  <span className="text-[#111111] font-medium">
-                    {shippingCost === 0 ? (
-                      <span className="text-green-600">Free</span>
-                    ) : (
-                      `₹${shippingCost}`
-                    )}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#6b6b6b]">Tax (18% GST)</span>
-                  <span className="text-[#111111] font-medium">
-                    ₹{gst.toLocaleString("en-IN")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Total */}
-              <div className="flex justify-between text-xl font-semibold text-[#111111] mb-8">
-                <span>Total</span>
-                <span>₹{totalAmount.toLocaleString("en-IN")}</span>
-              </div>
-
-              {/* Checkout Button */}
-              <button
-                onClick={handleCheckout}
-                disabled={isCheckingOut}
-                className="w-full px-6 py-4 bg-[#5540b7] text-white font-semibold uppercase tracking-wider hover:bg-[#3d2d7f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
-              >
-                {isCheckingOut ? "Processing..." : "Proceed to Checkout"}
-              </button>
-
-              {/* Info Messages */}
-              <div className="mt-6 space-y-4 pt-6 border-t border-[#e6e0da]">
-                <p className="text-xs text-[#6b6b6b] text-center font-light">
-                  {totalPrice >= 3000
-                    ? "✓ Free shipping on your order"
-                    : "Add ₹" +
-                      (3000 - totalPrice).toLocaleString("en-IN") +
-                      " more for free shipping"}
-                </p>
-                <p className="text-xs text-[#6b6b6b] text-center font-light">
-                  🔒 Secure checkout powered by Razorpay
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <CartPageContent />
+    </main>
   );
 }

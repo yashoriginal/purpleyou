@@ -1,95 +1,215 @@
 @import "tailwindcss";
 
-/**
- * PURPLE YOU - Brand Identity & Design System
- *
- * Brand Philosophy: Minimal, Premium, High-End Jewelry
- * Inspired by: Melody Ehsani & Auraté New York
- */
-
 :root {
-  /* BRAND COLORS */
-  /* Primary Accent: Light Lavender (Secondary) */
-  --primary-accent: #d3c9ff;
-  /* Deep Purple: Primary Brand Color */
-  --primary-purple: #5540b7;
-  /* Luxury Cream Background (Base) */
-  --luxury-bg: #f8f5f2;
-  /* Soft Champagne Gold: Highlights & Accents */
-  --champagne-gold: #e5d4b8;
+  --background: #0d0d0d;
+  --surface: #151515;
+  --surface-soft: #1b1b1b;
 
-  /* TYPOGRAPHY COLORS */
-  --text-primary: #111111;
-  --text-secondary: #6b6b6b;
+  --foreground: #f6f4ef;
+  --muted-foreground: #9c9c9c;
 
-  /* UI COLORS */
-  --border-color: #e6e0da;
-  --background: #ffffff;
-  --foreground: #111111;
+  --border: #2a2a2a;
 
-  /* DEPRECATED: Use specific color names above */
-  --tertiary-bg: var(--luxury-bg);
+  --brand: #8f5cff;
+  --brand-hover: #7b46f2;
+
+  --success: #2e9d67;
+  --danger: #d94b4b;
+
+  --container-max: 1440px;
+  --page-padding-mobile: 16px;
+  --page-padding-tablet: 24px;
+  --page-padding-desktop: 40px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-body {
-  background: var(--background);
-  color: var(--text-primary);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Inter",
-    Roboto, sans-serif;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+* {
+  box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
-/* INTERACTIVE ELEMENTS - Smooth Transitions */
-a,
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  text-decoration: none;
+}
+
 button,
 input,
 textarea,
 select {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font: inherit;
 }
 
-/* HOVER STATES - Premium Feel */
-a:hover,
-button:hover {
-  color: var(--primary-purple);
+button {
+  cursor: pointer;
 }
 
-/* Focus States - Accessibility */
-button:focus,
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  ring: 2px var(--primary-purple);
+img {
+  display: block;
+  max-width: 100%;
 }
 
-/* ANIMATIONS */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+::selection {
+  background: var(--brand);
+  color: white;
+}
+
+/* Shared page container */
+
+.site-container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--page-padding-mobile);
+}
+
+@media (min-width: 768px) {
+  .site-container {
+    padding-inline: var(--page-padding-tablet);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+}
+
+@media (min-width: 1280px) {
+  .site-container {
+    padding-inline: var(--page-padding-desktop);
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-in-out;
+/* Shared section spacing */
+
+.section-spacing {
+  padding-block: 64px;
+}
+
+@media (min-width: 768px) {
+  .section-spacing {
+    padding-block: 80px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .section-spacing {
+    padding-block: 100px;
+  }
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------
+   Accessibility
+--------------------------------------- */
+
+:where(a, button, input, select, textarea, [role="button"]):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+:where(button, [role="button"]):disabled {
+  cursor: not-allowed;
+}
+
+/* Respect operating-system motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.home-scroll-shell {
+  height: calc(100svh - 112px);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior-y: contain;
+
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+
+  scrollbar-width: thin;
+}
+
+.home-scroll-screen {
+  position: relative;
+
+  height: calc(100svh - 112px);
+  min-height: calc(100svh - 112px);
+
+  overflow: hidden;
+
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.home-scroll-screen-natural {
+  height: auto;
+  min-height: calc(100svh - 112px);
+  overflow: visible;
+}
+
+@media (max-width: 1023px) {
+  .home-scroll-shell {
+    /*
+     * Mobile keeps native finger scrolling.
+     * CSS snap handles the screen settling.
+     */
+    scroll-snap-type: y mandatory;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-scroll-shell {
+    scroll-snap-type: y proximity;
+    scroll-behavior: auto;
+  }
 }

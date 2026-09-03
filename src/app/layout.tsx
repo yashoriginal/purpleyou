@@ -1,66 +1,44 @@
-import "@/app/globals.css";
-import HeaderWithCategories from "@/components/layout/HeaderWithCategories";
-import Footer from "@/components/layout/Footer";
-import { ProvidersWrapper } from "@/components/ProvidersWrapper";
-import { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
+
+import { Header } from "@/components/layout/header";
+import { StoreProvider } from "@/store/provider";
+import { AuthInitializer } from "@/components/auth/auth-initializer";
+import { CartInitializer } from "@/components/cart/cart-initializer";
+import { WishlistInitializer } from "@/components/wishlist/wishlist-initializer";
+import { Footer } from "@/components/layout/footer";
+import { RouteAwareFooter } from "@/components/layout/route-aware-footer";
+
+import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://purpleyou.com"),
   title: {
-    default: "PURPLE YOU - Premium Jewelry Collection | Elegant Accessories",
-    template: "%s | PURPLE YOU",
+    default: "PurpleYou",
+    template: "%s | PurpleYou",
   },
   description:
-    "Premium jewelry for every moment. Discover elegant, timeless pieces crafted with care and designed to last.",
-  keywords: [
-    "jewelry",
-    "premium jewelry",
-    "gold jewelry",
-    "earrings",
-    "necklaces",
-    "rings",
-    "bracelets",
-    "luxury accessories",
-    "handcrafted jewelry",
-  ],
-  authors: [{ name: "PURPLE YOU" }],
-  creator: "PURPLE YOU",
-  publisher: "PURPLE YOU",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  alternates: {
-    canonical: "https://purpleyou.com",
-  },
-};
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 5,
+    "Discover modern jewelry and accessories designed to elevate your everyday style.",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en">
-      <body className="bg-white text-black">
-        <ProvidersWrapper>
-          <HeaderWithCategories />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-        </ProvidersWrapper>
+      <body>
+        <StoreProvider>
+          <AuthInitializer />
+          <CartInitializer />
+          <WishlistInitializer />
+
+          <Header />
+
+          {children}
+          <RouteAwareFooter>
+            <Footer />
+          </RouteAwareFooter>
+        </StoreProvider>
       </body>
     </html>
   );
