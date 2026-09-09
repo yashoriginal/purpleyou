@@ -9,10 +9,16 @@ export class ClientApiError extends Error {
   }
 }
 
+const PRODUCTION_CLIENT_API_URL = "https://purpleoneservice.onrender.com/api/v1";
+
 function getClientApiBaseUrl(): string {
   const value = process.env.NEXT_PUBLIC_PURPLEYOU_API_BASE_URL;
 
   if (!value?.trim()) {
+    if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
+      return PRODUCTION_CLIENT_API_URL;
+    }
+
     throw new Error(
       "Missing NEXT_PUBLIC_PURPLEYOU_API_BASE_URL environment variable.",
     );

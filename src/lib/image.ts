@@ -1,6 +1,8 @@
 const IMAGE_BASE_URL =
   process.env.NEXT_PUBLIC_PURPLEYOU_IMAGE_BASE_URL?.replace(/\/+$/, "") ?? "";
 
+const PLACEHOLDER = "/placeholder.svg";
+
 export function normalizeProductImageUrl(image: unknown): string | null {
   if (typeof image !== "string") {
     return null;
