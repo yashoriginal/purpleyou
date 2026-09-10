@@ -166,9 +166,10 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
-
 .home-scroll-shell {
-  height: calc(100svh - 112px);
+  --home-header-height: 162px;
+
+  height: calc(100svh - var(--home-header-height));
   overflow-y: auto;
   overflow-x: hidden;
 
@@ -183,27 +184,27 @@ a {
 .home-scroll-screen {
   position: relative;
 
-  height: calc(100svh - 112px);
-  min-height: calc(100svh - 112px);
+  height: calc(100svh - var(--home-header-height));
+  min-height: calc(100svh - var(--home-header-height));
 
   overflow: hidden;
 
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
+
 .home-scroll-screen-natural {
   height: auto;
-  min-height: calc(100svh - 112px);
+  min-height: calc(100svh - var(--home-header-height));
   overflow: visible;
 }
 
-@media (max-width: 1023px) {
+/* Desktop:
+   announcement 46px + main header 76px
+*/
+@media (min-width: 1024px) {
   .home-scroll-shell {
-    /*
-     * Mobile keeps native finger scrolling.
-     * CSS snap handles the screen settling.
-     */
-    scroll-snap-type: y mandatory;
+    --home-header-height: 122px;
   }
 }
 

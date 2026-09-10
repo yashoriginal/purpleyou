@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import {
+  getDepartmentCollectionHref,
+  normalizeDepartment,
+} from "@/lib/departments";
 
 import { ShopMegaMenu } from "@/components/layout/shop-mega-menu";
 
@@ -13,6 +17,11 @@ interface MenuState {
 
 export function DesktopShopMenu() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const department = normalizeDepartment(searchParams.get("department"));
+
+  const shopHref = getDepartmentCollectionHref(department, "all");
 
   const [menuState, setMenuState] = useState<MenuState>({
     open: false,
@@ -61,7 +70,7 @@ export function DesktopShopMenu() {
       }}
     >
       <Link
-        href="/collections/all"
+        href={shopHref}
         aria-haspopup="true"
         aria-expanded={open}
         onClick={closeMenu}
@@ -121,7 +130,11 @@ export function DesktopShopMenu() {
         />
       </Link>
 
-      <ShopMegaMenu open={open} onNavigate={closeMenu} />
+      <ShopMegaMenu
+        open={open}
+        department={department}
+        onNavigate={closeMenu}
+      />
     </div>
   );
 }

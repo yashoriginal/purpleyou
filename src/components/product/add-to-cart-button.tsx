@@ -6,13 +6,15 @@ import type { CartItemVariant } from "@/types/cart";
 
 import { addItemToCart } from "@/store/slices/cart-slice";
 
-import { openAuth, openCart } from "@/store/slices/ui-slice";
-
-import { selectAuthStatus } from "@/store/selectors/auth-selectors";
+import { openCart } from "@/store/slices/ui-slice";
 
 import { selectCartIsMutating } from "@/store/selectors/cart-selectors";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+
+/* =========================================================
+   TYPES
+========================================================= */
 
 interface AddToCartButtonProps {
   productId: string;
@@ -29,6 +31,10 @@ interface AddToCartButtonProps {
   className?: string;
 }
 
+/* =========================================================
+   HYDRATION
+========================================================= */
+
 const emptySubscribe = () => {
   return () => {};
 };
@@ -36,10 +42,18 @@ const emptySubscribe = () => {
 function useHasHydratedClient() {
   return useSyncExternalStore(
     emptySubscribe,
+
+    // Browser after hydration
     () => true,
+
+    // Server + first browser hydration render
     () => false,
   );
 }
+
+/* =========================================================
+   ADD TO CART BUTTON
+========================================================= */
 
 export function AddToCartButton({
   productId,
@@ -52,37 +66,43 @@ export function AddToCartButton({
 }: AddToCartButtonProps) {
   const dispatch = useAppDispatch();
 
-  const authStatus = useAppSelector(selectAuthStatus);
-
   const isMutating = useAppSelector(selectCartIsMutating);
 
   const hasHydratedClient = useHasHydratedClient();
 
-  const isAuthenticated = hasHydratedClient && authStatus === "authenticated";
-
-  const isAuthLoading =
-    !hasHydratedClient || authStatus === "idle" || authStatus === "restoring";
-
   /*
-   * Keep the server render and first client render identical.
+   * Redux cart state may be restored from browser
+   * persistence before this component hydrates.
    *
-   * Cart/auth state may already be restored from localStorage
-   * before this component itself hydrates.
+   * Keep server + first client render identical.
    */
   const renderedIsMutating = hasHydratedClient ? isMutating : false;
 
-  const handleAddToCart = async () => {
-    if (!hasHydratedClient || isAuthLoading) {
+  /* =======================================================
+     ADD TO BAG
+  ======================================================= */
+
+  async function handleAddToCart() {
+    if (!hasHydratedClient) {
       return;
     }
 
-    if (!isAuthenticated) {
-      dispatch(openAuth());
-
+    if (!productId || priceEach <= 0) {
       return;
     }
 
     try {
+      /*
+       * IMPORTANT:
+       *
+       * Adding to cart does NOT require authentication.
+       *
+       * Guest users and authenticated users use the same
+       * cart action here.
+       *
+       * Authentication will only be required later when
+       * the customer attempts to continue toward payment.
+       */
       await dispatch(
         addItemToCart({
           productId,
@@ -93,17 +113,28 @@ export function AddToCartButton({
         }),
       ).unwrap();
 
+      /*
+       * Open the shopping bag after a successful add
+       * for both guests and authenticated customers.
+       */
       dispatch(openCart());
     } catch {
-      // Redux cart state already contains
-      // the API error.
+      /*
+       * Redux cart state already contains the cart error.
+       *
+       * Do not open authentication here.
+       */
     }
-  };
+  }
+
+  /* =======================================================
+     BUTTON STATE
+  ======================================================= */
 
   const buttonDisabled =
     disabled ||
+    !hasHydratedClient ||
     renderedIsMutating ||
-    isAuthLoading ||
     !productId ||
     priceEach <= 0;
 
@@ -115,21 +146,30 @@ export function AddToCartButton({
         void handleAddToCart();
       }}
       className={`
-        flex min-h-14
+        flex
+        min-h-14
         w-full
         items-center
         justify-center
+
         bg-[var(--foreground)]
-        px-6 py-4
+
+        px-6
+        py-4
+
         text-sm
         font-medium
         uppercase
         tracking-[0.18em]
         text-[var(--background)]
+
         transition-opacity
+
         hover:opacity-85
+
         disabled:cursor-not-allowed
         disabled:opacity-40
+
         ${className}
       `}
     >

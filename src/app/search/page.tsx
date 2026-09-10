@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 
 import { ProductCard } from "@/components/product/product-card";
 import { EmptySearchResults } from "@/components/search/empty-search-results";
+
+import {
+  getDepartmentLabel,
+  normalizeDepartment,
+  productMatchesDepartment,
+} from "@/lib/departments";
+
 import { getProducts } from "@/services/products.service";
 
 import type { Product } from "@/types/product";
@@ -9,6 +16,7 @@ import type { Product } from "@/types/product";
 interface SearchPageProps {
   searchParams: Promise<{
     q?: string | string[];
+    department?: string | string[];
   }>;
 }
 
@@ -16,24 +24,34 @@ export async function generateMetadata({
   searchParams,
 }: SearchPageProps): Promise<Metadata> {
   const params = await searchParams;
+
   const query = normalizeQuery(params.q);
+
+  const department = normalizeDepartment(normalizeQuery(params.department));
+
+  const departmentLabel = getDepartmentLabel(department);
 
   if (!query) {
     return {
-      title: "Search | PurpleYou",
-      description: "Search PurpleYou jewelry.",
+      title: `${departmentLabel}'s Search | PurpleYou`,
+      description: `Search ${departmentLabel.toLowerCase()}'s PurpleYou jewelry.`,
     };
   }
 
   return {
-    title: `Search: ${query} | PurpleYou`,
-    description: `Search results for ${query} at PurpleYou.`,
+    title: `${departmentLabel}'s Search: ${query} | PurpleYou`,
+    description: `Search results for ${query} in PurpleYou ${departmentLabel.toLowerCase()}'s jewelry.`,
   };
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
+
   const query = normalizeQuery(params.q);
+
+  const department = normalizeDepartment(normalizeQuery(params.department));
+
+  const departmentLabel = getDepartmentLabel(department);
 
   let products: Product[] = [];
   let searchFailed = false;
@@ -48,6 +66,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         searchTerms.map((search) =>
           getProducts({
             search,
+
+            taxonomy: {
+              department: department === "women" ? "Women" : "Men",
+            },
+
             limit: 60,
           }),
         ),
@@ -57,6 +80,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
       for (const result of results) {
         for (const product of result.products) {
+          /*
+           * Extra storefront guard:
+           * even if the backend ignores
+           * taxonomy.department, do not
+           * mix Women and Men results.
+           */
+          if (!productMatchesDepartment(product, department)) {
+            continue;
+          }
+
           uniqueProducts.set(product.productId, product);
         }
       }
@@ -71,22 +104,28 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <main>
-      <SearchHeader query={query} resultCount={products.length} />
+      <SearchHeader
+        query={query}
+        resultCount={products.length}
+        departmentLabel={departmentLabel}
+      />
 
       <section
         className="
           site-container
           py-8
+
           sm:py-10
+
           lg:py-14
         "
       >
         {!query ? (
-          <SearchPrompt />
+          <SearchPrompt departmentLabel={departmentLabel} />
         ) : searchFailed ? (
           <SearchError />
         ) : products.length === 0 ? (
-          <EmptySearchResults query={query} />
+          <EmptySearchResults query={query} department={department} />
         ) : (
           <div
             className="
@@ -94,8 +133,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               grid-cols-2
               gap-x-3
               gap-y-10
+
               sm:gap-x-5
+
               md:grid-cols-3
+
               lg:grid-cols-4
             "
           >
@@ -112,9 +154,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 interface SearchHeaderProps {
   query: string;
   resultCount: number;
+  departmentLabel: string;
 }
 
-function SearchHeader({ query, resultCount }: SearchHeaderProps) {
+function SearchHeader({
+  query,
+  resultCount,
+  departmentLabel,
+}: SearchHeaderProps) {
   return (
     <header
       className="
@@ -127,8 +174,10 @@ function SearchHeader({ query, resultCount }: SearchHeaderProps) {
           site-container
           pb-10
           pt-14
+
           sm:pb-14
           sm:pt-18
+
           lg:pb-16
           lg:pt-20
         "
@@ -141,7 +190,7 @@ function SearchHeader({ query, resultCount }: SearchHeaderProps) {
             text-[var(--muted-foreground)]
           "
         >
-          PurpleYou Search
+          {departmentLabel}&apos;s PurpleYou Search
         </p>
 
         <div
@@ -150,6 +199,7 @@ function SearchHeader({ query, resultCount }: SearchHeaderProps) {
             flex
             flex-col
             gap-5
+
             lg:flex-row
             lg:items-end
             lg:justify-between
@@ -161,11 +211,15 @@ function SearchHeader({ query, resultCount }: SearchHeaderProps) {
                 text-4xl
                 font-medium
                 tracking-[-0.04em]
+
                 sm:text-5xl
+
                 lg:text-6xl
               "
             >
-              {query ? `Results for “${query}”` : "Search PurpleYou"}
+              {query
+                ? `Results for “${query}”`
+                : `Search ${departmentLabel}'s Jewelry`}
             </h1>
           </div>
 
@@ -187,7 +241,11 @@ function SearchHeader({ query, resultCount }: SearchHeaderProps) {
   );
 }
 
-function SearchPrompt() {
+interface SearchPromptProps {
+  departmentLabel: string;
+}
+
+function SearchPrompt({ departmentLabel }: SearchPromptProps) {
   return (
     <div
       className="
@@ -217,7 +275,8 @@ function SearchPrompt() {
             font-medium
           "
         >
-          Start with the search icon above.
+          Search {departmentLabel.toLowerCase()}
+          &apos;s jewelry.
         </h2>
       </div>
     </div>
@@ -257,6 +316,7 @@ function SearchError() {
             text-3xl
             font-medium
             tracking-[-0.035em]
+
             sm:text-4xl
           "
         >

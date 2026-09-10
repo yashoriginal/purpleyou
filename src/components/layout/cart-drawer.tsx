@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  getDepartmentCollectionHref,
+  normalizeDepartment,
+} from "@/lib/departments";
 
 import { CloseIcon } from "@/components/ui/icons";
 
@@ -33,6 +38,15 @@ import { selectAuthStatus } from "@/store/selectors/auth-selectors";
 
 export function CartDrawer() {
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+
+  const department = normalizeDepartment(searchParams.get("department"));
+
+  const shopAllHref = getDepartmentCollectionHref(department, "all");
+
+  const cartHref = `/cart?department=${department}`;
+
+  const checkoutHref = `/checkout?department=${department}`;
   const isMutating = useAppSelector(selectCartIsMutating);
 
   const isOpen = useAppSelector((state) => state.ui.cartOpen);
@@ -52,6 +66,8 @@ export function CartDrawer() {
   const error = useAppSelector(selectCartError);
 
   const isAuthenticated = authStatus === "authenticated";
+
+  const isGuest = !isAuthenticated;
 
   useEffect(() => {
     if (!isOpen) {
@@ -156,16 +172,30 @@ export function CartDrawer() {
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col">
-          {!isAuthenticated ? (
-            <GuestCart onSignIn={handleSignIn} onClose={handleClose} />
-          ) : isLoading && !cart ? (
+          {isLoading && !cart ? (
             <CartLoading />
           ) : error && !cart ? (
             <CartError message={error} />
           ) : items.length === 0 ? (
-            <EmptyCart onClose={handleClose} />
+            <EmptyCart onClose={handleClose} shopAllHref={shopAllHref} />
           ) : (
             <>
+              {isGuest && (
+                <div className="border-b border-[var(--border)] px-5 py-3 sm:px-7">
+                  <p className="text-xs leading-5 text-[var(--muted-foreground)]">
+                    You&apos;re shopping as a guest. You can review your bag
+                    and continue to checkout — sign-in is only needed before
+                    payment.{" "}
+                    <button
+                      type="button"
+                      onClick={handleSignIn}
+                      className="underline underline-offset-4 hover:opacity-70"
+                    >
+                      Sign In
+                    </button>
+                  </p>
+                </div>
+              )}
               <div
                 className="
                   flex-1 overflow-y-auto
@@ -218,83 +248,16 @@ export function CartDrawer() {
                 ))}
               </div>
 
-              <CartSummary subtotal={subtotal} currency={cart?.currency} />
+              <CartSummary
+                subtotal={subtotal}
+                currency={cart?.currency}
+                cartHref={cartHref}
+                checkoutHref={checkoutHref}
+              />
             </>
           )}
         </div>
       </aside>
-    </div>
-  );
-}
-
-interface GuestCartProps {
-  onSignIn: () => void;
-  onClose: () => void;
-}
-
-function GuestCart({ onSignIn, onClose }: GuestCartProps) {
-  return (
-    <div
-      className="
-        flex flex-1 flex-col
-        items-center justify-center
-        px-7 text-center
-      "
-    >
-      <p
-        className="
-          text-xs uppercase
-          tracking-[0.28em]
-          text-[var(--muted-foreground)]
-        "
-      >
-        Your Bag
-      </p>
-
-      <h3 className="mt-4 text-2xl font-medium">Sign in to view your bag</h3>
-
-      <p
-        className="
-          mt-3 max-w-sm
-          text-sm leading-6
-          text-[var(--muted-foreground)]
-        "
-      >
-        Your PurpleYou shopping bag is connected to your account.
-      </p>
-
-      <button
-        type="button"
-        onClick={onSignIn}
-        className="
-          mt-8 w-full max-w-sm
-          bg-[var(--foreground)]
-          px-6 py-4
-          text-sm font-medium
-          uppercase tracking-[0.2em]
-          text-[var(--background)]
-          transition-opacity
-          hover:opacity-85
-        "
-      >
-        Sign In
-      </button>
-
-      <Link
-        href="/collections/all"
-        onClick={onClose}
-        className="
-          mt-4 w-full max-w-sm
-          border border-[var(--border)]
-          px-6 py-4
-          text-sm
-          uppercase tracking-[0.2em]
-          transition-colors
-          hover:bg-[var(--surface)]
-        "
-      >
-        Continue Shopping
-      </Link>
     </div>
   );
 }
@@ -350,9 +313,10 @@ function CartError({ message }: CartErrorProps) {
 
 interface EmptyCartProps {
   onClose: () => void;
+  shopAllHref: string;
 }
 
-function EmptyCart({ onClose }: EmptyCartProps) {
+function EmptyCart({ onClose, shopAllHref }: EmptyCartProps) {
   return (
     <div
       className="
@@ -383,7 +347,7 @@ function EmptyCart({ onClose }: EmptyCartProps) {
       </p>
 
       <Link
-        href="/collections/all"
+        href={shopAllHref}
         onClick={onClose}
         className="
           mt-8 w-full max-w-sm
@@ -669,9 +633,16 @@ function CartItemRow({
 interface CartSummaryProps {
   subtotal: number;
   currency?: string;
+  cartHref: string;
+  checkoutHref: string;
 }
 
-function CartSummary({ subtotal, currency }: CartSummaryProps) {
+function CartSummary({
+  subtotal,
+  currency,
+  cartHref,
+  checkoutHref,
+}: CartSummaryProps) {
   const dispatch = useAppDispatch();
   return (
     <footer
@@ -711,7 +682,7 @@ function CartSummary({ subtotal, currency }: CartSummaryProps) {
         Shipping and taxes are calculated at checkout.
       </p>
       <Link
-        href="/cart"
+        href={cartHref}
         onClick={() => dispatch(closeCart())}
         className="
     mt-5
@@ -734,21 +705,26 @@ function CartSummary({ subtotal, currency }: CartSummaryProps) {
         View Bag
       </Link>
 
-      <button
-        type="button"
-        disabled
+      <Link
+        href={checkoutHref}
+        onClick={() => dispatch(closeCart())}
         className="
-          mt-5 w-full
+          mt-3 flex
+          min-h-12
+          w-full
+          items-center
+          justify-center
           bg-[var(--foreground)]
-          px-6 py-4
+          px-6
           text-sm font-medium
           uppercase tracking-[0.2em]
           text-[var(--background)]
-          opacity-50
+          transition-opacity
+          hover:opacity-85
         "
       >
         Checkout
-      </button>
+      </Link>
     </footer>
   );
 }

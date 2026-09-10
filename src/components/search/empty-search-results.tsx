@@ -1,10 +1,23 @@
 import { EmptyState } from "@/components/ui/empty-state";
 
+import {
+  getDepartmentCollectionHref,
+  type Department,
+} from "@/lib/departments";
+
 interface EmptySearchResultsProps {
   query: string;
+  department: Department;
 }
 
-export function EmptySearchResults({ query }: EmptySearchResultsProps) {
+export function EmptySearchResults({
+  query,
+  department,
+}: EmptySearchResultsProps) {
+  const shopAllHref = getDepartmentCollectionHref(department, "all");
+
+  const homeHref = `/?department=${department}`;
+
   return (
     <EmptyState
       eyebrow="Search"
@@ -16,11 +29,11 @@ export function EmptySearchResults({ query }: EmptySearchResultsProps) {
       }
       primaryAction={{
         label: "Shop All",
-        href: "/collections/all",
+        href: shopAllHref,
       }}
       secondaryAction={{
         label: "Back Home",
-        href: "/",
+        href: homeHref,
       }}
     />
   );

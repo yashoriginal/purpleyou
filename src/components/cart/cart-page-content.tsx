@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { EmptyCart } from "@/components/cart/empty-cart";
+
+import {
+  getDepartmentCollectionHref,
+  normalizeDepartment,
+} from "@/lib/departments";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
@@ -34,17 +40,19 @@ const emptySubscribe = () => {
 function useHasHydratedClient() {
   return useSyncExternalStore(
     emptySubscribe,
-
-    // Client snapshot
     () => true,
-
-    // Server + first hydration snapshot
     () => false,
   );
 }
 
 export function CartPageContent() {
   const hasHydratedClient = useHasHydratedClient();
+
+  const searchParams = useSearchParams();
+
+  const department = normalizeDepartment(searchParams.get("department"));
+
+  const continueShoppingHref = getDepartmentCollectionHref(department, "all");
 
   const cart = useAppSelector(selectCartData);
 
@@ -73,7 +81,9 @@ export function CartPageContent() {
       className="
         site-container
         py-8
+
         sm:py-10
+
         lg:py-14
       "
     >
@@ -82,6 +92,7 @@ export function CartPageContent() {
           grid
           grid-cols-1
           gap-12
+
           lg:grid-cols-[minmax(0,1fr)_380px]
           lg:gap-16
         "
@@ -94,6 +105,7 @@ export function CartPageContent() {
               flex
               items-center
               justify-between
+
               border-b
               border-[var(--border)]
               pb-5
@@ -129,6 +141,7 @@ export function CartPageContent() {
             border
             border-[var(--border)]
             p-6
+
             lg:sticky
             lg:top-28
           "
@@ -220,34 +233,40 @@ export function CartPageContent() {
             </span>
           </div>
 
-          <button
-            type="button"
-            disabled
+          {/*
+           * Checkout remains disabled for now.
+           * Next phase will connect this to
+           * the real checkout/order flow.
+           */}
+          <Link
+            href={`/checkout?department=${department}`}
             className="
-              flex
-              min-h-14
-              w-full
-              items-center
-              justify-center
-              bg-[var(--foreground)]
-              px-6
-              text-xs
-              font-medium
-              uppercase
-              tracking-[0.2em]
-              text-[var(--background)]
-              opacity-50
-            "
+    flex
+    min-h-14
+    w-full
+    items-center
+    justify-center
+    bg-[var(--foreground)]
+    px-6
+    text-xs
+    font-medium
+    uppercase
+    tracking-[0.2em]
+    text-[var(--background)]
+    transition-opacity
+    hover:opacity-85
+  "
           >
-            Checkout Coming Soon
-          </button>
+            Checkout
+          </Link>
 
           <Link
-            href="/collections/all"
+            href={continueShoppingHref}
             className="
               mt-5
               flex
               justify-center
+
               text-[10px]
               uppercase
               tracking-[0.18em]
@@ -312,6 +331,12 @@ function CartPageItem({
 
   const product = loaded ? productState.product : null;
 
+  const productHref = product
+    ? product.department
+      ? `/products/${product.slug}?department=${product.department}`
+      : `/products/${product.slug}`
+    : null;
+
   function decrease() {
     if (item.quantity <= 1) {
       return;
@@ -320,7 +345,9 @@ function CartPageItem({
     void dispatch(
       updateCartQuantity({
         productId: item.productId,
+
         quantity: item.quantity - 1,
+
         variant: item.variant,
       }),
     );
@@ -330,7 +357,9 @@ function CartPageItem({
     void dispatch(
       updateCartQuantity({
         productId: item.productId,
+
         quantity: item.quantity + 1,
+
         variant: item.variant,
       }),
     );
@@ -340,10 +369,49 @@ function CartPageItem({
     void dispatch(
       removeItemFromCart({
         productId: item.productId,
+
         variant: item.variant,
       }),
     );
   }
+
+  const imageContent = product?.imageUrl ? (
+    <div
+      role="img"
+      aria-label={product.name}
+      className="
+          h-full
+          w-full
+          bg-contain
+          bg-center
+          bg-no-repeat
+        "
+      style={{
+        backgroundImage: `url("${product.imageUrl}")`,
+      }}
+    />
+  ) : (
+    <div
+      className="
+          flex
+          h-full
+          items-center
+          justify-center
+          px-2
+          text-center
+
+          text-[9px]
+          uppercase
+          tracking-[0.16em]
+          text-[var(--muted-foreground)]
+        "
+    >
+      {loaded ? "Image unavailable" : "Loading"}
+    </div>
+  );
+
+  const productName =
+    product?.name ?? (loaded ? "Product unavailable" : "Loading product...");
 
   return (
     <article
@@ -351,55 +419,41 @@ function CartPageItem({
         grid
         grid-cols-[110px_minmax(0,1fr)]
         gap-5
+
         border-b
         border-[var(--border)]
         py-6
+
         sm:grid-cols-[150px_minmax(0,1fr)]
         sm:gap-7
       "
     >
-      <div
-        className="
-          aspect-square
-          overflow-hidden
-          bg-[var(--surface)]
-        "
-      >
-        {product?.imageUrl ? (
-          <div
-            role="img"
-            aria-label={product.name}
-            className="
-              h-full
-              w-full
-              bg-contain
-              bg-center
-              bg-no-repeat
-            "
-            style={{
-              backgroundImage: `url("${product.imageUrl}")`,
-            }}
-          />
-        ) : (
-          <div
-            className="
-              flex
-              h-full
-              items-center
-              justify-center
-              px-2
-              text-center
-              text-[9px]
-              uppercase
-              tracking-[0.16em]
-              text-[var(--muted-foreground)]
-            "
-          >
-            {loaded ? "Image unavailable" : "Loading"}
-          </div>
-        )}
-      </div>
+      {/* Image */}
+      {productHref ? (
+        <Link
+          href={productHref}
+          aria-label={`View ${productName}`}
+          className="
+            aspect-square
+            overflow-hidden
+            bg-[var(--surface)]
+          "
+        >
+          {imageContent}
+        </Link>
+      ) : (
+        <div
+          className="
+            aspect-square
+            overflow-hidden
+            bg-[var(--surface)]
+          "
+        >
+          {imageContent}
+        </div>
+      )}
 
+      {/* Product details */}
       <div
         className="
           flex
@@ -407,16 +461,38 @@ function CartPageItem({
           flex-col
         "
       >
-        <h2
-          className="
-            text-sm
-            font-medium
-            sm:text-base
-          "
-        >
-          {product?.name ??
-            (loaded ? "Product unavailable" : "Loading product...")}
-        </h2>
+        {productHref ? (
+          <Link
+            href={productHref}
+            className="
+              w-fit
+              transition-opacity
+              hover:opacity-60
+            "
+          >
+            <h2
+              className="
+                text-sm
+                font-medium
+
+                sm:text-base
+              "
+            >
+              {productName}
+            </h2>
+          </Link>
+        ) : (
+          <h2
+            className="
+              text-sm
+              font-medium
+
+              sm:text-base
+            "
+          >
+            {productName}
+          </h2>
+        )}
 
         <CartVariant item={item} />
 
@@ -440,11 +516,13 @@ function CartPageItem({
             pt-5
           "
         >
+          {/* Quantity */}
           <div
             className="
               inline-flex
               h-10
               items-center
+
               border
               border-[var(--border)]
             "
@@ -453,9 +531,11 @@ function CartPageItem({
               type="button"
               disabled={disabled || item.quantity <= 1}
               onClick={decrease}
+              aria-label="Decrease quantity"
               className="
                 h-full
                 w-10
+
                 disabled:opacity-30
               "
             >
@@ -476,9 +556,11 @@ function CartPageItem({
               type="button"
               disabled={disabled}
               onClick={increase}
+              aria-label="Increase quantity"
               className="
                 h-full
                 w-10
+
                 disabled:opacity-30
               "
             >
@@ -497,6 +579,7 @@ function CartPageItem({
               text-[var(--muted-foreground)]
               underline
               underline-offset-4
+
               disabled:opacity-40
             "
           >

@@ -2,23 +2,50 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { CloseIcon, SearchIcon } from "@/components/ui/icons";
+
+import {
+  getDepartmentCollectionHref,
+  normalizeDepartment,
+} from "@/lib/departments";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 import { closeSearch } from "@/store/slices/ui-slice";
 
+const popularCategories = [
+  {
+    label: "Earrings",
+    collection: "earrings",
+  },
+  {
+    label: "Necklaces",
+    collection: "necklaces",
+  },
+  {
+    label: "Rings",
+    collection: "rings",
+  },
+  {
+    label: "Bracelets",
+    collection: "bracelets",
+  },
+];
+
 export function SearchDrawer() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const searchOpen = useAppSelector((state) => state.ui.searchOpen);
 
   const [query, setQuery] = useState("");
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const department = normalizeDepartment(searchParams.get("department"));
 
   useEffect(() => {
     if (!searchOpen) {
@@ -35,6 +62,7 @@ export function SearchDrawer() {
 
     return () => {
       window.clearTimeout(focusTimer);
+
       document.body.style.overflow = previousOverflow;
     };
   }, [searchOpen]);
@@ -66,9 +94,15 @@ export function SearchDrawer() {
       return;
     }
 
+    const params = new URLSearchParams();
+
+    params.set("q", trimmedQuery);
+
+    params.set("department", department);
+
     dispatch(closeSearch());
 
-    router.push(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+    router.push(`/search?${params.toString()}`);
   }
 
   if (!searchOpen) {
@@ -77,24 +111,59 @@ export function SearchDrawer() {
 
   return (
     <div className="fixed inset-0 z-[200]">
+      {/* Backdrop */}
       <button
         type="button"
         aria-label="Close search"
         onClick={() => dispatch(closeSearch())}
-        className="absolute inset-0 bg-black/70"
+        className="
+          absolute
+          inset-0
+          bg-black/70
+        "
       />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Search PurpleYou"
-        className="relative z-10 border-b border-[var(--border)] bg-[var(--background)]"
+        className="
+          relative
+          z-10
+          border-b
+          border-[var(--border)]
+          bg-[var(--background)]
+        "
       >
         <div className="site-container">
-          <div className="flex min-h-20 items-center gap-4 md:min-h-24">
-            <SearchIcon className="h-5 w-5 shrink-0 text-[var(--muted-foreground)]" />
+          {/* Search input */}
+          <div
+            className="
+              flex
+              min-h-20
+              items-center
+              gap-4
 
-            <form onSubmit={handleSubmit} className="flex min-w-0 flex-1">
+              md:min-h-24
+            "
+          >
+            <SearchIcon
+              className="
+                h-5
+                w-5
+                shrink-0
+                text-[var(--muted-foreground)]
+              "
+            />
+
+            <form
+              onSubmit={handleSubmit}
+              className="
+                flex
+                min-w-0
+                flex-1
+              "
+            >
               <label htmlFor="global-search" className="sr-only">
                 Search products
               </label>
@@ -105,9 +174,18 @@ export function SearchDrawer() {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search PurpleYou"
+                placeholder={`Search ${department === "men" ? "Men's" : "Women's"} PurpleYou`}
                 autoComplete="off"
-                className="w-full bg-transparent text-lg text-[var(--foreground)] outline-none placeholder:text-[var(--muted-foreground)] md:text-2xl"
+                className="
+                  w-full
+                  bg-transparent
+                  text-lg
+                  text-[var(--foreground)]
+                  outline-none
+                  placeholder:text-[var(--muted-foreground)]
+
+                  md:text-2xl
+                "
               />
             </form>
 
@@ -115,49 +193,68 @@ export function SearchDrawer() {
               type="button"
               aria-label="Close search"
               onClick={() => dispatch(closeSearch())}
-              className="flex h-10 w-10 shrink-0 items-center justify-center transition-opacity hover:opacity-60"
+              className="
+                flex
+                h-10
+                w-10
+                shrink-0
+                items-center
+                justify-center
+
+                transition-opacity
+                hover:opacity-60
+              "
             >
               <CloseIcon className="h-6 w-6" />
             </button>
           </div>
 
-          <div className="border-t border-[var(--border)] py-5">
-            <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
+          {/* Popular categories */}
+          <div
+            className="
+              border-t
+              border-[var(--border)]
+              py-5
+            "
+          >
+            <p
+              className="
+                mb-4
+                text-[10px]
+                font-medium
+                uppercase
+                tracking-[0.2em]
+                text-[var(--muted-foreground)]
+              "
+            >
               Popular categories
             </p>
 
-            <div className="flex flex-wrap gap-x-6 gap-y-3">
-              <Link
-                href="/collections/earrings"
-                onClick={() => dispatch(closeSearch())}
-                className="text-sm hover:text-[var(--brand)]"
-              >
-                Earrings
-              </Link>
-
-              <Link
-                href="/collections/necklaces"
-                onClick={() => dispatch(closeSearch())}
-                className="text-sm hover:text-[var(--brand)]"
-              >
-                Necklaces
-              </Link>
-
-              <Link
-                href="/collections/rings"
-                onClick={() => dispatch(closeSearch())}
-                className="text-sm hover:text-[var(--brand)]"
-              >
-                Rings
-              </Link>
-
-              <Link
-                href="/collections/bracelets"
-                onClick={() => dispatch(closeSearch())}
-                className="text-sm hover:text-[var(--brand)]"
-              >
-                Bracelets
-              </Link>
+            <div
+              className="
+                flex
+                flex-wrap
+                gap-x-6
+                gap-y-3
+              "
+            >
+              {popularCategories.map((item) => (
+                <Link
+                  key={item.collection}
+                  href={getDepartmentCollectionHref(
+                    department,
+                    item.collection,
+                  )}
+                  onClick={() => dispatch(closeSearch())}
+                  className="
+                      text-sm
+                      transition-colors
+                      hover:text-[var(--brand)]
+                    "
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
         </div>

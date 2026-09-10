@@ -5,6 +5,14 @@ export interface NavigationItem {
 
 export const mainNavigation: NavigationItem[] = [
   {
+    label: "Women",
+    href: "/?department=women",
+  },
+  {
+    label: "Men",
+    href: "/?department=men",
+  },
+  {
     label: "Shop",
     href: "/collections/all",
   },

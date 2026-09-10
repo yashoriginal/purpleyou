@@ -1,6 +1,12 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product/product-card";
+
+import {
+  getDepartmentCollectionHref,
+  normalizeDepartment,
+} from "@/lib/departments";
+
 import { getProducts } from "@/services/products.service";
 
 import type { Product } from "@/types/product";
@@ -8,6 +14,7 @@ import type { Product } from "@/types/product";
 interface RelatedProductsProps {
   currentProductId: string;
   productType?: string;
+  department?: string;
 }
 
 const RELATED_PRODUCT_LIMIT = 4;
@@ -15,12 +22,21 @@ const RELATED_PRODUCT_LIMIT = 4;
 export async function RelatedProducts({
   currentProductId,
   productType,
+  department,
 }: RelatedProductsProps) {
-  const products = await loadRelatedProducts(currentProductId, productType);
+  const products = await loadRelatedProducts(
+    currentProductId,
+    productType,
+    department,
+  );
 
   if (products.length === 0) {
     return null;
   }
+
+  const shopAllHref = department
+    ? getDepartmentCollectionHref(normalizeDepartment(department), "all")
+    : "/collections/all";
 
   return (
     <section
@@ -67,7 +83,7 @@ export async function RelatedProducts({
           </div>
 
           <Link
-            href="/collections/all"
+            href={shopAllHref}
             className="
               hidden
               text-[10px]
@@ -90,8 +106,11 @@ export async function RelatedProducts({
             grid-cols-2
             gap-x-3
             gap-y-10
+
             sm:gap-x-5
+
             md:grid-cols-3
+
             lg:grid-cols-4
           "
         >
@@ -107,26 +126,42 @@ export async function RelatedProducts({
 async function loadRelatedProducts(
   currentProductId: string,
   productType?: string,
+  department?: string,
 ): Promise<Product[]> {
   const selected = new Map<string, Product>();
 
   try {
     /*
      * Priority 1:
-     * Products from the same product type.
+     * Same department + same product type.
+     *
+     * Example:
+     * Men's Ring -> other Men's Rings
      */
     if (productType) {
       const sameTypeResult = await getProducts({
         taxonomy: {
           productType,
+          ...(department
+            ? {
+                department,
+              }
+            : {}),
         },
+
         limit: 8,
       });
 
       for (const product of sameTypeResult.products) {
-        if (product.productId !== currentProductId) {
-          selected.set(product.productId, product);
+        if (product.productId === currentProductId) {
+          continue;
         }
+
+        if (department && !matchesDepartment(product, department)) {
+          continue;
+        }
+
+        selected.set(product.productId, product);
 
         if (selected.size >= RELATED_PRODUCT_LIMIT) {
           break;
@@ -136,11 +171,21 @@ async function loadRelatedProducts(
 
     /*
      * Priority 2:
-     * Fill remaining spaces using other
-     * storefront products.
+     * Fill remaining slots using products
+     * from the SAME department.
+     *
+     * Example:
+     * Men's Ring can then show
+     * Men's Bracelet / Necklace / Earring.
      */
     if (selected.size < RELATED_PRODUCT_LIMIT) {
       const allProductsResult = await getProducts({
+        taxonomy: department
+          ? {
+              department,
+            }
+          : undefined,
+
         limit: 16,
       });
 
@@ -150,6 +195,10 @@ async function loadRelatedProducts(
         }
 
         if (selected.has(product.productId)) {
+          continue;
+        }
+
+        if (department && !matchesDepartment(product, department)) {
           continue;
         }
 
@@ -167,4 +216,11 @@ async function loadRelatedProducts(
 
     return [];
   }
+}
+
+function matchesDepartment(product: Product, department: string) {
+  return (
+    product.base.taxonomy?.department?.trim().toLowerCase() ===
+    department.trim().toLowerCase()
+  );
 }

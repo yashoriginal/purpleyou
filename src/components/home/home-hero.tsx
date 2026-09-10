@@ -1,7 +1,21 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+
+import {
+  getDepartmentCollectionHref,
+  normalizeDepartment,
+} from "@/lib/departments";
 
 export function HomeHero() {
+  const searchParams = useSearchParams();
+
+  const department = normalizeDepartment(searchParams.get("department"));
+
+  const collectionHref = getDepartmentCollectionHref(department, "all");
+
   return (
     <section
       id="home-hero"
@@ -14,7 +28,7 @@ export function HomeHero() {
         text-white
       "
     >
-      {/* Temporary image — we can replace with the final PurpleYou campaign image */}
+      {/* Temporary image — replace later with final PurpleYou campaign image */}
       <Image
         src="/images/mega-menu/new-arrivals.jpeg"
         alt=""
@@ -75,7 +89,9 @@ export function HomeHero() {
           pb-24
           pt-20
           text-center
+
           sm:px-8
+
           lg:pb-28
           lg:pt-24
         "
@@ -88,6 +104,7 @@ export function HomeHero() {
             uppercase
             tracking-[0.34em]
             text-white/70
+
             sm:text-[10px]
           "
         >
@@ -121,14 +138,16 @@ export function HomeHero() {
             leading-6
             tracking-[0.22em]
             text-white/75
+
             sm:text-xs
           "
         >
           Jewelry for every version of you.
         </p>
 
+        {/* Department-aware CTA */}
         <Link
-          href="/collections/all"
+          href={collectionHref}
           className="
             group
             relative
@@ -161,10 +180,10 @@ export function HomeHero() {
           Shop the Collection
         </Link>
 
-        {/* Scroll arrow */}
+        {/* Explore arrow */}
         <Link
-          href="/collections/all"
-          aria-label="Explore PurpleYou jewelry"
+          href={collectionHref}
+          aria-label={`Explore ${department === "men" ? "men's" : "women's"} PurpleYou jewelry`}
           className="
             group
             absolute
@@ -182,6 +201,7 @@ export function HomeHero() {
             bg-black/10
             text-white
             backdrop-blur-sm
+
             transition-all
             duration-300
 
@@ -189,7 +209,8 @@ export function HomeHero() {
             hover:bg-[#a96ad8]/10
 
             sm:bottom-20
-lg:bottom-16
+
+            lg:bottom-16
           "
         >
           <span
@@ -203,8 +224,10 @@ lg:bottom-16
               border-b
               border-r
               border-current
+
               transition-transform
               duration-300
+
               group-hover:translate-y-[2px]
             "
           />

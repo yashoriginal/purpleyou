@@ -1,50 +1,62 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+
+import {
+  getDepartmentCollectionHref,
+  type Department,
+} from "@/lib/departments";
 
 const categoryLinks = [
   {
     label: "Rings",
-    href: "/collections/rings",
+    collection: "rings",
   },
   {
     label: "Necklaces",
-    href: "/collections/necklaces",
+    collection: "necklaces",
   },
   {
     label: "Earrings",
-    href: "/collections/earrings",
+    collection: "earrings",
   },
   {
     label: "Bracelets",
-    href: "/collections/bracelets",
+    collection: "bracelets",
   },
   {
     label: "All Jewelry",
-    href: "/collections/all",
+    collection: "all",
   },
 ];
 
 const discoverLinks = [
   {
     label: "New Arrivals",
-    href: "/collections/all",
+    collection: "all",
   },
   {
     label: "Best Sellers",
-    href: "/collections/all",
+    collection: "all",
   },
   {
     label: "PurpleYou Edit",
-    href: "/collections/all",
+    collection: "all",
   },
 ];
 
 interface ShopMegaMenuProps {
   open: boolean;
+  department: Department;
   onNavigate: () => void;
 }
 
-export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
+export function ShopMegaMenu({
+  open,
+  department,
+  onNavigate,
+}: ShopMegaMenuProps) {
+  const allJewelryHref = getDepartmentCollectionHref(department, "all");
+
   return (
     <div
       className={`
@@ -58,9 +70,11 @@ export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
         border-white/10
         bg-[#090909]
         text-[#f3f0eb]
+
         transition-[opacity,transform,visibility]
         duration-200
         ease-out
+
         lg:block
 
         ${
@@ -92,12 +106,14 @@ export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
           className="
             px-10
             py-12
+
             xl:px-14
+
             2xl:px-16
           "
         >
           <Link
-            href="/collections/all"
+            href={allJewelryHref}
             onClick={onNavigate}
             className="
               inline-block
@@ -105,6 +121,7 @@ export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
               font-medium
               uppercase
               tracking-[0.24em]
+
               transition-colors
               hover:text-[#a96ad8]
             "
@@ -120,6 +137,7 @@ export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
               gap-12
             "
           >
+            {/* Categories */}
             <div>
               <p
                 className="
@@ -135,18 +153,22 @@ export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
               <div className="mt-7 space-y-5">
                 {categoryLinks.map((item) => (
                   <Link
-                    key={item.href}
-                    href={item.href}
+                    key={item.collection}
+                    href={getDepartmentCollectionHref(
+                      department,
+                      item.collection,
+                    )}
                     onClick={onNavigate}
                     className="
-                      block
-                      w-fit
-                      text-[15px]
-                      font-medium
-                      tracking-[0.04em]
-                      transition-colors
-                      hover:text-[#a96ad8]
-                    "
+                        block
+                        w-fit
+                        text-[15px]
+                        font-medium
+                        tracking-[0.04em]
+
+                        transition-colors
+                        hover:text-[#a96ad8]
+                      "
                   >
                     {item.label}
                   </Link>
@@ -154,6 +176,7 @@ export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
               </div>
             </div>
 
+            {/* Discover */}
             <div>
               <p
                 className="
@@ -170,17 +193,21 @@ export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
                 {discoverLinks.map((item) => (
                   <Link
                     key={item.label}
-                    href={item.href}
+                    href={getDepartmentCollectionHref(
+                      department,
+                      item.collection,
+                    )}
                     onClick={onNavigate}
                     className="
-                      block
-                      w-fit
-                      text-[15px]
-                      font-medium
-                      tracking-[0.04em]
-                      transition-colors
-                      hover:text-[#a96ad8]
-                    "
+                        block
+                        w-fit
+                        text-[15px]
+                        font-medium
+                        tracking-[0.04em]
+
+                        transition-colors
+                        hover:text-[#a96ad8]
+                      "
                   >
                     {item.label}
                   </Link>
@@ -224,7 +251,7 @@ export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
           <MegaMenuImage
             title="New Arrivals"
             action="Explore"
-            href="/collections/all"
+            href={allJewelryHref}
             image="/images/mega-menu/new-arrivals.jpeg"
             onNavigate={onNavigate}
           />
@@ -232,7 +259,7 @@ export function ShopMegaMenu({ open, onNavigate }: ShopMegaMenuProps) {
           <MegaMenuImage
             title="Best Sellers"
             action="Shop"
-            href="/collections/all"
+            href={allJewelryHref}
             image="/images/mega-menu/best-sellers.jpeg"
             onNavigate={onNavigate}
           />
@@ -275,9 +302,11 @@ function MegaMenuImage({
         sizes="30vw"
         className="
           object-cover
+
           transition-transform
           duration-700
           ease-out
+
           group-hover:scale-[1.035]
         "
       />
@@ -299,10 +328,14 @@ function MegaMenuImage({
         className="
           absolute
           inset-0
+
           bg-[radial-gradient(circle_at_25%_20%,rgba(137,72,181,0.22),transparent_46%)]
+
           opacity-70
+
           transition-opacity
           duration-500
+
           group-hover:opacity-100
         "
       />
@@ -315,8 +348,10 @@ function MegaMenuImage({
           inset-0
           border
           border-transparent
+
           transition-colors
           duration-300
+
           group-hover:border-[#a96ad8]/30
         "
       />
@@ -327,6 +362,7 @@ function MegaMenuImage({
           inset-x-8
           bottom-9
           z-10
+
           xl:inset-x-10
         "
       >
@@ -362,6 +398,7 @@ function MegaMenuImage({
             items-center
             gap-3
             pb-1
+
             text-[10px]
             font-medium
             uppercase
@@ -383,6 +420,7 @@ function MegaMenuImage({
             className="
               transition-transform
               duration-300
+
               group-hover:translate-x-1
             "
           >

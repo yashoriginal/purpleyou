@@ -1,7 +1,8 @@
 import Link from "next/link";
 
-import type { Product } from "@/types/product";
 import { WishlistButton } from "@/components/wishlist/wishlist-button";
+
+import type { Product } from "@/types/product";
 
 interface ProductCardProps {
   product: Product;
@@ -20,27 +21,36 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
     typeof product.base.undiscountedPrice === "number" &&
     product.base.undiscountedPrice > product.base.price;
 
+  const productHref = getProductHref(product);
+
   return (
     <article className="group relative min-w-0">
+      {/* Wishlist */}
       <div
         className="
-      absolute
-      right-3
-      top-3
-      z-10
-    "
+          absolute
+          right-3
+          top-3
+          z-10
+        "
       >
         <WishlistButton productId={product.productId} />
       </div>
 
-      <Link href={`/products/${product.slug}`} className="block">
+      <Link href={productHref} className="block">
+        {/* Product image */}
         <div
           className={`
             relative
             mx-auto
             overflow-hidden
             bg-[var(--surface)]
-            ${compact ? "aspect-square w-full max-w-[250px]" : "aspect-[4/5] w-full"}
+
+            ${
+              compact
+                ? "aspect-square w-full max-w-[250px]"
+                : "aspect-[4/5] w-full"
+            }
           `}
         >
           {primaryImage ? (
@@ -53,9 +63,11 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
                   inset-0
                   bg-cover
                   bg-center
+
                   transition-all
                   duration-500
                   ease-out
+
                   group-hover:scale-[1.02]
                 "
                 style={{
@@ -73,9 +85,11 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
                     bg-cover
                     bg-center
                     opacity-0
+
                     transition-all
                     duration-500
                     ease-out
+
                     group-hover:scale-[1.02]
                     group-hover:opacity-100
                   "
@@ -109,6 +123,7 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
             </div>
           )}
 
+          {/* Sold out */}
           {isOutOfStock && (
             <div
               className="
@@ -128,6 +143,7 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
           )}
         </div>
 
+        {/* Product information */}
         <div className="pt-4">
           <p
             className="
@@ -147,6 +163,7 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
               text-sm
               font-medium
               leading-5
+
               sm:text-base
             "
           >
@@ -182,6 +199,18 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
       </Link>
     </article>
   );
+}
+
+function getProductHref(product: Product) {
+  const department = product.base.taxonomy?.department?.trim().toLowerCase();
+
+  const baseHref = `/products/${product.slug}`;
+
+  if (department !== "men" && department !== "women") {
+    return baseHref;
+  }
+
+  return `${baseHref}?department=${department}`;
 }
 
 function formatPrice(value: number, currency = "INR") {

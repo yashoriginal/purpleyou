@@ -1,27 +1,7 @@
 import Link from "next/link";
 
-const shopLinks = [
-  {
-    label: "Shop All",
-    href: "/collections/all",
-  },
-  {
-    label: "Rings",
-    href: "/collections/rings",
-  },
-  {
-    label: "Necklaces",
-    href: "/collections/necklaces",
-  },
-  {
-    label: "Bracelets",
-    href: "/collections/bracelets",
-  },
-  {
-    label: "Earrings",
-    href: "/collections/earrings",
-  },
-];
+import { DepartmentHomeLink } from "@/components/layout/department-home-link";
+import { FooterShopLinks } from "@/components/layout/footer-shop-links";
 
 const exploreLinks = [
   {
@@ -53,8 +33,10 @@ export function Footer() {
             grid
             gap-12
             py-14
+
             md:grid-cols-2
             md:py-16
+
             lg:grid-cols-[1.6fr_0.7fr_0.7fr]
             lg:gap-16
             lg:py-20
@@ -62,18 +44,19 @@ export function Footer() {
         >
           {/* Brand */}
           <div>
-            <Link
-              href="/"
+            <DepartmentHomeLink
+              ariaLabel="PurpleYou home"
               className="
                 text-2xl
                 font-medium
                 uppercase
                 tracking-[0.24em]
+
                 sm:text-3xl
               "
             >
               Purple You
-            </Link>
+            </DepartmentHomeLink>
 
             <p
               className="
@@ -123,19 +106,7 @@ export function Footer() {
                 gap-3
               "
             >
-              {shopLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="
-                    text-sm
-                    transition-opacity
-                    hover:opacity-55
-                  "
-                >
-                  {link.label}
-                </Link>
-              ))}
+              <FooterShopLinks />
             </nav>
           </div>
 
@@ -187,10 +158,12 @@ export function Footer() {
             border-t
             border-[var(--border)]
             py-6
+
             text-[9px]
             uppercase
             tracking-[0.2em]
             text-[var(--muted-foreground)]
+
             sm:flex-row
             sm:items-center
             sm:justify-between

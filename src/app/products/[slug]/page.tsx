@@ -303,7 +303,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Related products */}
       <RelatedProducts
         currentProductId={product.productId}
-        productType={productType}
+        productType={product.base.taxonomy?.productType}
+        department={product.base.taxonomy?.department}
       />
     </main>
   );

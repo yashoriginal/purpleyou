@@ -7,6 +7,7 @@ import { CartInitializer } from "@/components/cart/cart-initializer";
 import { WishlistInitializer } from "@/components/wishlist/wishlist-initializer";
 import { Footer } from "@/components/layout/footer";
 import { RouteAwareFooter } from "@/components/layout/route-aware-footer";
+import { Suspense } from "react";
 
 import "./globals.css";
 
@@ -32,14 +33,46 @@ export default function RootLayout({
           <CartInitializer />
           <WishlistInitializer />
 
-          <Header />
+          <Suspense fallback={<HeaderFallback />}>
+            <Header />
+          </Suspense>
 
           {children}
           <RouteAwareFooter>
-            <Footer />
+            <Suspense fallback={<FooterFallback />}>
+              <Footer />
+            </Suspense>
           </RouteAwareFooter>
         </StoreProvider>
       </body>
     </html>
+  );
+}
+
+function HeaderFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="
+        h-[162px]
+        border-b
+        border-[var(--border)]
+
+        lg:h-[122px]
+      "
+    />
+  );
+}
+
+function FooterFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="
+        min-h-[260px]
+        border-t
+        border-[var(--border)]
+      "
+    />
   );
 }

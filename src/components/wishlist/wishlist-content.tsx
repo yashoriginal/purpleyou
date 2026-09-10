@@ -7,7 +7,8 @@ import { EmptyWishlist } from "@/components/wishlist/empty-wishlist";
 import { WishlistButton } from "@/components/wishlist/wishlist-button";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-
+import { useSearchParams } from "next/navigation";
+import { normalizeDepartment } from "@/lib/departments";
 import {
   selectWishlistHydrated,
   selectWishlistIds,
@@ -43,6 +44,9 @@ function useHasHydratedClient() {
 
 export function WishlistContent() {
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+
+  const department = normalizeDepartment(searchParams.get("department"));
 
   const hasHydratedClient = useHasHydratedClient();
 
@@ -104,7 +108,7 @@ export function WishlistContent() {
   }
 
   if (productIds.length === 0) {
-    return <EmptyWishlist />;
+    return <EmptyWishlist department={department} />;
   }
 
   const productsReady = productState?.key === requestKey;
@@ -180,6 +184,9 @@ export function WishlistContent() {
 }
 
 function WishlistProductCard({ product }: { product: WishlistProductSummary }) {
+  const productHref = product.department
+    ? `/products/${product.slug}?department=${product.department}`
+    : `/products/${product.slug}`;
   const hasDiscount =
     typeof product.undiscountedPrice === "number" &&
     product.undiscountedPrice > product.price;
@@ -205,7 +212,7 @@ function WishlistProductCard({ product }: { product: WishlistProductSummary }) {
         <WishlistButton productId={product.productId} />
       </div>
 
-      <Link href={`/products/${product.slug}`} className="block">
+      <Link href={productHref} className="block">
         <div
           className="
             relative

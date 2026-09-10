@@ -4,14 +4,19 @@ import { notFound } from "next/navigation";
 
 import { CollectionHeader } from "@/components/collection/collection-header";
 import { CollectionSidebar } from "@/components/collection/collection-sidebar";
+import { MobileCollectionFilters } from "@/components/collection/mobile-collection-filters";
 import { ProductCard } from "@/components/product/product-card";
-
+import { CollectionDepartmentTabs } from "@/components/collection/collection-department-tabs";
 import { getCollection } from "@/lib/collections";
+import {
+  getDepartmentLabel,
+  normalizeDepartment,
+  productMatchesDepartment,
+} from "@/lib/departments";
+
 import { getProducts } from "@/services/products.service";
 
 import type { Product } from "@/types/product";
-
-import { MobileCollectionFilters } from "@/components/collection/mobile-collection-filters";
 
 interface CollectionPageProps {
   params: Promise<{
@@ -19,6 +24,7 @@ interface CollectionPageProps {
   }>;
 
   searchParams: Promise<{
+    department?: string | string[];
     sort?: string | string[];
     stock?: string | string[];
     min?: string | string[];
@@ -28,8 +34,10 @@ interface CollectionPageProps {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const filters = await searchParams;
 
   const collection = getCollection(slug);
 
@@ -39,8 +47,12 @@ export async function generateMetadata({
     };
   }
 
+  const department = normalizeDepartment(normalizeParam(filters.department));
+
+  const departmentLabel = getDepartmentLabel(department);
+
   return {
-    title: `${collection.title} | PurpleYou`,
+    title: `${departmentLabel}'s ${collection.title} | PurpleYou`,
     description: collection.description,
   };
 }
@@ -58,25 +70,60 @@ export default async function CollectionPage({
     notFound();
   }
 
+  /*
+   * Women is the default when the URL does not
+   * contain a department.
+   */
+  const department = normalizeDepartment(normalizeParam(filters.department));
+
+  const departmentLabel = getDepartmentLabel(department);
+
+  /*
+   * Ask the backend/service for this department.
+   *
+   * The local development Men products also use
+   * this same taxonomy query.
+   */
   const { products } = await getProducts({
-    taxonomy: collection.taxonomy,
+    taxonomy: {
+      ...collection.taxonomy,
+
+      department: department === "women" ? "Women" : "Men",
+    },
+
     limit: 60,
   });
 
+  /*
+   * Important:
+   *
+   * Filter again after fetching.
+   *
+   * This guarantees the collection stays
+   * department-specific even if the backend
+   * currently ignores taxonomy.department.
+   */
+  const departmentProducts = products.filter((product) =>
+    productMatchesDepartment(product, department),
+  );
+
   const sort = normalizeParam(filters.sort);
+
   const stock = normalizeParam(filters.stock);
+
   const min = normalizeParam(filters.min);
+
   const max = normalizeParam(filters.max);
 
   const visibleProducts = prepareCollectionProducts(
-    products,
+    departmentProducts,
     sort,
     stock,
     min,
     max,
   );
 
-  const prices = products.map((product) => product.base.price);
+  const prices = departmentProducts.map((product) => product.base.price);
 
   const minAvailablePrice = prices.length > 0 ? Math.min(...prices) : undefined;
 
@@ -85,11 +132,12 @@ export default async function CollectionPage({
   return (
     <main>
       <CollectionHeader
-        eyebrow={collection.eyebrow}
+        eyebrow={`${departmentLabel}'s`}
         title={collection.title}
         description={collection.description}
         productCount={visibleProducts.length}
       />
+      <CollectionDepartmentTabs />
 
       <section
         className="
@@ -103,13 +151,16 @@ export default async function CollectionPage({
           minAvailablePrice={minAvailablePrice}
           maxAvailablePrice={maxAvailablePrice}
         />
+
         <div
           className="
             grid
             grid-cols-1
             gap-10
+
             lg:grid-cols-[240px_minmax(0,1fr)]
             lg:gap-10
+
             xl:grid-cols-[270px_minmax(0,1fr)]
             xl:gap-14
           "
@@ -130,7 +181,9 @@ export default async function CollectionPage({
                   grid-cols-2
                   gap-x-4
                   gap-y-10
+
                   md:grid-cols-3
+
                   xl:grid-cols-4
                   xl:gap-x-5
                 "
@@ -144,7 +197,7 @@ export default async function CollectionPage({
                 ))}
               </div>
             ) : (
-              <EmptyCollection />
+              <EmptyCollection department={departmentLabel} />
             )}
           </div>
         </div>
@@ -172,7 +225,7 @@ function prepareCollectionProducts(
   }
 
   /*
-   * Price range
+   * Price
    */
   const minimumPrice = parsePriceParam(min);
 
@@ -209,8 +262,7 @@ function prepareCollectionProducts(
     }
 
     /*
-     * "featured" uses the order returned
-     * from the backend.
+     * Featured keeps backend order.
      */
     default:
       break;
@@ -241,7 +293,11 @@ function parsePriceParam(value?: string): number | undefined {
   return parsed;
 }
 
-function EmptyCollection() {
+interface EmptyCollectionProps {
+  department: string;
+}
+
+function EmptyCollection({ department }: EmptyCollectionProps) {
   return (
     <div
       className="
@@ -261,7 +317,7 @@ function EmptyCollection() {
             text-[var(--muted-foreground)]
           "
         >
-          PurpleYou
+          {department}&apos;s
         </p>
 
         <h2

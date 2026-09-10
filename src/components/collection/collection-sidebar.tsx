@@ -49,6 +49,12 @@ export function CollectionSidebar({
 
   const maxPrice = searchParams.get("max") ?? "";
 
+  /*
+   * Keeps all existing query parameters.
+   *
+   * Example:
+   * ?department=men&sort=price-low
+   */
   function updateParam(key: string, value?: string) {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -63,10 +69,31 @@ export function CollectionSidebar({
     router.push(query ? `${pathname}?${query}` : pathname);
   }
 
+  /*
+   * Category navigation must also preserve
+   * the current department and filters.
+   *
+   * Example:
+   *
+   * /collections/rings?department=men
+   *
+   * clicking Necklaces becomes:
+   *
+   * /collections/necklaces?department=men
+   */
+  function getCategoryHref(href: string) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    const query = params.toString();
+
+    return query ? `${href}?${query}` : href;
+  }
+
   return (
     <aside
       className="
         border-[var(--border)]
+
         lg:sticky
         lg:top-28
         lg:self-start
@@ -176,7 +203,7 @@ export function CollectionSidebar({
             return (
               <Link
                 key={category.href}
-                href={category.href}
+                href={getCategoryHref(category.href)}
                 className={`
                     flex
                     items-center
@@ -186,6 +213,7 @@ export function CollectionSidebar({
                     tracking-[0.16em]
                     transition-opacity
                     hover:opacity-60
+
                     ${
                       active
                         ? "text-[var(--foreground)]"
@@ -198,9 +226,10 @@ export function CollectionSidebar({
                       h-3
                       w-3
                       border
+
                       ${
                         active
-                          ? "bg-[var(--foreground)]"
+                          ? "border-[var(--foreground)] bg-[var(--foreground)]"
                           : "border-[var(--muted-foreground)]"
                       }
                     `}
