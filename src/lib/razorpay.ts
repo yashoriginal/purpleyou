@@ -36,10 +36,16 @@ declare global {
 
 const RAZORPAY_SCRIPT_SRC = "https://checkout.razorpay.com/v1/checkout.js";
 
+const PRODUCTION_RAZORPAY_KEY_ID = "rzp_live_S5QodLSds6pZbk";
+
 export function getRazorpayKeyId(): string {
   const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim();
 
   if (!keyId) {
+    if (process.env.NODE_ENV === "production") {
+      return PRODUCTION_RAZORPAY_KEY_ID;
+    }
+
     throw new Error(
       "Missing NEXT_PUBLIC_RAZORPAY_KEY_ID environment variable.",
     );
