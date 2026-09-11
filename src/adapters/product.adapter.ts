@@ -2,6 +2,22 @@ import type { ApiProduct, Product } from "@/types/product";
 
 import { normalizeProductImageUrl } from "@/lib/image";
 
+function extractImageUrl(
+  image: unknown,
+): string | null {
+  if (typeof image === "string") {
+    return normalizeProductImageUrl(image);
+  }
+
+  if (image && typeof image === "object" && "url" in image) {
+    const url = (image as { url: unknown }).url;
+
+    return normalizeProductImageUrl(url);
+  }
+
+  return null;
+}
+
 export function createProductSlug(name: string, productId: string): string {
   const slug = name
     .toLowerCase()
@@ -33,7 +49,7 @@ export function adaptProduct(apiProduct: ApiProduct): Product {
   );
 
   const images = rawImages
-    .map(normalizeProductImageUrl)
+    .map(extractImageUrl)
     .filter((image): image is string => image !== null);
 
   return {

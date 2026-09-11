@@ -22,11 +22,13 @@ export interface ProductTaxonomy {
   productSubtype?: string;
 }
 
+export type ImageEntry = string | { url: string; alt?: string; isPrimary?: boolean };
+
 export interface ProductBase {
   price: number;
   undiscountedPrice?: number;
   stock: number;
-  images: string[];
+  images: ImageEntry[];
   attributes?: VariantAttributes;
   taxonomy?: ProductTaxonomy;
 }
