@@ -16,6 +16,8 @@ interface Category {
   productType: string;
   womenImage: string | null;
   menImage: string | null;
+  womenCount?: number;
+  menCount?: number;
   fallbackImage?: string | null;
 }
 
@@ -39,7 +41,13 @@ export function DepartmentCategoryCarousel({ categories }: Props) {
    */
   const department = normalizeDepartment(searchParams.get("department"));
 
-  const visibleCategories = categories;
+  const visibleCategories = categories.filter((category) => {
+    if (department === "women") {
+      return (category.womenCount ?? 0) > 0 || Boolean(category.womenImage);
+    }
+    return (category.menCount ?? 0) > 0 || Boolean(category.menImage);
+  });
+
 
   function changeDepartment(nextDepartment: Department) {
     if (nextDepartment === department) {

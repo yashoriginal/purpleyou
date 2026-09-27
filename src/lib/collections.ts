@@ -58,5 +58,22 @@ export const collections: Record<string, CollectionConfig> = {
 };
 
 export function getCollection(slug: string): CollectionConfig | null {
-  return collections[slug] ?? null;
+  if (collections[slug]) {
+    return collections[slug];
+  }
+
+  const cleanSlug = slug.trim().toLowerCase();
+  if (!cleanSlug) return null;
+
+  const title = cleanSlug.charAt(0).toUpperCase() + cleanSlug.slice(1);
+  return {
+    slug: cleanSlug,
+    title,
+    eyebrow: `PurpleYou ${title}`,
+    description: `Explore our collection of ${cleanSlug}.`,
+    taxonomy: {
+      productType: title,
+    },
+  };
 }
+
